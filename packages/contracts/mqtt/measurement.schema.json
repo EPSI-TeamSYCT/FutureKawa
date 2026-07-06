@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://futurekawa.local/contracts/mqtt/measurement.schema.json",
+  "title": "Measurement",
+  "description": "A single temperature/humidity reading published by an IoT module.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["warehouse_id", "country", "temperature", "humidity", "timestamp"],
+  "properties": {
+    "warehouse_id": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["wh-01"]
+    },
+    "country": {
+      "type": "string",
+      "enum": ["brazil", "ecuador", "colombia"]
+    },
+    "temperature": {
+      "type": "number",
+      "description": "Temperature in degrees Celsius",
+      "minimum": -40,
+      "maximum": 85
+    },
+    "humidity": {
+      "type": "number",
+      "description": "Relative humidity in percent",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "timestamp": {
+      "type": "integer",
+      "description": "UNIX epoch seconds, UTC",
+      "minimum": 0
+    }
+  }
+}
