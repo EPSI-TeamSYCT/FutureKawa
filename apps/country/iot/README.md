@@ -11,7 +11,8 @@ red = fault). The module is **publish-only**; alert logic lives in the country A
 
 - **NodeMCU ESP8266** (board `nodemcuv2`), Arduino framework
 - **PlatformIO** (build + upload + serial monitor)
-- Libraries: `256dpi/MQTT` (MQTT, QoS 1), `beegee-tokyo/DHTesp` (DHT11),
+- Libraries: `256dpi/MQTT` (MQTT, QoS 1),
+  `beegee-tokyo/DHT sensor library for ESPx` (DHT11, header `DHTesp.h`),
   `bblanchon/ArduinoJson` (payload)
 
 ## Hardware & wiring
