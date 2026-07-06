@@ -53,8 +53,11 @@ Full details in [`CONTRIBUTING.md`](CONTRIBUTING.md). Summary:
   `ci`, `chore`, `revert`. Recommended scopes: `hq`, `country`, `api`, `iot`,
   `database`, `auth`, `config`, `contracts`, `types`, `infra`, `docs`, `docs-site`,
   `ci`, `deps`, `repo`.
-- **Branches**: `<type>/<short-kebab-description>` (e.g. `feat/iot-mqtt-ingest`,
-  `docs/architecture-overview`).
+- **Issue-first.** Every change tracks a GitHub issue: PR body uses `Closes #N`
+  (or `Refs #N` if partial), commits may carry a `Refs #N` footer. The chain
+  issue → branch → commits → PR → merge is the project's audit trail.
+- **Branches**: `<type>/<#issue>-<short-kebab-description>` when an issue exists
+  (e.g. `feat/42-iot-mqtt-ingest`), otherwise `<type>/<short-kebab-description>`.
 - **Pull requests** are small and focused, fill `.github/pull_request_template.md`,
   and respect the Definition of Done above.
 - Run `npm install` once at the repo root to activate the git hooks (husky).

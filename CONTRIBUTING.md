@@ -16,12 +16,79 @@ This installs [husky](https://typicode.github.io/husky/) and
 [commitlint](https://commitlint.js.org/) and registers the `commit-msg` hook that
 validates every commit message.
 
+## Workflow & traceability (GitHub Projects)
+
+Every change is traceable end-to-end: **issue → branch → commit → PR → merge**.
+The FutureKawa GitHub Project board reflects the current state of each piece of work.
+
+### Step 1 — Start from an issue
+
+Create an issue first (use the **Feature** or **Bug** template). Even tiny chores
+get a one-line issue. Add it to the FutureKawa Project; pick labels (type + area)
+and a priority.
+
+### Step 2 — Branch from main, prefix with the issue number
+
+`<type>/<#issue>-<short-kebab-description>` — e.g. `feat/42-iot-mqtt-ingest`.
+The issue number in the branch name makes the link obvious even before a PR exists.
+
+### Step 3 — Reference the issue in commits
+
+Add a `Refs #<issue>` footer so each commit shows up on the issue's timeline:
+
+```
+feat(iot): publish sensor readings to mqtt
+
+Refs #42
+```
+
+### Step 4 — Open the PR with `Closes #<issue>`
+
+The PR template has a `Closes #<issue>` line at the top — fill it. GitHub
+auto-closes the issue when the PR merges, and moves the linked card to **Done**.
+Use `Refs #<issue>` instead if the PR is partial (does not finish the issue).
+
+### Project board columns
+
+- **Backlog** — captured but not committed to
+- **Todo** — ready to pick up
+- **In progress** — actively worked
+- **In review** — PR open
+- **Done** — merged or closed
+
+Enable the built-in Project workflows (UI → Project settings → Workflows):
+*Item added to project*, *Pull request merged → Done*, *Item closed → Done*.
+
+### Labels (canonical set)
+
+- **type**: `type:feat`, `type:fix`, `type:docs`, `type:refactor`, `type:chore`,
+  `type:test`, `type:perf`, `type:build`, `type:ci`
+- **area**: `area:hq`, `area:country`, `area:iot`, `area:infra`, `area:docs`
+- **priority**: `prio:high`, `prio:med`, `prio:low`
+- **status**: `status:blocked`
+
+Apply them once after the GitHub repo is created, with the `gh` CLI:
+
+```bash
+for t in feat fix docs refactor chore test perf build ci; do
+  gh label create "type:$t" -c "1f77b4" -f
+done
+for a in hq country iot infra docs; do
+  gh label create "area:$a" -c "2ca02c" -f
+done
+gh label create "prio:high" -c "d62728" -f
+gh label create "prio:med"  -c "ff7f0e" -f
+gh label create "prio:low"  -c "7f7f7f" -f
+gh label create "status:blocked" -c "9467bd" -f
+```
+
 ## Branches
 
-Use `<type>/<short-kebab-description>`, where `<type>` matches a commit type:
+Use `<type>/<#issue>-<short-kebab-description>` when the work tracks an issue
+(recommended), or `<type>/<short-kebab-description>` otherwise:
 
-- `feat/iot-mqtt-ingest`
-- `fix/api-auth-401`
+- `feat/42-iot-mqtt-ingest`
+- `fix/57-api-auth-401`
 - `docs/architecture-overview`
 - `chore/repo-gitignore`
 
@@ -82,6 +149,14 @@ feat(iot): publish sensor readings to mqtt
 fix(api): reject expired jwt with 401
 docs(architecture): add distributed-system overview
 chore(repo): add root gitignore and commit hooks
+```
+
+With an issue footer (preferred when the work tracks an issue):
+
+```
+feat(iot): publish sensor readings to mqtt
+
+Refs #42
 ```
 
 Bad:
