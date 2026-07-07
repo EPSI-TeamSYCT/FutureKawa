@@ -15,6 +15,8 @@ Local technical docs (setup, run, endpoints) live in each app's `README.md`.
   - [Test Strategy](tests/strategy.md)
 - **CI/CD**
   - [Pipeline](ci-cd/pipeline.md)
+- **Deployment**
+  - [Running the stack](deployment/running-the-stack.md)
 - **Phase 2**
   - [Automation Schema](phase2/automation-schema.md)
   - [Interview Questionnaire](phase2/interview-questionnaire.md)
