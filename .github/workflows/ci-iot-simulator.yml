@@ -1,11 +1,8 @@
 name: CI · iot-simulator
 
+# Reusable per-service pipeline. Called by the ci.yml orchestrator.
 on:
-  pull_request:
-
-concurrency:
-  group: ci-iot-simulator-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
   # 1) Detect whether the service CODE changed in this PR.
