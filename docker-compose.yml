@@ -63,11 +63,11 @@ services:
   #   environment:
   #     APP_ENV: prod
   #     API_KEY: ${COUNTRY_API_KEY:-change-me}
-  #     DATABASE_URL: postgresql://futurekawa:futurekawa@db-brazil:5432/futurekawa
+  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@db-brazil:5432/${DB_NAME:-futurekawa}
   #   depends_on: [db-brazil]
   # db-brazil:
   #   image: postgres:16-alpine
-  #   environment: { POSTGRES_USER: futurekawa, POSTGRES_PASSWORD: futurekawa, POSTGRES_DB: futurekawa }
+  #   environment: { POSTGRES_USER: ${DB_USER:-futurekawa}, POSTGRES_PASSWORD: ${DB_PASSWORD:?set a strong password in .env}, POSTGRES_DB: ${DB_NAME:-futurekawa} }
   #   volumes: [db-brazil-data:/var/lib/postgresql/data]
   #
   # stack-ecuador / db-ecuador  — same shape, COUNTRY=ecuador

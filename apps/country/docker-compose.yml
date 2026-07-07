@@ -53,7 +53,7 @@ services:
   #   environment:
   #     MQTT_HOST: mosquitto
   #     COUNTRY: ${COUNTRY:-brazil}
-  #     DATABASE_URL: postgresql://futurekawa:futurekawa@country-db:5432/futurekawa
+  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
   #   depends_on: [mosquitto, country-db]
   #
   # country-api — Thomas's Symfony / API Platform service (apps/country/api).
@@ -64,7 +64,7 @@ services:
   #   restart: unless-stopped
   #   environment:
   #     APP_ENV: prod
-  #     DATABASE_URL: postgresql://futurekawa:futurekawa@country-db:5432/futurekawa
+  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
   #     API_KEY: ${COUNTRY_API_KEY:-change-me}
   #   ports: ["8000:8000"]
   #   depends_on: [country-db]
@@ -75,9 +75,9 @@ services:
   #   image: postgres:16-alpine
   #   restart: unless-stopped
   #   environment:
-  #     POSTGRES_USER: futurekawa
-  #     POSTGRES_PASSWORD: futurekawa
-  #     POSTGRES_DB: futurekawa
+  #     POSTGRES_USER: ${DB_USER:-futurekawa}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:?set a strong password in .env}
+  #     POSTGRES_DB: ${DB_NAME:-futurekawa}
   #   volumes:
   #     - country-db-data:/var/lib/postgresql/data
 
