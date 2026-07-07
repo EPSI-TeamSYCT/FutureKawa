@@ -49,7 +49,12 @@ in the country API.
 | 🟢 Green LED (OK) | `D1` (GPIO5) | 220 Ω → LED → GND |
 | 🔴 Red LED (KO) | `D5` (GPIO14) | 220 Ω → LED → GND |
 
-Wiring diagram: [`docs/schemas/`](../../../docs/schemas/) (`iot-wiring`).
+### Wiring diagram
+
+Full breadboard schematic — NodeMCU ESP8266 + DHT11 + green/red status LEDs —
+made with [Cirkit Designer](https://www.cirkitdesigner.com/):
+
+![IoT wiring: NodeMCU ESP8266 with a DHT11 sensor and two status LEDs on a breadboard](../../../docs/schemas/iot-wiring-cirkit.png)
 
 ## Setup
 
