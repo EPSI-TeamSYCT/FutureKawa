@@ -17,7 +17,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 ) {
   const autoId = useId()
   const inputId = id ?? autoId
-  const describedBy = error ? `${inputId}-err` : hint ? `${inputId}-hint` : undefined
+  let describedBy: string | undefined
+  if (error) describedBy = `${inputId}-err`
+  else if (hint) describedBy = `${inputId}-hint`
 
   return (
     <div className={`fk-field ${error ? 'is-error' : ''} ${className}`.trim()}>

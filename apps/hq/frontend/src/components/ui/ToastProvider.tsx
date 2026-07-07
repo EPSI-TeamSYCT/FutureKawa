@@ -4,7 +4,7 @@ import { ToastContext, type ToastInput, type ToastItem } from './toast-context'
 import { Toast } from './Toast'
 import './Toast.css'
 
-export function ToastProvider({ children }: { children: ReactNode }) {
+export function ToastProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [toasts, setToasts] = useState<ToastItem[]>([])
   const idRef = useRef(0)
   const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>())
@@ -41,11 +41,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       {createPortal(
-        <div className="fk-toast-viewport" role="region" aria-label="Notifications">
+        <section className="fk-toast-viewport" aria-label="Notifications">
           {toasts.map((t) => (
             <Toast key={t.id} toast={t} onDismiss={dismiss} />
           ))}
-        </div>,
+        </section>,
         document.body,
       )}
     </ToastContext.Provider>

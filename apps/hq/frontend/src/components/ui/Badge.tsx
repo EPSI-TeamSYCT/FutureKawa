@@ -25,7 +25,7 @@ export function Badge({
   icon,
   className = '',
   children,
-}: BadgeProps) {
+}: Readonly<BadgeProps>) {
   const classes = ['fk-badge', `fk-badge--${tone}`, `fk-badge--${size}`, className]
     .filter(Boolean)
     .join(' ')

@@ -12,9 +12,15 @@ export interface EmptyStateProps {
 }
 
 /** Drawn empty state with the grain picto as a faint watermark — never a blank panel. */
-export function EmptyState({ icon, title, description, action, className = '' }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+  className = '',
+}: Readonly<EmptyStateProps>) {
   return (
-    <div className={`fk-empty ${className}`.trim()} role="status">
+    <div className={`fk-empty ${className}`.trim()}>
       <img className="fk-empty-watermark" src={grain} alt="" aria-hidden="true" />
       <div className="fk-empty-content">
         {icon && (

@@ -18,7 +18,13 @@ export interface TabsProps {
 }
 
 /** Accessible tabs: roving focus, ←/→/Home/End keyboard support. */
-export function Tabs({ items, defaultId, value, onValueChange, className = '' }: TabsProps) {
+export function Tabs({
+  items,
+  defaultId,
+  value,
+  onValueChange,
+  className = '',
+}: Readonly<TabsProps>) {
   const baseId = useId()
   const [internal, setInternal] = useState(defaultId ?? items[0]?.id)
   const active = value ?? internal
@@ -29,14 +35,24 @@ export function Tabs({ items, defaultId, value, onValueChange, className = '' }:
     onValueChange?.(id)
   }
 
+  function nextIndex(key: string, index: number, last: number): number | null {
+    switch (key) {
+      case 'ArrowRight':
+        return index === last ? 0 : index + 1
+      case 'ArrowLeft':
+        return index === 0 ? last : index - 1
+      case 'Home':
+        return 0
+      case 'End':
+        return last
+      default:
+        return null
+    }
+  }
+
   function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, index: number) {
-    const last = items.length - 1
-    let next = index
-    if (e.key === 'ArrowRight') next = index === last ? 0 : index + 1
-    else if (e.key === 'ArrowLeft') next = index === 0 ? last : index - 1
-    else if (e.key === 'Home') next = 0
-    else if (e.key === 'End') next = last
-    else return
+    const next = nextIndex(e.key, index, items.length - 1)
+    if (next === null) return
     e.preventDefault()
     const item = items[next]
     select(item.id)

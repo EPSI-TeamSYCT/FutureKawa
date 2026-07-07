@@ -14,7 +14,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
 ) {
   const autoId = useId()
   const selectId = id ?? autoId
-  const describedBy = error ? `${selectId}-err` : hint ? `${selectId}-hint` : undefined
+  let describedBy: string | undefined
+  if (error) describedBy = `${selectId}-err`
+  else if (hint) describedBy = `${selectId}-hint`
 
   return (
     <div className={`fk-field ${error ? 'is-error' : ''} ${className}`.trim()}>

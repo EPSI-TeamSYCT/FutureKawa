@@ -18,17 +18,16 @@ export function Skeleton({
   variant = 'rect',
   className = '',
   style,
-}: SkeletonProps) {
+}: Readonly<SkeletonProps>) {
+  const defaultRadius: Record<'rect' | 'text' | 'circle', string> = {
+    circle: 'var(--fk-radius-full)',
+    text: '4px',
+    rect: 'var(--fk-radius-btn)',
+  }
   const resolved: CSSProperties = {
     width,
     height: height ?? (variant === 'text' ? '0.9em' : undefined),
-    borderRadius:
-      radius ??
-      (variant === 'circle'
-        ? 'var(--fk-radius-full)'
-        : variant === 'text'
-          ? '4px'
-          : 'var(--fk-radius-btn)'),
+    borderRadius: radius ?? defaultRadius[variant],
     ...style,
   }
   return (

@@ -14,7 +14,7 @@ export interface ToastProps {
   onDismiss: (id: number) => void
 }
 
-export function Toast({ toast, onDismiss }: ToastProps) {
+export function Toast({ toast, onDismiss }: Readonly<ToastProps>) {
   const variant = toast.variant ?? 'info'
   const Icon = ICONS[variant]
   return (

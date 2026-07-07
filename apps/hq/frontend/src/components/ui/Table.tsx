@@ -16,7 +16,7 @@ export function Table({
   className = '',
   children,
   ...rest
-}: TableProps) {
+}: Readonly<TableProps>) {
   return (
     <div
       className={`fk-table-scroll ${stickyHeader ? 'is-sticky' : ''} ${containerClassName}`.trim()}
@@ -29,11 +29,11 @@ export function Table({
   )
 }
 
-export function THead({ children, ...rest }: HTMLAttributes<HTMLTableSectionElement>) {
+export function THead({ children, ...rest }: Readonly<HTMLAttributes<HTMLTableSectionElement>>) {
   return <thead {...rest}>{children}</thead>
 }
 
-export function TBody({ children, ...rest }: HTMLAttributes<HTMLTableSectionElement>) {
+export function TBody({ children, ...rest }: Readonly<HTMLAttributes<HTMLTableSectionElement>>) {
   return <tbody {...rest}>{children}</tbody>
 }
 
@@ -42,7 +42,7 @@ export interface TrProps extends HTMLAttributes<HTMLTableRowElement> {
   active?: boolean
   muted?: boolean
 }
-export function Tr({ active, muted, className = '', children, ...rest }: TrProps) {
+export function Tr({ active, muted, className = '', children, ...rest }: Readonly<TrProps>) {
   const classes = [active ? 'is-active' : '', muted ? 'is-muted' : '', className]
     .filter(Boolean)
     .join(' ')
@@ -65,7 +65,7 @@ export function Th({
   className = '',
   children,
   ...rest
-}: ThProps) {
+}: Readonly<ThProps>) {
   const sortLabel = { asc: 'ascending', desc: 'descending' } as const
   let ariaSort: 'ascending' | 'descending' | 'none' | undefined
   if (sortable) ariaSort = sortDirection ? sortLabel[sortDirection] : 'none'
@@ -85,7 +85,13 @@ export interface TdProps extends TdHTMLAttributes<HTMLTableCellElement> {
   align?: 'left' | 'right' | 'center'
   mono?: boolean
 }
-export function Td({ align = 'left', mono = false, className = '', children, ...rest }: TdProps) {
+export function Td({
+  align = 'left',
+  mono = false,
+  className = '',
+  children,
+  ...rest
+}: Readonly<TdProps>) {
   return (
     <td
       className={`fk-td ${mono ? 'fk-mono' : ''} ${className}`.trim()}

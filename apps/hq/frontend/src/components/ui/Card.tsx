@@ -14,7 +14,7 @@ export function Card({
   className = '',
   children,
   ...rest
-}: CardProps) {
+}: Readonly<CardProps>) {
   const classes = [
     'fk-card',
     interactive ? 'fk-card--interactive' : '',
@@ -30,7 +30,11 @@ export function Card({
   )
 }
 
-export function CardHeader({ children, className = '', ...rest }: HTMLAttributes<HTMLDivElement>) {
+export function CardHeader({
+  children,
+  className = '',
+  ...rest
+}: Readonly<HTMLAttributes<HTMLDivElement>>) {
   return (
     <div className={`fk-card-header ${className}`.trim()} {...rest}>
       {children}
@@ -43,7 +47,13 @@ export interface CardTitleProps extends HTMLAttributes<HTMLDivElement> {
   action?: ReactNode
 }
 
-export function CardTitle({ eyebrow, action, children, className = '', ...rest }: CardTitleProps) {
+export function CardTitle({
+  eyebrow,
+  action,
+  children,
+  className = '',
+  ...rest
+}: Readonly<CardTitleProps>) {
   return (
     <div className={`fk-card-title ${className}`.trim()} {...rest}>
       <div>

@@ -8,7 +8,7 @@ export interface PageHeaderProps {
   actions?: ReactNode
 }
 
-export function PageHeader({ title, eyebrow, description, actions }: PageHeaderProps) {
+export function PageHeader({ title, eyebrow, description, actions }: Readonly<PageHeaderProps>) {
   return (
     <header className="fk-page-header">
       <div className="fk-page-header-text">
