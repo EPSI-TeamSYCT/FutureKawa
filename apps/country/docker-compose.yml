@@ -21,7 +21,7 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      - ../../infra/docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
 
   # IoT layer — the sensor publisher (real hardware in prod; this simulator for
   # the demo). Publishes futurekawa/<country>/<warehouse>/measurements over MQTT.
