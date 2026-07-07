@@ -1,0 +1,21 @@
+name: CI
+
+# Single entry point for CI. Runs on pull requests only (save resources) and
+# calls each service's reusable pipeline. Add a service = add one job below.
+on:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  iot-simulator:
+    uses: ./.github/workflows/ci-iot-simulator.yml
+
+  # backend:
+  #   uses: ./.github/workflows/ci-backend.yml
+  # api:
+  #   uses: ./.github/workflows/ci-api.yml
+  # frontend:
+  #   uses: ./.github/workflows/ci-frontend.yml

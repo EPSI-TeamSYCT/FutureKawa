@@ -2,18 +2,28 @@ import json
 import random
 
 from config import Settings
-from worker import build_generators, publish_round
+from worker import Worker, build_generators, publish_round
+
+_ONE = '[{"warehouse":"wh-01","hardware_id":"ref1"}]'
 
 
 class FakePublisher:
     def __init__(self):
         self.calls = []
+        self.connected = False
+        self.disconnected = False
+
+    def connect(self):
+        self.connected = True
 
     def publish(self, topic, payload):
         self.calls.append((topic, payload))
 
+    def disconnect(self):
+        self.disconnected = True
 
-def _settings(monkeypatch, devices):
+
+def _settings(monkeypatch, devices=_ONE):
     monkeypatch.setenv("COUNTRY", "brazil")
     monkeypatch.setenv("TEMP_THRESHOLD", "29")
     monkeypatch.setenv("HUMIDITY_THRESHOLD", "55")
@@ -24,8 +34,7 @@ def _settings(monkeypatch, devices):
 def test_publish_round_one_message_per_device(monkeypatch):
     s = _settings(
         monkeypatch,
-        '[{"warehouse":"wh-01","hardware_id":"ref1"},'
-        '{"warehouse":"wh-02","hardware_id":"ref2"}]',
+        '[{"warehouse":"wh-01","hardware_id":"ref1"},{"warehouse":"wh-02","hardware_id":"ref2"}]',
     )
     gens = build_generators(s, lambda: random.Random(1))
     pub = FakePublisher()
@@ -40,8 +49,7 @@ def test_publish_round_one_message_per_device(monkeypatch):
 def test_multiple_devices_same_warehouse(monkeypatch):
     s = _settings(
         monkeypatch,
-        '[{"warehouse":"wh-01","hardware_id":"ref1"},'
-        '{"warehouse":"wh-01","hardware_id":"ref2"}]',
+        '[{"warehouse":"wh-01","hardware_id":"ref1"},{"warehouse":"wh-01","hardware_id":"ref2"}]',
     )
     gens = build_generators(s, lambda: random.Random(1))
     pub = FakePublisher()
@@ -52,3 +60,31 @@ def test_multiple_devices_same_warehouse(monkeypatch):
         "futurekawa/brazil/wh-01/measurements",
     ]
     assert [json.loads(p)["hardware_id"] for _, p in pub.calls] == ["ref1", "ref2"]
+
+
+def test_worker_runs_one_round_then_stops(monkeypatch):
+    s = _settings(monkeypatch)
+    gens = build_generators(s, lambda: random.Random(1))
+    pub = FakePublisher()
+    worker = Worker(s, gens, pub)
+    # Stop after the first round by breaking out during the sleep.
+    monkeypatch.setattr(worker, "_sleep", lambda seconds: setattr(worker, "_running", False))
+    worker.run()
+    assert pub.connected is True
+    assert pub.disconnected is True
+    assert len(pub.calls) == len(s.devices)
+
+
+def test_stop_sets_running_false(monkeypatch):
+    s = _settings(monkeypatch)
+    worker = Worker(s, [], FakePublisher())
+    worker._running = True
+    worker._stop()
+    assert worker._running is False
+
+
+def test_sleep_returns_immediately_when_stopped(monkeypatch):
+    s = _settings(monkeypatch)
+    worker = Worker(s, [], FakePublisher())
+    worker._running = False
+    worker._sleep(999)  # must not block

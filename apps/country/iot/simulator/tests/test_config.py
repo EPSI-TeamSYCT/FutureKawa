@@ -53,8 +53,7 @@ def test_multiple_devices_same_warehouse(monkeypatch):
     _required(monkeypatch)
     monkeypatch.setenv(
         "DEVICES",
-        '[{"warehouse":"wh-01","hardware_id":"ref1"},'
-        '{"warehouse":"wh-01","hardware_id":"ref2"}]',
+        '[{"warehouse":"wh-01","hardware_id":"ref1"},{"warehouse":"wh-01","hardware_id":"ref2"}]',
     )
     s = Settings(_env_file=None)
     assert [d.hardware_id for d in s.devices] == ["ref1", "ref2"]
