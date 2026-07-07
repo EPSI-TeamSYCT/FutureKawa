@@ -1,4 +1,4 @@
-import { countryClient } from "../clients/countryClient";
+import { countryClient } from "../adapters/country-api.adapter";
 import { config } from "../config";
 import { FallbackCache, type Cached } from "../lib/cache";
 import {
@@ -7,18 +7,8 @@ import {
   toLot,
   toMeasure,
   toRef,
-  type Alert,
-  type Country,
-  type Lookups,
-  type Lot,
-  type Measure,
-} from "../types/domain";
-
-export interface Aggregate {
-  countries: Country[];
-  lots: Lot[];
-  alerts: Alert[];
-}
+} from "../mappers/domain.mapper";
+import type { Aggregate, Lookups, Measure } from "../types/domain";
 
 function mapById<T extends { id: number }>(items: T[]): Map<number, T> {
   return new Map(items.map((item) => [item.id, item]));

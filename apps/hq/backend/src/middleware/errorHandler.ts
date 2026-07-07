@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { logger } from "../lib/logger";
-import type { Errors } from "../enums/errors";
+import type { Errors } from "../types/errors.enum";
 
 export class HttpError extends Error {
   constructor(public status: number, message: Errors, detail?: string) {

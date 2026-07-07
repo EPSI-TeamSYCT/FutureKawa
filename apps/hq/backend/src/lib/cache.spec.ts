@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { FallbackCache } from "../src/lib/cache";
+import { FallbackCache } from "./cache";
 
 describe("FallbackCache", () => {
   it("returns live data on success", async () => {

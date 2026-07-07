@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
-import { getAggregate } from "../services/aggregate";
-import { selectAlerts } from "../services/views";
+import { getAggregate } from "../services/aggregate.service";
+import { selectAlerts } from "../services/views.service";
 import { assertCountry, parseIntParam } from "./helpers";
 
 export const alertsRouter = Router();

@@ -1,6 +1,5 @@
-import type { Cached } from "../src/lib/cache";
-import type { Aggregate } from "../src/services/aggregate";
-import type { Alert, Country, Lot } from "../src/types/domain";
+import type { Cached } from "../lib/cache";
+import type { Aggregate, Alert, Country, Lot } from "../types/domain";
 
 export function country(over: Partial<Country> & Pick<Country, "id">): Country {
   return {
@@ -12,9 +11,7 @@ export function country(over: Partial<Country> & Pick<Country, "id">): Country {
   };
 }
 
-export function lot(
-  over: Partial<Lot> & Pick<Lot, "id" | "storageDate">,
-): Lot {
+export function lot(over: Partial<Lot> & Pick<Lot, "id" | "storageDate">): Lot {
   return {
     reference: `LOT-${over.id}`,
     status: "conforme",
@@ -46,6 +43,24 @@ export function alert(
 
 export function aggregate(over: Partial<Aggregate> = {}): Aggregate {
   return { countries: [], lots: [], alerts: [], ...over };
+}
+
+// Shared scene: two countries, three lots (out of FIFO order), one alert.
+export function scene(): Aggregate {
+  return aggregate({
+    countries: [
+      country({ id: 1, name: "Brazil" }),
+      country({ id: 2, name: "Colombia", isoCode: "CO" }),
+    ],
+    lots: [
+      lot({ id: 2, storageDate: "2026-03-01T00:00:00.000Z", countryId: 1 }),
+      lot({ id: 1, storageDate: "2026-01-01T00:00:00.000Z", countryId: 1 }),
+      lot({ id: 3, storageDate: "2026-02-01T00:00:00.000Z", countryId: 2, country: "Colombia" }),
+    ],
+    alerts: [
+      alert({ id: 5, createdAt: "2026-05-01T00:00:00.000Z", countryId: 2 }),
+    ],
+  });
 }
 
 export function live(data: Aggregate): Cached<Aggregate> {

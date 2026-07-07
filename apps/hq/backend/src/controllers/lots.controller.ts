@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
-import { Errors } from "../enums/errors";
+import { Errors } from "../types/errors.enum";
 import { HttpError } from "../middleware/errorHandler";
-import { getAggregate, getWarehouseMeasures } from "../services/aggregate";
-import { findLot, selectLots } from "../services/views";
+import { getAggregate, getWarehouseMeasures } from "../services/aggregate.service";
+import { findLot, selectLots } from "../services/views.service";
 import { assertCountry, parseIntParam } from "./helpers";
 
 export const lotsRouter = Router();

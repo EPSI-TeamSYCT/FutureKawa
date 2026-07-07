@@ -1,6 +1,6 @@
 import { logger } from "./logger";
 
-export type Source = "live" | "cache";
+type Source = "live" | "cache";
 
 export interface Cached<T> {
   data: T;

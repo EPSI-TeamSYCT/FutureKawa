@@ -2,10 +2,10 @@ import express from "express";
 import pinoHttp from "pino-http";
 import { logger } from "./lib/logger";
 import { errorHandler } from "./middleware/errorHandler";
-import { countriesRouter } from "./routes/countries";
-import { lotsRouter } from "./routes/lots";
-import { alertsRouter } from "./routes/alerts";
-import { overviewRouter } from "./routes/overview";
+import { countriesRouter } from "./controllers/countries.controller";
+import { lotsRouter } from "./controllers/lots.controller";
+import { alertsRouter } from "./controllers/alerts.controller";
+import { overviewRouter } from "./controllers/overview.controller";
 
 export function createApp() {
   const app = express();

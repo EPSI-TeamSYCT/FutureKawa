@@ -1,10 +1,5 @@
-import type { Alert, Country, Lot } from "../types/domain";
-import type { Aggregate } from "./aggregate";
-
-export interface LotFilter {
-  countryId?: number;
-  exploitationId?: number;
-}
+import type { Aggregate, Alert, Lot } from "../types/domain";
+import type { CountrySummary, LotFilter, Overview } from "../types/views";
 
 // Lots sorted by storage date ascending: oldest first, to drive FIFO shipping.
 export function selectLots(agg: Aggregate, filter: LotFilter = {}): Lot[] {
@@ -29,11 +24,6 @@ export function selectAlerts(agg: Aggregate, countryId?: number): Alert[] {
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 }
 
-export interface CountrySummary extends Country {
-  lots: number;
-  alerts: number;
-}
-
 function countBy<T>(items: T[], key: (item: T) => number | null): Map<number, number> {
   const counts = new Map<number, number>();
   for (const item of items) {
@@ -52,13 +42,6 @@ export function summarizeCountries(agg: Aggregate): CountrySummary[] {
     lots: lots.get(country.id) ?? 0,
     alerts: alerts.get(country.id) ?? 0,
   }));
-}
-
-export interface Overview {
-  countries: number;
-  lots: number;
-  alerts: number;
-  lotsByStatus: Record<string, number>;
 }
 
 export function buildOverview(agg: Aggregate): Overview {

@@ -1,6 +1,6 @@
-import { Errors } from "../enums/errors";
+import { Errors } from "../types/errors.enum";
 import { HttpError } from "../middleware/errorHandler";
-import type { Aggregate } from "../services/aggregate";
+import type { Aggregate } from "../types/domain";
 
 export function parseIntParam(value: unknown): number | undefined {
   if (value === undefined) return undefined;

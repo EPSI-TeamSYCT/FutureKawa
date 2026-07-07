@@ -1,15 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  iriId,
-  toAlert,
-  toCountry,
-  toLot,
-  toRef,
-  type Lookups,
-  type RawAlert,
-  type RawBatch,
-  type RawCountry,
-} from "../src/types/domain";
+import { iriId, toAlert, toCountry, toLot, toRef } from "./domain.mapper";
+import type {
+  Lookups,
+  RawAlert,
+  RawBatch,
+  RawCountry,
+} from "../types/domain";
 
 const rawCountry: RawCountry = {
   id: 1,

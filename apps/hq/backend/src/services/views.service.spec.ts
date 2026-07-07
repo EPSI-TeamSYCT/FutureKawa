@@ -5,8 +5,8 @@ import {
   selectAlerts,
   selectLots,
   summarizeCountries,
-} from "../src/services/views";
-import { aggregate, alert, country, lot } from "./fixtures";
+} from "./views.service";
+import { aggregate, alert, country, lot } from "../testing/fixtures";
 
 const scene = aggregate({
   countries: [
@@ -48,7 +48,7 @@ describe("findLot", () => {
   });
 });
 
-describe("countrySummaries", () => {
+describe("summarizeCountries", () => {
   it("attaches per-country lot and alert counts", () => {
     const brazil = summarizeCountries(scene).find((c) => c.id === 1);
     expect(brazil).toMatchObject({ lots: 2, alerts: 1 });

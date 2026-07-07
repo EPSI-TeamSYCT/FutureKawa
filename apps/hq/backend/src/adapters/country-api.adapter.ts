@@ -8,12 +8,14 @@ import {
   rawExploitationSchema,
   rawMeasureSchema,
   rawWarehouseSchema,
-  type RawAlert,
-  type RawBatch,
-  type RawCountry,
-  type RawExploitation,
-  type RawMeasure,
-  type RawWarehouse,
+} from "../schemas/country-api.schema";
+import type {
+  RawAlert,
+  RawBatch,
+  RawCountry,
+  RawExploitation,
+  RawMeasure,
+  RawWarehouse,
 } from "../types/domain";
 
 // Single shared HTTP client for the API Platform country API. `Accept:
@@ -38,7 +40,7 @@ async function getList<T>(
 }
 
 // Thin HTTP layer: every method `fetch*` hits the country API and returns raw
-// (unnormalized) shapes. Normalization happens one layer up, in the aggregate.
+// (unnormalized) shapes. Normalization happens in the mappers, one layer up.
 export const countryClient = {
   fetchCountries: (): Promise<RawCountry[]> =>
     getList("/api/countries", rawCountrySchema),
@@ -50,8 +52,6 @@ export const countryClient = {
     getList("/api/batches", rawBatchSchema),
   fetchAlerts: (): Promise<RawAlert[]> =>
     getList("/api/alerts", rawAlertSchema),
-  // Measures belong to sensors; filter them by the sensor's warehouse
-  // (API Platform SearchFilter) to get a warehouse's readings.
   fetchWarehouseMeasures: (warehouseId: number): Promise<RawMeasure[]> =>
     getList("/api/measures", rawMeasureSchema, {
       "sensor.warehouse": warehouseId,

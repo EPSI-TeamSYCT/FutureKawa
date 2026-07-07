@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
-import { getAggregate } from "../services/aggregate";
-import { buildOverview } from "../services/views";
+import { getAggregate } from "../services/aggregate.service";
+import { buildOverview } from "../services/views.service";
 
 export const overviewRouter = Router();
 

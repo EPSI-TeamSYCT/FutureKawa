@@ -16,6 +16,28 @@ IoT, no alerting, no database. It only consumes, normalizes and consolidates.
 - pino / pino-http (logs)
 - vitest + supertest (tests)
 
+## Architecture
+
+Layered, with hexagonal influences. A request flows top → bottom:
+
+```
+controller (HTTP)  →  service (logic)  →  adapter (country API I/O)
+                                       ↘  mapper (raw → DTO)
+```
+
+| Layer | Folder | Responsibility |
+|---|---|---|
+| Controllers | `src/controllers/*.controller.ts` | Express routers: input parsing/validation, HTTP status codes |
+| Services | `src/services/*.service.ts` | Orchestration & business logic (aggregate, views) |
+| Adapters | `src/adapters/*.adapter.ts` | Outbound gateway to the country API (HTTP, API key, IRIs) |
+| Mappers | `src/mappers/*.mapper.ts` | Pure raw-API → normalized DTO transforms (anti-corruption) |
+| Schemas | `src/schemas/*.schema.ts` | zod validators for the country API wire format |
+| Types | `src/types/` | Domain types & interfaces (`domain.ts`, `views.ts`) and enums (`*.enum.ts`) |
+| Infra | `src/lib`, `src/middleware`, `src/config` | Fallback cache, logger, error handling, config |
+
+Tests are **co-located** as `*.spec.ts` next to the code they cover; shared test
+fixtures live in `src/testing/`.
+
 ## Setup
 
 ```bash
@@ -76,9 +98,10 @@ requests `Accept: application/json` to receive plain arrays.
 The HQ backend consumes: `/api/countries`, `/api/exploitations`,
 `/api/warehouses`, `/api/batches`, `/api/alerts`, and
 `/api/measures?sensor.warehouse=:id` for a lot's readings. The **only** place
-coupled to that wire format is the raw zod schemas in `src/types/domain.ts`; if
-a field is renamed upstream, change it there and the rest of the backend
-follows.
+coupled to that wire format is the raw zod schemas in
+`src/schemas/country-api.schema.ts`; if a field is renamed upstream, change it
+there (and its inferred type in `src/types/domain.ts`) and the rest of the
+backend follows.
 
 Lots and alerts are enriched with their country by resolving
 `batch/alert → warehouse → country`. A lot's country is the country of the
@@ -107,18 +130,20 @@ npm run test        # vitest
 npm run typecheck   # tsc --noEmit
 ```
 
-- `domain` — IRI parsing and relational mapping (country resolved via warehouse).
-- `views` — FIFO sort, filters, per-country counts, overview (pure functions).
-- `cache` — live / fresh-cache / stale-cache / no-cache fallback.
-- API routes via supertest, mocking the aggregate layer (no real HTTP).
+Co-located `*.spec.ts` files:
+
+- `mappers/domain.mapper.spec` — IRI parsing and relational mapping (country resolved via warehouse).
+- `services/views.service.spec` — FIFO sort, filters, per-country counts, overview (pure functions).
+- `lib/cache.spec` — live / fresh-cache / stale-cache / no-cache fallback.
+- `app.spec` — API routes via supertest, mocking the aggregate layer (no real HTTP).
 
 ## Local decisions
 
 - **Single source of truth for config** (`src/config`): API URL, key, timeouts.
-- **Anti-corruption layer**: raw (API Platform, IRIs) vs normalized (camelCase,
-  resolved names) shapes are kept separate in `src/types/domain.ts`, so the
-  frontend contract is decoupled from the country API.
-- **One data path** (`getAggregate`) + **pure view functions** (`src/services/views`):
-  DRY and easy to unit-test.
+- **Anti-corruption layer**: the wire format (`schemas/`, IRIs) → domain types
+  (`types/`) → mapping (`mappers/`) are kept in separate layers, so the frontend
+  contract is decoupled from the country API.
+- **One data path** (`getAggregate` in `services/aggregate.service`) + **pure view
+  functions** (`services/views.service`): DRY and easy to unit-test.
 - **No database**: HQ is a stateless aggregator; resilience is an in-memory
   fallback cache. A store will be reintroduced only when authentication needs it.
