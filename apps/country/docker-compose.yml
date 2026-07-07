@@ -39,47 +39,60 @@ services:
     depends_on:
       - mosquitto
 
-  # ---------------------------------------------------------------------------
-  # TODO — components below are NOT built yet. Uncomment as they are delivered.
-  # ---------------------------------------------------------------------------
-  #
-  # ingest-worker — the "Worker subscribe" of the architecture diagram: an MQTT
-  # consumer that subscribes to futurekawa/${COUNTRY}/# and persists each
-  # measurement into the country database (directly or via country-api). Owner: TBD.
-  #
-  # ingest-worker:
-  #   image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-ingest:${IMAGE_TAG:-latest}
-  #   restart: unless-stopped
-  #   environment:
-  #     MQTT_HOST: mosquitto
-  #     COUNTRY: ${COUNTRY:-brazil}
-  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
-  #   depends_on: [mosquitto, country-db]
-  #
-  # country-api — Thomas's Symfony / API Platform service (apps/country/api).
-  # Image not published yet.
-  #
-  # country-api:
-  #   image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
-  #   restart: unless-stopped
-  #   environment:
-  #     APP_ENV: prod
-  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
-  #     API_KEY: ${COUNTRY_API_KEY:-change-me}
-  #   ports: ["8000:8000"]
-  #   depends_on: [country-db]
-  #
-  # country-db — the country's own datastore (data sovereignty).
-  #
-  # country-db:
-  #   image: postgres:16-alpine
-  #   restart: unless-stopped
-  #   environment:
-  #     POSTGRES_USER: ${DB_USER:-futurekawa}
-  #     POSTGRES_PASSWORD: ${DB_PASSWORD:?set a strong password in .env}
-  #     POSTGRES_DB: ${DB_NAME:-futurekawa}
-  #   volumes:
-  #     - country-db-data:/var/lib/postgresql/data
+  # Country database — the country's own datastore (data sovereignty).
+  country-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-futurekawa}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set a strong password in .env}
+      POSTGRES_DB: ${DB_NAME:-futurekawa}
+    volumes:
+      - country-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-futurekawa} -d ${DB_NAME:-futurekawa}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
-# volumes:
-#   country-db-data:
+  # Country REST API — Symfony / API Platform (apps/country/api). Built locally
+  # from ./api, or pulled from GHCR when deploying.
+  country-api:
+    image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
+    build: ./api
+    restart: unless-stopped
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
+      API_KEY: ${COUNTRY_API_KEY:-change-me}
+    ports:
+      - "8000:8000"
+    depends_on:
+      country-db:
+        condition: service_healthy
+
+  # Ingest worker — the "Worker subscribe" of the architecture diagram: subscribes
+  # to MQTT and persists measures. Same image as the API, run as a console command.
+  ingest-worker:
+    image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
+    build: ./api
+    restart: unless-stopped
+    command: ["php", "bin/console", "app:mqtt:subscribe"]
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      MQTT_USER: ${MQTT_USER:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+      COUNTRY: ${COUNTRY:-brazil}
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
+    depends_on:
+      mosquitto:
+        condition: service_started
+      country-db:
+        condition: service_healthy
+
+volumes:
+  country-db-data:
