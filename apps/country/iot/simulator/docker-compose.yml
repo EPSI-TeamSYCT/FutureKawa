@@ -15,6 +15,7 @@ services:
       WAREHOUSES: wh-01,wh-02
       TEMP_THRESHOLD: "29"
       HUMIDITY_THRESHOLD: "55"
+      PUBLISH_INTERVAL: "10"
     depends_on: [mosquitto]
 
   ecuador:
@@ -25,6 +26,7 @@ services:
       WAREHOUSES: wh-01
       TEMP_THRESHOLD: "31"
       HUMIDITY_THRESHOLD: "60"
+      PUBLISH_INTERVAL: "10"
     depends_on: [mosquitto]
 
   colombia:
@@ -35,4 +37,5 @@ services:
       WAREHOUSES: wh-01
       TEMP_THRESHOLD: "26"
       HUMIDITY_THRESHOLD: "80"
+      PUBLISH_INTERVAL: "10"
     depends_on: [mosquitto]
