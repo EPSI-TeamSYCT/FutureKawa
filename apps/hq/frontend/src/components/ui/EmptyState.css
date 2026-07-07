@@ -1,0 +1,55 @@
+.fk-empty {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--fk-sp-48) var(--fk-sp-24);
+  border: 1px dashed var(--fk-border);
+  border-radius: var(--fk-radius-card);
+  background: var(--fk-surface);
+}
+
+.fk-empty-watermark {
+  position: absolute;
+  right: -12px;
+  bottom: -18px;
+  width: 160px;
+  height: 160px;
+  opacity: 0.05;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+.fk-empty-content {
+  position: relative;
+  max-width: 42ch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fk-sp-8);
+}
+
+.fk-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--fk-sp-4);
+  border-radius: var(--fk-radius-panel);
+  background: var(--fk-inset);
+  color: var(--fk-text-muted);
+}
+.fk-empty-title {
+  color: var(--fk-text);
+}
+.fk-empty-desc {
+  color: var(--fk-text-muted);
+  font-size: var(--fk-fs-body);
+  line-height: var(--fk-lh-body);
+}
+.fk-empty-action {
+  margin-top: var(--fk-sp-12);
+}

@@ -1,0 +1,44 @@
+.fk-skeleton {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--fk-inset);
+}
+.fk-skeleton[data-variant='text'] {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.fk-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--fk-surface) 60%, transparent),
+    transparent
+  );
+  animation: fk-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes fk-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fk-skeleton::after {
+    animation: none;
+  }
+  .fk-skeleton {
+    animation: fk-skeleton-pulse 1.6s ease-in-out infinite;
+  }
+}
+@keyframes fk-skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}

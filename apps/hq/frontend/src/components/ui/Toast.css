@@ -1,0 +1,107 @@
+.fk-toast-viewport {
+  position: fixed;
+  top: var(--fk-sp-16);
+  right: var(--fk-sp-16);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fk-sp-12);
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.fk-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fk-sp-12);
+  padding: var(--fk-sp-16);
+  padding-left: var(--fk-sp-16);
+  background: var(--fk-surface);
+  border: 1px solid var(--fk-border);
+  border-left: 4px solid var(--fk-accent);
+  border-radius: var(--fk-radius-card);
+  box-shadow: var(--fk-shadow-2);
+  pointer-events: auto;
+  animation: fk-toast-in var(--fk-dur-3) var(--fk-ease);
+}
+
+.fk-toast-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--fk-accent);
+}
+.fk-toast-body {
+  flex: 1;
+  min-width: 0;
+}
+.fk-toast-title {
+  font-weight: var(--fk-fw-bold);
+  font-size: var(--fk-fs-body);
+  color: var(--fk-text);
+}
+.fk-toast-desc {
+  margin-top: 3px;
+  font-size: var(--fk-fs-small);
+  color: var(--fk-text-muted);
+  word-break: break-word;
+}
+.fk-toast-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin: -2px -2px 0 0;
+  border: none;
+  border-radius: var(--fk-radius-badge);
+  background: transparent;
+  color: var(--fk-text-meta);
+  cursor: pointer;
+  transition:
+    background var(--fk-dur-1) var(--fk-ease),
+    color var(--fk-dur-1) var(--fk-ease);
+}
+.fk-toast-close:hover {
+  background: var(--fk-inset);
+  color: var(--fk-text);
+}
+
+/* Variants — left accent + icon colour */
+.fk-toast--info {
+  border-left-color: var(--fk-accent);
+}
+.fk-toast--info .fk-toast-icon {
+  color: var(--fk-accent);
+}
+.fk-toast--success {
+  border-left-color: var(--fk-success);
+}
+.fk-toast--success .fk-toast-icon {
+  color: var(--fk-success);
+}
+.fk-toast--warning {
+  border-left-color: var(--fk-alert);
+}
+.fk-toast--warning .fk-toast-icon {
+  color: var(--fk-status-alerte-text);
+}
+.fk-toast--error {
+  border-left-color: var(--fk-danger);
+}
+.fk-toast--error .fk-toast-icon {
+  color: var(--fk-danger);
+}
+
+@keyframes fk-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fk-toast {
+    animation: none;
+  }
+}

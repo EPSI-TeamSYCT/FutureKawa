@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react'
-import { Check, Clock, TriangleAlert, Truck } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Check, Clock, TriangleAlert, Truck } from 'lucide-react'
 import { useTheme } from '@/hooks/theme-context'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import logo from '@/assets/brand/logo.svg'
@@ -91,7 +92,7 @@ function useCssVar() {
 function readableOn(hex: string): string {
   const m = /^#?([\da-f]{6})$/i.exec(hex.trim())
   if (!m) return '#3b2a20'
-  const int = parseInt(m[1], 16)
+  const int = Number.parseInt(m[1], 16)
   const r = (int >> 16) & 255
   const g = (int >> 8) & 255
   const b = int & 255
@@ -117,7 +118,9 @@ export function StyleGuide() {
           <span>FutureKawa</span>
         </div>
         <div className="sg-topbar-right">
-          <span className="fk-mono sg-topbar-tag">v1.0 · charte</span>
+          <Link className="sg-nav-link fk-mono" to="/components">
+            composants <ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" />
+          </Link>
           <ThemeToggle />
         </div>
       </header>

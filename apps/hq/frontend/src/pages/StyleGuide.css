@@ -41,6 +41,20 @@
 .sg-topbar-tag {
   color: var(--fk-text-meta);
 }
+.sg-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fk-text-muted);
+  padding: 6px 10px;
+  border-radius: var(--fk-radius-btn);
+}
+.sg-nav-link:hover {
+  color: var(--fk-text);
+  background: var(--fk-inset);
+  text-decoration: none;
+}
 
 /* ---- Page shell -------------------------------------------------------- */
 .sg-main {

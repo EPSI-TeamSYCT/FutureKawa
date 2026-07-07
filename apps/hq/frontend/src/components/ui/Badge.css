@@ -1,0 +1,56 @@
+.fk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--fk-radius-badge);
+  font-family: var(--fk-font-ui);
+  font-weight: var(--fk-fw-semibold);
+  font-size: var(--fk-fs-code);
+  line-height: 1;
+  white-space: nowrap;
+}
+.fk-badge--sm {
+  padding: 4px 9px;
+  font-size: var(--fk-fs-caption);
+  gap: 5px;
+}
+
+.fk-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--fk-radius-full);
+  background: currentColor;
+  flex-shrink: 0;
+}
+.fk-badge-icon {
+  display: inline-flex;
+  margin-left: -1px;
+}
+
+.fk-badge--neutral {
+  background: var(--fk-status-expedie-bg);
+  border-color: var(--fk-status-expedie-border);
+  color: var(--fk-status-expedie-text);
+}
+.fk-badge--success {
+  background: var(--fk-status-conforme-bg);
+  border-color: var(--fk-status-conforme-border);
+  color: var(--fk-status-conforme-text);
+}
+.fk-badge--alert {
+  background: var(--fk-status-alerte-bg);
+  border-color: var(--fk-status-alerte-border);
+  color: var(--fk-status-alerte-text);
+}
+.fk-badge--danger {
+  background: var(--fk-status-perime-bg);
+  border-color: var(--fk-status-perime-border);
+  color: var(--fk-status-perime-text);
+}
+.fk-badge--accent {
+  background: color-mix(in srgb, var(--fk-accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--fk-accent) 40%, transparent);
+  color: var(--fk-accent);
+}

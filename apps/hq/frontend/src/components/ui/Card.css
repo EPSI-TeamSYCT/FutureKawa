@@ -1,0 +1,48 @@
+.fk-card {
+  background: var(--fk-surface);
+  border: 1px solid var(--fk-border);
+  border-radius: var(--fk-radius-card);
+  box-shadow: var(--fk-shadow-1);
+  padding: var(--fk-sp-24);
+}
+.fk-card--flush {
+  padding: 0;
+  overflow: hidden;
+}
+.fk-card--interactive {
+  cursor: pointer;
+  transition:
+    box-shadow var(--fk-dur-2) var(--fk-ease),
+    border-color var(--fk-dur-2) var(--fk-ease),
+    transform var(--fk-dur-2) var(--fk-ease);
+}
+.fk-card--interactive:hover {
+  box-shadow: var(--fk-shadow-2);
+  border-color: var(--fk-neutre-400);
+  transform: translateY(-2px);
+}
+.fk-card--interactive:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--fk-bg),
+    0 0 0 4px var(--fk-ring);
+}
+
+.fk-card-header {
+  margin-bottom: var(--fk-sp-16);
+}
+.fk-card-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--fk-sp-16);
+}
+.fk-card-title .fk-h4 {
+  color: var(--fk-text);
+}
+.fk-card-eyebrow {
+  margin-bottom: 4px;
+}
+.fk-card-action {
+  flex-shrink: 0;
+}
