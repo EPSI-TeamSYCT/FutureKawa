@@ -30,6 +30,8 @@ jobs:
 
       - name: Compute version & sha
         id: info
+        env:
+          BUMP: ${{ inputs.bump }}
         run: |
           set -euo pipefail
           sha=$(git rev-parse --short HEAD)
@@ -40,7 +42,7 @@ jobs:
             v=${latest#${SERVICE}-v}
             major=${v%%.*}; rest=${v#*.}; minor=${rest%%.*}; patch=${rest##*.}
           fi
-          case "${{ inputs.bump }}" in
+          case "$BUMP" in
             minor) minor=$((minor + 1)); patch=0; release=true ;;
             patch) patch=$((patch + 1));          release=true ;;
             *)                                    release=false ;;
@@ -51,13 +53,15 @@ jobs:
             echo "version=$version"
             echo "release=$release"
           } >> "$GITHUB_OUTPUT"
-          echo "bump=${{ inputs.bump }} -> version=$version (release=$release), sha=$sha"
+          echo "bump=$BUMP -> version=$version (release=$release), sha=$sha"
 
       - name: Create version tag
         if: ${{ steps.info.outputs.release == 'true' }}
+        env:
+          VERSION: ${{ steps.info.outputs.version }}
         run: |
           set -euo pipefail
-          tag="${SERVICE}-v${{ steps.info.outputs.version }}"
+          tag="${SERVICE}-v${VERSION}"
           git tag "$tag"
           git push origin "$tag"
 

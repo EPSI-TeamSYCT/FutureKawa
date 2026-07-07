@@ -20,14 +20,18 @@ jobs:
 
       - name: Determine bump from branch name
         id: bump
+        env:
+          # Passed as an env var (never interpolated into the script) to avoid
+          # shell injection — a branch name is attacker-controllable.
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          case "${{ github.head_ref }}" in
+          case "$HEAD_REF" in
             feat/*|feature/*) bump=minor ;;
             fix/*)            bump=patch ;;
             *)                bump=none  ;;
           esac
           echo "bump=$bump" >> "$GITHUB_OUTPUT"
-          echo "branch=${{ github.head_ref }} -> bump=$bump"
+          echo "branch=$HEAD_REF -> bump=$bump"
 
       # Which services had image-relevant changes (src/deps/Dockerfile)?
       - uses: dorny/paths-filter@v3
