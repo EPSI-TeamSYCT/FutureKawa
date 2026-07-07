@@ -29,7 +29,7 @@ UI ships light (default) and dark themes.
 - **lucide-react** icons (stroke 1.75, always labelled)
 - **MSW** (Mock Service Worker) for a fully offline, seeded mock backend
 - **Vitest + React Testing Library** for unit tests
-- **ESLint (flat) + Prettier**
+- **oxc toolchain** — [oxlint](https://oxc.rs) (lint) + [oxfmt](https://oxc.rs) (format), Rust-based & fast
 
 ## Getting started
 
@@ -49,8 +49,10 @@ The app boots on the MSW mock layer by default — no backend required.
 | `npm run preview` | Preview the production build locally |
 | `npm test` | Run the Vitest suite once |
 | `npm run test:watch` | Run tests in watch mode |
-| `npm run lint` | ESLint (zero warnings expected) |
-| `npm run format` | Format with Prettier |
+| `npm run typecheck` | Type-check only (`tsc -b`) |
+| `npm run lint` | Lint with oxlint |
+| `npm run format` | Format in place with oxfmt |
+| `npm run format:check` | Check formatting (CI: fails if unformatted) |
 
 ## Environment
 
