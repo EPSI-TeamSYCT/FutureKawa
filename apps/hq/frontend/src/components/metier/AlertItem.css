@@ -6,12 +6,8 @@
   padding: var(--fk-sp-16) var(--fk-sp-24);
   background: var(--fk-surface);
   border: 1px solid var(--fk-border);
-  border-left: 4px solid var(--fk-alert);
   border-radius: var(--fk-radius-card);
   transition: opacity var(--fk-dur-2) var(--fk-ease);
-}
-.fk-alert.is-expiry {
-  border-left-color: var(--fk-danger);
 }
 .fk-alert.is-done {
   opacity: 0.62;

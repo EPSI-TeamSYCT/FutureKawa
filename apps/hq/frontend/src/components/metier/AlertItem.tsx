@@ -25,9 +25,7 @@ export function AlertItem({ alerte, onTraiter, treating = false }: AlertItemProp
   const target = alerte.lotId ? `/lots/${alerte.lotId}` : `/entrepots/${alerte.entrepotId}`
 
   return (
-    <article
-      className={`fk-alert ${drift ? 'is-drift' : 'is-expiry'} ${alerte.traitee ? 'is-done' : ''}`}
-    >
+    <article className={`fk-alert ${alerte.traitee ? 'is-done' : ''}`.trim()}>
       <div className="fk-alert-main">
         <div className="fk-alert-top">
           <Badge tone={drift ? 'alert' : 'danger'} size="sm" dot>
