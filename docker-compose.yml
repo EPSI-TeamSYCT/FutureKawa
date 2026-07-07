@@ -1,0 +1,79 @@
+# FutureKawa — HQ aggregation stack (headquarters).
+#
+# Brings up the central layer: the HQ backend (aggregator/BFF) and the frontend.
+# In the target topology each country is sovereign and exposes its own API; the
+# backend fans out to the three of them and consolidates. See apps/country/ for
+# the per-country edge stack (broker + sensors + API + DB).
+#
+#   docker login ghcr.io            # images are private GHCR packages
+#   docker compose up -d            # backend :3000 · frontend :8080
+#
+# Images come from GHCR; override the tag with IMAGE_TAG (see .env.example).
+
+name: futurekawa-hq
+
+services:
+  # HQ backend — aggregator/BFF over the country APIs.
+  backend:
+    image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-hq-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      LOG_LEVEL: info
+      COUNTRY_API_KEY: ${COUNTRY_API_KEY:-change-me}
+      COUNTRY_TIMEOUT_MS: "4000"
+      CACHE_STALE_MS: "300000"
+      # --- Single-URL (as currently built) -------------------------------
+      # The backend today reads ONE COUNTRY_API_URL. Point it at whichever
+      # country API is reachable for a first end-to-end test.
+      COUNTRY_API_URL: ${COUNTRY_API_URL:-http://stack-brazil:8000}
+      # --- 3-country target (needs backend evolution) --------------------
+      # For true per-country sovereignty the backend must be extended to read
+      # one URL per country and merge. Wiring kept here as the target contract:
+      COUNTRY_API_URL_BRAZIL: http://stack-brazil:8000
+      COUNTRY_API_URL_ECUADOR: http://stack-ecuador:8000
+      COUNTRY_API_URL_COLOMBIA: http://stack-colombia:8000
+    # depends_on: [stack-brazil, stack-ecuador, stack-colombia]  # enable when APIs exist
+
+  # HQ frontend — React SPA served by nginx.
+  # NOTE: the published image is built with VITE_USE_MOCKS=true, so it runs on its
+  # offline MSW mock layer by default (great for the jury demo, ignores backend).
+  # To hit the real backend, rebuild: --build-arg VITE_USE_MOCKS=false --build-arg VITE_API_URL=http://localhost:3000
+  frontend:
+    image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-hq-frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+
+  # ---------------------------------------------------------------------------
+  # TODO — 3 sovereign country APIs. NOT runnable yet: Thomas's Symfony image
+  # (apps/country/api) is unpublished and the backend multi-URL aggregation is
+  # pending. Uncomment one block per country when both land. Each is the API
+  # half of the per-country stack (the IoT/broker/worker halves stay in
+  # apps/country/docker-compose.yml, deployed at the edge).
+  # ---------------------------------------------------------------------------
+  #
+  # stack-brazil:
+  #   image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
+  #   restart: unless-stopped
+  #   environment:
+  #     APP_ENV: prod
+  #     API_KEY: ${COUNTRY_API_KEY:-change-me}
+  #     DATABASE_URL: postgresql://futurekawa:futurekawa@db-brazil:5432/futurekawa
+  #   depends_on: [db-brazil]
+  # db-brazil:
+  #   image: postgres:16-alpine
+  #   environment: { POSTGRES_USER: futurekawa, POSTGRES_PASSWORD: futurekawa, POSTGRES_DB: futurekawa }
+  #   volumes: [db-brazil-data:/var/lib/postgresql/data]
+  #
+  # stack-ecuador / db-ecuador  — same shape, COUNTRY=ecuador
+  # stack-colombia / db-colombia — same shape, COUNTRY=colombia
+
+# volumes:
+#   db-brazil-data:
+#   db-ecuador-data:
+#   db-colombia-data:
