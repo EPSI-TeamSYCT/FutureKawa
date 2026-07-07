@@ -1,0 +1,12 @@
+# Keep the build context small and let the image build its own deps.
+/vendor/
+/var/
+/tests/
+/.git/
+.env.local
+.env.*.local
+.php-cs-fixer.cache
+.phpunit.cache/
+docker-compose*.yml
+Dockerfile
+.dockerignore
