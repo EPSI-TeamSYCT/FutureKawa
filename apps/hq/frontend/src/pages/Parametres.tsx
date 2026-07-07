@@ -54,7 +54,7 @@ export function Parametres() {
           <CardHeader>
             <CardTitle eyebrow="Apparence">Thème</CardTitle>
           </CardHeader>
-          <div className="param-themes" role="group" aria-label="Choix du thème">
+          <fieldset className="param-themes" aria-label="Choix du thème">
             {THEMES.map((t) => (
               <button
                 key={t.id}
@@ -67,7 +67,7 @@ export function Parametres() {
                 {t.label}
               </button>
             ))}
-          </div>
+          </fieldset>
           <p className="param-note">Le choix est mémorisé sur cet appareil.</p>
         </Card>
 

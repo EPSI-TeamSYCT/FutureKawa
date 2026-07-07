@@ -19,7 +19,12 @@ import { getAlertes } from '@/api/alertes'
 import { scopeName } from '@/lib/countries'
 import { relativeTime } from '@/lib/format'
 import type { Alerte } from '@/api/types'
+import type { ReactNode } from 'react'
 import './Dashboard.css'
+
+const KPI_SKELETONS = ['k0', 'k1', 'k2', 'k3']
+const WAREHOUSE_SKELETONS = ['w0', 'w1', 'w2', 'w3']
+const ALERT_SKELETONS = ['a0', 'a1', 'a2', 'a3', 'a4']
 
 /** Deterministic gentle series for KPI sparklines (decorative trend shape). */
 function miniTrend(seed: number, points = 8): number[] {
@@ -67,6 +72,41 @@ export function Dashboard() {
     age: miniTrend(43),
   }
 
+  const alertes = alertesQ.data ?? []
+  let alertsContent: ReactNode
+  if (alertesQ.loading) {
+    alertsContent = (
+      <div className="dash-alert-list">
+        {ALERT_SKELETONS.map((id) => (
+          <div className="dash-alert-row" key={id}>
+            <Skeleton variant="text" width="70%" />
+            <Skeleton variant="text" width="40%" />
+          </div>
+        ))}
+      </div>
+    )
+  } else if (alertes.length === 0) {
+    alertsContent = (
+      <EmptyState
+        className="dash-alert-empty"
+        title="Aucune alerte"
+        description="Conditions et âges dans les seuils."
+      />
+    )
+  } else {
+    alertsContent = (
+      <ul className="dash-alert-list">
+        {alertes.slice(0, 5).map((a) => (
+          <AlertRow
+            key={a.id}
+            alerte={a}
+            onOpen={() => navigate(a.lotId ? `/lots/${a.lotId}` : `/entrepots/${a.entrepotId}`)}
+          />
+        ))}
+      </ul>
+    )
+  }
+
   return (
     <>
       <PageHeader
@@ -77,7 +117,7 @@ export function Dashboard() {
 
       <div className="dash-kpis">
         {!ready ? (
-          Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
+          KPI_SKELETONS.map((id) => <KpiSkeleton key={id} />)
         ) : (
           <>
             <KpiCard
@@ -131,8 +171,8 @@ export function Dashboard() {
           </div>
           {entrepotsQ.loading ? (
             <div className="dash-wh-grid">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} height={168} radius="var(--fk-radius-card)" />
+              {WAREHOUSE_SKELETONS.map((id) => (
+                <Skeleton key={id} height={168} radius="var(--fk-radius-card)" />
               ))}
             </div>
           ) : (
@@ -159,34 +199,7 @@ export function Dashboard() {
                 Dernières alertes
               </CardTitle>
             </CardHeader>
-            {alertesQ.loading ? (
-              <div className="dash-alert-list">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div className="dash-alert-row" key={i}>
-                    <Skeleton variant="text" width="70%" />
-                    <Skeleton variant="text" width="40%" />
-                  </div>
-                ))}
-              </div>
-            ) : (alertesQ.data ?? []).length === 0 ? (
-              <EmptyState
-                className="dash-alert-empty"
-                title="Aucune alerte"
-                description="Conditions et âges dans les seuils."
-              />
-            ) : (
-              <ul className="dash-alert-list">
-                {(alertesQ.data ?? []).slice(0, 5).map((a) => (
-                  <AlertRow
-                    key={a.id}
-                    alerte={a}
-                    onOpen={() =>
-                      navigate(a.lotId ? `/lots/${a.lotId}` : `/entrepots/${a.entrepotId}`)
-                    }
-                  />
-                ))}
-              </ul>
-            )}
+            {alertsContent}
           </Card>
         </section>
       </div>
@@ -194,7 +207,7 @@ export function Dashboard() {
   )
 }
 
-function AlertRow({ alerte, onOpen }: { alerte: Alerte; onOpen: () => void }) {
+function AlertRow({ alerte, onOpen }: Readonly<{ alerte: Alerte; onOpen: () => void }>) {
   const drift = alerte.type === 'DERIVE'
   return (
     <li>

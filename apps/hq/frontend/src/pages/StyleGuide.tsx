@@ -131,7 +131,7 @@ export function StyleGuide() {
       <main className="sg-main">
         <div className="sg-hero">
           <div className="sg-eyebrow">
-            <span className="fk-caption">Design system</span>
+            <span className="fk-caption">Design system</span>{' '}
             <span className="sg-chip">
               <span className="dot" aria-hidden="true" />
               Phase 1 · socle

@@ -9,6 +9,10 @@
 .param-themes {
   display: flex;
   gap: var(--fk-sp-12);
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
 }
 .param-theme {
   display: inline-flex;

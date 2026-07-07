@@ -4,7 +4,7 @@ import { isCountryScope, type CountryScope } from '@/lib/countries'
 import { CountryFilterContext } from './country-context'
 
 /** Holds the active country scope in the URL (?pays=br|ec|co, absent = Siège). */
-export function CountryProvider({ children }: { children: ReactNode }) {
+export function CountryProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [params, setParams] = useSearchParams()
   const raw = params.get('pays')
   const scope: CountryScope = isCountryScope(raw) ? raw : 'siege'

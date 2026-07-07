@@ -34,7 +34,9 @@
 .lotd-periods {
   display: inline-flex;
   gap: 2px;
+  margin: 0;
   padding: 3px;
+  min-inline-size: 0;
   background: var(--fk-inset);
   border: 1px solid var(--fk-border);
   border-radius: var(--fk-radius-btn);

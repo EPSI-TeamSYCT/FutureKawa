@@ -29,6 +29,7 @@ import './Lots.css'
 
 type SortKey = 'id' | 'entrepotNom' | 'dateEntree' | 'ageJours' | 'statut'
 const STATUTS: LotStatut[] = ['CONFORME', 'EN_ALERTE', 'PERIME', 'EXPEDIE']
+const ROW_SKELETONS = ['r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7']
 
 export function Lots() {
   const { scope } = useCountryFilter()
@@ -201,7 +202,7 @@ export function Lots() {
             </THead>
             <TBody>
               {loading
-                ? Array.from({ length: 8 }).map((_, i) => <LotRowSkeleton key={i} />)
+                ? ROW_SKELETONS.map((id) => <LotRowSkeleton key={id} />)
                 : rows.map((lot) => (
                     <LotRow key={lot.id} lot={lot} onOpen={() => navigate(`/lots/${lot.id}`)} />
                   ))}
@@ -220,7 +221,7 @@ export function Lots() {
   )
 }
 
-function LotRow({ lot, onOpen }: { lot: Lot; onOpen: () => void }) {
+function LotRow({ lot, onOpen }: Readonly<{ lot: Lot; onOpen: () => void }>) {
   return (
     <Tr
       muted={lot.statut === 'EXPEDIE'}

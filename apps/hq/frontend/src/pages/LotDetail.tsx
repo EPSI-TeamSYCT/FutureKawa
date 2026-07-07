@@ -26,6 +26,7 @@ import type { Lot, Periode } from '@/api/types'
 import './LotDetail.css'
 
 const PERIODS: Periode[] = ['24h', '7j', '30j', 'tout']
+const META_SKELETONS = ['m0', 'm1', 'm2', 'm3', 'm4']
 
 function buildSteps(lot: Lot): TimelineStep[] {
   const steps: TimelineStep[] = [
@@ -85,6 +86,25 @@ export function LotDetail() {
   const lot = lotQ.data
   const country = lot ? getCountry(lot.pays) : undefined
 
+  let chartContent: ReactNode
+  if (mesuresQ.loading || !country) {
+    chartContent = <Skeleton height={340} />
+  } else if (mesuresQ.error) {
+    chartContent = (
+      <EmptyState
+        title="Mesures indisponibles"
+        description={mesuresQ.error.message}
+        action={
+          <Button variant="secondary" size="sm" onClick={mesuresQ.refetch}>
+            Réessayer
+          </Button>
+        }
+      />
+    )
+  } else {
+    chartContent = <TempHumidityChart mesures={mesuresQ.data ?? []} country={country} />
+  }
+
   return (
     <>
       <PageHeader
@@ -102,8 +122,8 @@ export function LotDetail() {
       <Card className="lotd-fiche">
         {lotQ.loading || !lot ? (
           <div className="lotd-meta">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div className="lotd-meta-item" key={i}>
+            {META_SKELETONS.map((id) => (
+              <div className="lotd-meta-item" key={id}>
                 <Skeleton variant="text" width={70} />
                 <Skeleton variant="text" width={90} />
               </div>
@@ -149,7 +169,7 @@ export function LotDetail() {
           <CardTitle
             eyebrow="Conditions de stockage"
             action={
-              <div className="lotd-periods" role="group" aria-label="Période">
+              <fieldset className="lotd-periods" aria-label="Période">
                 {PERIODS.map((p) => (
                   <button
                     key={p}
@@ -161,33 +181,23 @@ export function LotDetail() {
                     {p}
                   </button>
                 ))}
-              </div>
+              </fieldset>
             }
           >
             Température &amp; humidité
           </CardTitle>
         </CardHeader>
-        {mesuresQ.loading || !country ? (
-          <Skeleton height={340} />
-        ) : mesuresQ.error ? (
-          <EmptyState
-            title="Mesures indisponibles"
-            description={mesuresQ.error.message}
-            action={
-              <Button variant="secondary" size="sm" onClick={mesuresQ.refetch}>
-                Réessayer
-              </Button>
-            }
-          />
-        ) : (
-          <TempHumidityChart mesures={mesuresQ.data ?? []} country={country} />
-        )}
+        {chartContent}
       </Card>
     </>
   )
 }
 
-function Meta({ label, value, mono = false }: { label: string; value: ReactNode; mono?: boolean }) {
+function Meta({
+  label,
+  value,
+  mono = false,
+}: Readonly<{ label: string; value: ReactNode; mono?: boolean }>) {
   return (
     <div className="lotd-meta-item">
       <span className="fk-caption">{label}</span>

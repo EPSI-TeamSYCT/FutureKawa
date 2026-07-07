@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { BellOff } from 'lucide-react'
 import { Button, EmptyState, PageHeader, Skeleton, useToast } from '@/components/ui'
 import { AlertItem } from '@/components/metier'
@@ -15,6 +15,7 @@ const FILTERS: { id: FilterMode; label: string }[] = [
   { id: 'todo', label: 'À traiter' },
   { id: 'done', label: 'Traitées' },
 ]
+const SKELETON_ROWS = ['s0', 's1', 's2', 's3']
 
 export function Alertes() {
   const { scope } = useCountryFilter()
@@ -63,6 +64,50 @@ export function Alertes() {
     return true
   })
 
+  let content: ReactNode
+  if (error) {
+    content = (
+      <EmptyState
+        title="Impossible de charger les alertes"
+        description={error.message}
+        action={
+          <Button variant="secondary" size="sm" onClick={refetch}>
+            Réessayer
+          </Button>
+        }
+      />
+    )
+  } else if (loading) {
+    content = (
+      <div className="alr-list">
+        {SKELETON_ROWS.map((id) => (
+          <Skeleton key={id} height={92} radius="var(--fk-radius-card)" />
+        ))}
+      </div>
+    )
+  } else if (visible.length === 0) {
+    content = (
+      <EmptyState
+        icon={<BellOff size={22} strokeWidth={1.75} />}
+        title={filter === 'todo' ? 'Aucune alerte à traiter' : 'Aucune alerte'}
+        description="Les conditions et les âges sont dans les seuils pour ce périmètre."
+      />
+    )
+  } else {
+    content = (
+      <div className="alr-list">
+        {visible.map((a) => (
+          <AlertItem
+            key={a.id}
+            alerte={a}
+            treating={treatingId === a.id}
+            onTraiter={handleTraiter}
+          />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <>
       <PageHeader
@@ -70,7 +115,7 @@ export function Alertes() {
         title="Alertes"
         description="File priorisée : dérive de conditions ou lot de plus de 365 jours."
         actions={
-          <div className="alr-filter" role="group" aria-label="Filtrer les alertes">
+          <fieldset className="alr-filter" aria-label="Filtrer les alertes">
             {FILTERS.map((f) => (
               <button
                 key={f.id}
@@ -83,44 +128,11 @@ export function Alertes() {
                 <span className="alr-filter-count fk-mono">{counts[f.id]}</span>
               </button>
             ))}
-          </div>
+          </fieldset>
         }
       />
 
-      {error ? (
-        <EmptyState
-          title="Impossible de charger les alertes"
-          description={error.message}
-          action={
-            <Button variant="secondary" size="sm" onClick={refetch}>
-              Réessayer
-            </Button>
-          }
-        />
-      ) : loading ? (
-        <div className="alr-list">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} height={92} radius="var(--fk-radius-card)" />
-          ))}
-        </div>
-      ) : visible.length === 0 ? (
-        <EmptyState
-          icon={<BellOff size={22} strokeWidth={1.75} />}
-          title={filter === 'todo' ? 'Aucune alerte à traiter' : 'Aucune alerte'}
-          description="Les conditions et les âges sont dans les seuils pour ce périmètre."
-        />
-      ) : (
-        <div className="alr-list">
-          {visible.map((a) => (
-            <AlertItem
-              key={a.id}
-              alerte={a}
-              treating={treatingId === a.id}
-              onTraiter={handleTraiter}
-            />
-          ))}
-        </div>
-      )}
+      {content}
     </>
   )
 }
