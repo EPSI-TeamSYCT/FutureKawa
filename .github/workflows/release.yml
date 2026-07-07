@@ -16,7 +16,7 @@ jobs:
       bump: ${{ steps.bump.outputs.bump }}
       simulator: ${{ steps.filter.outputs.simulator }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Determine bump from branch name
         id: bump
@@ -34,7 +34,7 @@ jobs:
           echo "branch=$HEAD_REF -> bump=$bump"
 
       # Which services had image-relevant changes (src/deps/Dockerfile)?
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
         id: filter
         with:
           filters: |
