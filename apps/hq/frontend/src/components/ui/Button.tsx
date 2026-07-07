@@ -1,17 +1,17 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
-import './Button.css'
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import "./Button.css";
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive'
-export type ButtonSize = 'sm' | 'md'
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
+export type ButtonSize = "sm" | "md";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant
-  size?: ButtonSize
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   /** Shows a spinner and disables the button. */
-  loading?: boolean
-  leftIcon?: ReactNode
-  rightIcon?: ReactNode
-  fullWidth?: boolean
+  loading?: boolean;
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
+  fullWidth?: boolean;
 }
 
 /**
@@ -20,30 +20,30 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
-    variant = 'primary',
-    size = 'md',
+    variant = "primary",
+    size = "md",
     loading = false,
     leftIcon,
     rightIcon,
     fullWidth = false,
     disabled,
-    className = '',
+    className = "",
     children,
-    type = 'button',
+    type = "button",
     ...rest
   },
   ref,
 ) {
   const classes = [
-    'fk-btn',
+    "fk-btn",
     `fk-btn--${variant}`,
     `fk-btn--${size}`,
-    fullWidth ? 'fk-btn--block' : '',
-    loading ? 'is-loading' : '',
+    fullWidth ? "fk-btn--block" : "",
+    loading ? "is-loading" : "",
     className,
   ]
     .filter(Boolean)
-    .join(' ')
+    .join(" ");
 
   return (
     <button
@@ -67,5 +67,5 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         </span>
       )}
     </button>
-  )
-})
+  );
+});

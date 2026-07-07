@@ -24,5 +24,13 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     css: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      // Gate coverage on the pure business logic only — UI (components, pages,
+      // providers, Chart.js setup, MSW mocks) is intentionally out of scope.
+      include: ['src/lib/**'],
+      exclude: ['src/lib/chartSetup.ts', 'src/lib/**/*.{test,spec}.*'],
+      thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
+    },
   },
 })

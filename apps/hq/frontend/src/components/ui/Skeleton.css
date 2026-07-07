@@ -4,13 +4,13 @@
   overflow: hidden;
   background: var(--fk-inset);
 }
-.fk-skeleton[data-variant='text'] {
+.fk-skeleton[data-variant="text"] {
   display: inline-block;
   vertical-align: middle;
 }
 
 .fk-skeleton::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-100%);

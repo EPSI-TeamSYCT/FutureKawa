@@ -1,6 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   Badge,
   Button,
@@ -10,55 +10,55 @@ import {
   EmptyState,
   PageHeader,
   Skeleton,
-} from '@/components/ui'
+} from "@/components/ui";
 import {
   LotStatusBadge,
   LotTimeline,
   TempHumidityChart,
   type TimelineStep,
-} from '@/components/metier'
-import { useAsync } from '@/hooks/useAsync'
-import { getLot } from '@/api/lots'
-import { getLotMesures } from '@/api/mesures'
-import { ageTone, ALERTE_AGE_DAYS, PERIME_DAYS } from '@/lib/conditions'
-import { getCountry } from '@/lib/countries'
-import type { Lot, Periode } from '@/api/types'
-import './LotDetail.css'
+} from "@/components/metier";
+import { useAsync } from "@/hooks/useAsync";
+import { getLot } from "@/api/lots";
+import { getLotMesures } from "@/api/mesures";
+import { ageTone, ALERTE_AGE_DAYS, PERIME_DAYS } from "@/lib/conditions";
+import { getCountry } from "@/lib/countries";
+import type { Lot, Periode } from "@/api/types";
+import "./LotDetail.css";
 
-const PERIODS: Periode[] = ['24h', '7j', '30j', 'tout']
-const META_SKELETONS = ['m0', 'm1', 'm2', 'm3', 'm4']
+const PERIODS: Periode[] = ["24h", "7j", "30j", "tout"];
+const META_SKELETONS = ["m0", "m1", "m2", "m3", "m4"];
 
 function buildSteps(lot: Lot): TimelineStep[] {
   const steps: TimelineStep[] = [
-    { label: 'Entrée en stockage', sublabel: lot.dateEntree, state: 'done' },
-  ]
+    { label: "Entrée en stockage", sublabel: lot.dateEntree, state: "done" },
+  ];
   if (lot.ageJours >= ALERTE_AGE_DAYS) {
     steps.push({
-      label: lot.ageJours >= PERIME_DAYS ? 'Seuil de péremption (550 j)' : 'Seuil d’âge (365 j)',
+      label: lot.ageJours >= PERIME_DAYS ? "Seuil de péremption (550 j)" : "Seuil d’âge (365 j)",
       sublabel: `${lot.ageJours} j`,
-      state: 'alert',
-    })
+      state: "alert",
+    });
   }
-  const final: Record<Lot['statut'], TimelineStep> = {
-    CONFORME: { label: 'Sous surveillance', sublabel: 'aujourd’hui', state: 'pending' },
-    EN_ALERTE: { label: 'En alerte', sublabel: 'aujourd’hui', state: 'alert' },
-    PERIME: { label: 'Périmé', sublabel: 'aujourd’hui', state: 'alert' },
-    EXPEDIE: { label: 'Expédié', sublabel: 'sorti du stock', state: 'done' },
-  }
-  steps.push(final[lot.statut])
-  return steps
+  const final: Record<Lot["statut"], TimelineStep> = {
+    CONFORME: { label: "Sous surveillance", sublabel: "aujourd’hui", state: "pending" },
+    EN_ALERTE: { label: "En alerte", sublabel: "aujourd’hui", state: "alert" },
+    PERIME: { label: "Périmé", sublabel: "aujourd’hui", state: "alert" },
+    EXPEDIE: { label: "Expédié", sublabel: "sorti du stock", state: "done" },
+  };
+  steps.push(final[lot.statut]);
+  return steps;
 }
 
 export function LotDetail() {
-  const { id = '' } = useParams()
-  const [periode, setPeriode] = useState<Periode>('30j')
+  const { id = "" } = useParams();
+  const [periode, setPeriode] = useState<Periode>("30j");
 
-  const lotQ = useAsync((signal) => getLot(id, signal), [id])
-  const mesuresQ = useAsync((signal) => getLotMesures(id, periode, signal), [id, periode])
+  const lotQ = useAsync((signal) => getLot(id, signal), [id]);
+  const mesuresQ = useAsync((signal) => getLotMesures(id, periode, signal), [id, periode]);
 
   useEffect(() => {
-    document.title = `FutureKawa — Lot ${id}`
-  }, [id])
+    document.title = `FutureKawa — Lot ${id}`;
+  }, [id]);
 
   if (lotQ.error) {
     return (
@@ -80,15 +80,15 @@ export function LotDetail() {
           }
         />
       </>
-    )
+    );
   }
 
-  const lot = lotQ.data
-  const country = lot ? getCountry(lot.pays) : undefined
+  const lot = lotQ.data;
+  const country = lot ? getCountry(lot.pays) : undefined;
 
-  let chartContent: ReactNode
+  let chartContent: ReactNode;
   if (mesuresQ.loading || !country) {
-    chartContent = <Skeleton height={340} />
+    chartContent = <Skeleton height={340} />;
   } else if (mesuresQ.error) {
     chartContent = (
       <EmptyState
@@ -100,9 +100,9 @@ export function LotDetail() {
           </Button>
         }
       />
-    )
+    );
   } else {
-    chartContent = <TempHumidityChart mesures={mesuresQ.data ?? []} country={country} />
+    chartContent = <TempHumidityChart mesures={mesuresQ.data ?? []} country={country} />;
   }
 
   return (
@@ -145,7 +145,7 @@ export function LotDetail() {
             <Meta
               label="Conditions"
               value={
-                lot.conditions ? `${lot.conditions.temp}°C · ${lot.conditions.humidity}%` : '—'
+                lot.conditions ? `${lot.conditions.temp}°C · ${lot.conditions.humidity}%` : "—"
               }
               mono
             />
@@ -174,7 +174,7 @@ export function LotDetail() {
                   <button
                     key={p}
                     type="button"
-                    className={`lotd-period ${periode === p ? 'is-active' : ''}`.trim()}
+                    className={`lotd-period ${periode === p ? "is-active" : ""}`.trim()}
                     aria-pressed={periode === p}
                     onClick={() => setPeriode(p)}
                   >
@@ -190,7 +190,7 @@ export function LotDetail() {
         {chartContent}
       </Card>
     </>
-  )
+  );
 }
 
 function Meta({
@@ -201,7 +201,7 @@ function Meta({
   return (
     <div className="lotd-meta-item">
       <span className="fk-caption">{label}</span>
-      <span className={`lotd-meta-value ${mono ? 'fk-mono' : ''}`.trim()}>{value}</span>
+      <span className={`lotd-meta-value ${mono ? "fk-mono" : ""}`.trim()}>{value}</span>
     </div>
-  )
+  );
 }

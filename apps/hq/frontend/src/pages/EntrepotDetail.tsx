@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   Badge,
   Button,
@@ -10,28 +10,28 @@ import {
   EmptyState,
   PageHeader,
   Skeleton,
-} from '@/components/ui'
-import { ConditionsGauge, LiveIndicator, TempHumidityChart } from '@/components/metier'
-import { useAsync } from '@/hooks/useAsync'
-import { usePolling } from '@/hooks/usePolling'
-import { getEntrepot } from '@/api/entrepots'
-import { getEntrepotMesures } from '@/api/mesures'
-import { getCountry } from '@/lib/countries'
-import { relativeTime } from '@/lib/format'
-import './EntrepotDetail.css'
+} from "@/components/ui";
+import { ConditionsGauge, LiveIndicator, TempHumidityChart } from "@/components/metier";
+import { useAsync } from "@/hooks/useAsync";
+import { usePolling } from "@/hooks/usePolling";
+import { getEntrepot } from "@/api/entrepots";
+import { getEntrepotMesures } from "@/api/mesures";
+import { getCountry } from "@/lib/countries";
+import { relativeTime } from "@/lib/format";
+import "./EntrepotDetail.css";
 
-const POLL_MS = 30_000
+const POLL_MS = 30_000;
 
 export function EntrepotDetail() {
-  const { id = '' } = useParams()
+  const { id = "" } = useParams();
 
-  const entrepotQ = usePolling((s) => getEntrepot(id, s), [id], POLL_MS)
-  const mesuresQ = useAsync((s) => getEntrepotMesures(id, '24h', s), [id])
+  const entrepotQ = usePolling((s) => getEntrepot(id, s), [id], POLL_MS);
+  const mesuresQ = useAsync((s) => getEntrepotMesures(id, "24h", s), [id]);
 
-  const entrepot = entrepotQ.data
+  const entrepot = entrepotQ.data;
   useEffect(() => {
-    document.title = `FutureKawa — ${entrepot?.nom ?? 'Entrepôt'}`
-  }, [entrepot])
+    document.title = `FutureKawa — ${entrepot?.nom ?? "Entrepôt"}`;
+  }, [entrepot]);
 
   if (entrepotQ.error) {
     return (
@@ -53,10 +53,10 @@ export function EntrepotDetail() {
           }
         />
       </>
-    )
+    );
   }
 
-  const country = entrepot ? getCountry(entrepot.pays) : undefined
+  const country = entrepot ? getCountry(entrepot.pays) : undefined;
 
   return (
     <>
@@ -70,8 +70,8 @@ export function EntrepotDetail() {
         }
         actions={
           entrepot ? (
-            <Badge tone={entrepot.horsPlage ? 'alert' : 'success'} dot>
-              {entrepot.horsPlage ? 'Hors plage' : 'Conforme'}
+            <Badge tone={entrepot.horsPlage ? "alert" : "success"} dot>
+              {entrepot.horsPlage ? "Hors plage" : "Conforme"}
             </Badge>
           ) : undefined
         }
@@ -84,7 +84,7 @@ export function EntrepotDetail() {
             eyebrow={entrepot?.ville}
             action={
               <span className="entd-live">
-                <LiveIndicator tone={entrepot?.horsPlage ? 'alert' : 'success'} label="live" />
+                <LiveIndicator tone={entrepot?.horsPlage ? "alert" : "success"} label="live" />
                 {entrepotQ.lastUpdated && (
                   <span className="fk-mono entd-updated">
                     maj {relativeTime(new Date(entrepotQ.lastUpdated).toISOString())}
@@ -134,5 +134,5 @@ export function EntrepotDetail() {
         )}
       </Card>
     </>
-  )
+  );
 }

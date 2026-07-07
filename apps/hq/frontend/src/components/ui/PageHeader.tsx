@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react'
-import './PageHeader.css'
+import type { ReactNode } from "react";
+import "./PageHeader.css";
 
 export interface PageHeaderProps {
-  title: ReactNode
-  eyebrow?: ReactNode
-  description?: ReactNode
-  actions?: ReactNode
+  title: ReactNode;
+  eyebrow?: ReactNode;
+  description?: ReactNode;
+  actions?: ReactNode;
 }
 
 export function PageHeader({ title, eyebrow, description, actions }: Readonly<PageHeaderProps>) {
@@ -18,5 +18,5 @@ export function PageHeader({ title, eyebrow, description, actions }: Readonly<Pa
       </div>
       {actions && <div className="fk-page-actions">{actions}</div>}
     </header>
-  )
+  );
 }

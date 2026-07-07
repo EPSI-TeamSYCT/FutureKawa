@@ -1,12 +1,12 @@
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Compass } from 'lucide-react'
-import { Button, EmptyState, PageHeader } from '@/components/ui'
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Compass } from "lucide-react";
+import { Button, EmptyState, PageHeader } from "@/components/ui";
 
 export function NotFound() {
   useEffect(() => {
-    document.title = 'FutureKawa — Page introuvable'
-  }, [])
+    document.title = "FutureKawa — Page introuvable";
+  }, []);
 
   return (
     <>
@@ -24,5 +24,5 @@ export function NotFound() {
         }
       />
     </>
-  )
+  );
 }

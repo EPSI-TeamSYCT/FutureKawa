@@ -1,12 +1,12 @@
-import { isOutOfRange } from '@/lib/conditions'
-import './ConditionsGauge.css'
+import { isOutOfRange } from "@/lib/conditions";
+import "./ConditionsGauge.css";
 
 export interface ConditionsGaugeProps {
-  label: string
-  value: number
-  ideal: number
-  tolerance: number
-  unit: string
+  label: string;
+  value: number;
+  ideal: number;
+  tolerance: number;
+  unit: string;
 }
 
 /*
@@ -14,7 +14,7 @@ export interface ConditionsGaugeProps {
  * The ideal zone (36% width) spans ideal ± tolerance, so the whole bar
  * represents ideal ± ~2.78·tolerance. A marker shows the current value.
  */
-const HALF_SPAN_FACTOR = 100 / 36 / 2 // ≈ 1.389 → per-side span in tolerances
+const HALF_SPAN_FACTOR = 100 / 36 / 2; // ≈ 1.389 → per-side span in tolerances
 
 export function ConditionsGauge({
   label,
@@ -23,17 +23,17 @@ export function ConditionsGauge({
   tolerance,
   unit,
 }: Readonly<ConditionsGaugeProps>) {
-  const span = tolerance * 2 * HALF_SPAN_FACTOR
-  const min = ideal - span
-  const max = ideal + span
-  const pos = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100))
-  const out = isOutOfRange(value, ideal, tolerance)
+  const span = tolerance * 2 * HALF_SPAN_FACTOR;
+  const min = ideal - span;
+  const max = ideal + span;
+  const pos = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+  const out = isOutOfRange(value, ideal, tolerance);
 
   return (
     <div className="fk-gauge">
       <div className="fk-gauge-top">
         <span className="fk-caption">{label}</span>
-        <span className={`fk-gauge-value fk-mono ${out ? 'is-out' : 'is-in'}`}>
+        <span className={`fk-gauge-value fk-mono ${out ? "is-out" : "is-in"}`}>
           {value}
           {unit}
         </span>
@@ -43,13 +43,13 @@ export function ConditionsGauge({
         role="img"
         aria-label={`${label} : ${value}${unit}, idéal ${ideal}±${tolerance}${unit}`}
       >
-        <span className="fk-gauge-seg seg-danger" style={{ width: '20%' }} />
-        <span className="fk-gauge-seg seg-warn" style={{ width: '12%' }} />
-        <span className="fk-gauge-seg seg-ideal" style={{ width: '36%' }} />
-        <span className="fk-gauge-seg seg-warn" style={{ width: '12%' }} />
-        <span className="fk-gauge-seg seg-danger" style={{ width: '20%' }} />
+        <span className="fk-gauge-seg seg-danger" style={{ width: "20%" }} />
+        <span className="fk-gauge-seg seg-warn" style={{ width: "12%" }} />
+        <span className="fk-gauge-seg seg-ideal" style={{ width: "36%" }} />
+        <span className="fk-gauge-seg seg-warn" style={{ width: "12%" }} />
+        <span className="fk-gauge-seg seg-danger" style={{ width: "20%" }} />
         <span
-          className={`fk-gauge-marker ${out ? 'is-out' : 'is-in'}`}
+          className={`fk-gauge-marker ${out ? "is-out" : "is-in"}`}
           style={{ left: `${pos}%` }}
           aria-hidden="true"
         />
@@ -69,5 +69,5 @@ export function ConditionsGauge({
         </span>
       </div>
     </div>
-  )
+  );
 }

@@ -70,8 +70,8 @@
   --fk-neutre-950: #1d160f;
 
   /* ---- Typography ------------------------------------------------------ */
-  --fk-font-ui: 'Archivo', system-ui, 'Helvetica Neue', Arial, sans-serif;
-  --fk-font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', 'Menlo', monospace;
+  --fk-font-ui: "Archivo", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --fk-font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
 
   /* type scale — size / line-height (px, verbatim from the charte) */
   --fk-fs-display: 64px;
@@ -148,7 +148,7 @@
 /*  LIGHT THEME (default) — "terrain", daylight legibility                  */
 /* ======================================================================= */
 :root,
-[data-theme='light'] {
+[data-theme="light"] {
   color-scheme: light;
 
   --fk-bg: #f3ede3; /* neutre-100 */
@@ -219,7 +219,7 @@
 /* ======================================================================= */
 /*  DARK THEME — HQ supervision, long sessions, data-dense                  */
 /* ======================================================================= */
-[data-theme='dark'] {
+[data-theme="dark"] {
   color-scheme: dark;
 
   --fk-bg: #241a13; /* espresso-900 */

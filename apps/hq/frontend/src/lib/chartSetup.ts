@@ -8,14 +8,14 @@ import {
   LineElement,
   PointElement,
   Tooltip,
-} from 'chart.js'
-import annotationPlugin from 'chartjs-plugin-annotation'
+} from "chart.js";
+import annotationPlugin from "chartjs-plugin-annotation";
 
-let registered = false
+let registered = false;
 
 /** Register the Chart.js pieces we use, exactly once. */
 export function ensureChartsRegistered() {
-  if (registered) return
+  if (registered) return;
   Chart.register(
     LineController,
     LineElement,
@@ -26,6 +26,6 @@ export function ensureChartsRegistered() {
     Tooltip,
     Legend,
     annotationPlugin,
-  )
-  registered = true
+  );
+  registered = true;
 }

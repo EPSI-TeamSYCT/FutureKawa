@@ -1,38 +1,38 @@
-import { useEffect, useMemo, type ReactNode } from 'react'
-import { Warehouse } from 'lucide-react'
-import { Button, EmptyState, PageHeader, Skeleton } from '@/components/ui'
-import { WarehouseCard } from '@/components/metier'
-import { useCountryFilter } from '@/hooks/country-context'
-import { useAsync } from '@/hooks/useAsync'
-import { getEntrepots } from '@/api/entrepots'
-import { COUNTRIES, scopeName, type CountryCode } from '@/lib/countries'
-import type { EntrepotStatut } from '@/api/types'
-import './Entrepots.css'
+import { useEffect, useMemo, type ReactNode } from "react";
+import { Warehouse } from "lucide-react";
+import { Button, EmptyState, PageHeader, Skeleton } from "@/components/ui";
+import { WarehouseCard } from "@/components/metier";
+import { useCountryFilter } from "@/hooks/country-context";
+import { useAsync } from "@/hooks/useAsync";
+import { getEntrepots } from "@/api/entrepots";
+import { COUNTRIES, scopeName, type CountryCode } from "@/lib/countries";
+import type { EntrepotStatut } from "@/api/types";
+import "./Entrepots.css";
 
-const SKELETON_CARDS = ['s0', 's1', 's2', 's3', 's4', 's5']
+const SKELETON_CARDS = ["s0", "s1", "s2", "s3", "s4", "s5"];
 
 export function Entrepots() {
-  const { scope } = useCountryFilter()
+  const { scope } = useCountryFilter();
   useEffect(() => {
-    document.title = 'FutureKawa — Entrepôts'
-  }, [])
+    document.title = "FutureKawa — Entrepôts";
+  }, []);
 
-  const { data, loading, error, refetch } = useAsync((s) => getEntrepots(scope, s), [scope])
+  const { data, loading, error, refetch } = useAsync((s) => getEntrepots(scope, s), [scope]);
 
   const grouped = useMemo(() => {
-    const byCountry = new Map<CountryCode, EntrepotStatut[]>()
+    const byCountry = new Map<CountryCode, EntrepotStatut[]>();
     for (const e of data ?? []) {
-      const list = byCountry.get(e.pays) ?? []
-      list.push(e)
-      byCountry.set(e.pays, list)
+      const list = byCountry.get(e.pays) ?? [];
+      list.push(e);
+      byCountry.set(e.pays, list);
     }
     return COUNTRIES.filter((c) => byCountry.has(c.code)).map((c) => ({
       country: c,
       entrepots: byCountry.get(c.code)!,
-    }))
-  }, [data])
+    }));
+  }, [data]);
 
-  let content: ReactNode
+  let content: ReactNode;
   if (error) {
     content = (
       <EmptyState
@@ -44,7 +44,7 @@ export function Entrepots() {
           </Button>
         }
       />
-    )
+    );
   } else if (loading) {
     content = (
       <div className="ent-grid">
@@ -52,7 +52,7 @@ export function Entrepots() {
           <Skeleton key={id} height={168} radius="var(--fk-radius-card)" />
         ))}
       </div>
-    )
+    );
   } else if (grouped.length === 0) {
     content = (
       <EmptyState
@@ -60,7 +60,7 @@ export function Entrepots() {
         title="Aucun entrepôt"
         description="Aucun entrepôt pour le périmètre sélectionné."
       />
-    )
+    );
   } else {
     content = grouped.map(({ country, entrepots }) => (
       <section className="ent-country" key={country.code}>
@@ -76,7 +76,7 @@ export function Entrepots() {
           ))}
         </div>
       </section>
-    ))
+    ));
   }
 
   return (
@@ -89,5 +89,5 @@ export function Entrepots() {
 
       {content}
     </>
-  )
+  );
 }

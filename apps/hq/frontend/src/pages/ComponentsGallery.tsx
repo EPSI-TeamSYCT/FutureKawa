@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   Bell,
@@ -12,7 +12,7 @@ import {
   TriangleAlert,
   Trash2,
   Truck,
-} from 'lucide-react'
+} from "lucide-react";
 import {
   Badge,
   Button,
@@ -33,69 +33,69 @@ import {
   ThemeToggle,
   Tr,
   useToast,
-} from '@/components/ui'
-import logo from '@/assets/brand/logo.svg'
-import logoBlanc from '@/assets/brand/logo-blanc.svg'
-import { useTheme } from '@/hooks/theme-context'
-import './StyleGuide.css'
-import './ComponentsGallery.css'
+} from "@/components/ui";
+import logo from "@/assets/brand/logo.svg";
+import logoBlanc from "@/assets/brand/logo-blanc.svg";
+import { useTheme } from "@/hooks/theme-context";
+import "./StyleGuide.css";
+import "./ComponentsGallery.css";
 
 const SAMPLE_LOTS = [
   {
-    id: 'BR-SAN-2025-0143',
-    warehouse: 'Santos-01',
-    entry: '2024-08-29',
+    id: "BR-SAN-2025-0143",
+    warehouse: "Santos-01",
+    entry: "2024-08-29",
     age: 312,
-    status: { tone: 'success' as const, label: 'CONFORME', Icon: Check },
-    cond: '29.4°C · 55%',
+    status: { tone: "success" as const, label: "CONFORME", Icon: Check },
+    cond: "29.4°C · 55%",
   },
   {
-    id: 'EC-GUA-2025-0088',
-    warehouse: 'Guayaquil-02',
-    entry: '2024-06-14',
+    id: "EC-GUA-2025-0088",
+    warehouse: "Guayaquil-02",
+    entry: "2024-06-14",
     age: 388,
-    status: { tone: 'alert' as const, label: 'EN ALERTE', Icon: TriangleAlert },
-    cond: '34.1°C · 58%',
+    status: { tone: "alert" as const, label: "EN ALERTE", Icon: TriangleAlert },
+    cond: "34.1°C · 58%",
   },
   {
-    id: 'CO-MED-2024-0501',
-    warehouse: 'Medellín-01',
-    entry: '2023-11-02',
+    id: "CO-MED-2024-0501",
+    warehouse: "Medellín-01",
+    entry: "2023-11-02",
     age: 612,
-    status: { tone: 'danger' as const, label: 'PÉRIMÉ', Icon: Clock },
-    cond: '26.2°C · 81%',
+    status: { tone: "danger" as const, label: "PÉRIMÉ", Icon: Clock },
+    cond: "26.2°C · 81%",
   },
   {
-    id: 'BR-SAN-2024-0377',
-    warehouse: 'Santos-01',
-    entry: '2024-02-20',
+    id: "BR-SAN-2024-0377",
+    warehouse: "Santos-01",
+    entry: "2024-02-20",
     age: 503,
-    status: { tone: 'neutral' as const, label: 'EXPÉDIÉ', Icon: Truck },
-    cond: '—',
+    status: { tone: "neutral" as const, label: "EXPÉDIÉ", Icon: Truck },
+    cond: "—",
   },
-] as const
+] as const;
 
-function ageTone(age: number): 'neutral' | 'alert' | 'danger' {
-  if (age >= 550) return 'danger'
-  if (age >= 365) return 'alert'
-  return 'neutral'
+function ageTone(age: number): "neutral" | "alert" | "danger" {
+  if (age >= 550) return "danger";
+  if (age >= 365) return "alert";
+  return "neutral";
 }
 
 export function ComponentsGallery() {
-  const { theme } = useTheme()
-  const { toast } = useToast()
-  const [modalOpen, setModalOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const { theme } = useTheme();
+  const { toast } = useToast();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = 'FutureKawa — Composants'
-  }, [])
+    document.title = "FutureKawa — Composants";
+  }, []);
 
   return (
     <div className="sg">
       <header className="sg-topbar">
         <div className="sg-brand">
-          <img src={theme === 'dark' ? logoBlanc : logo} alt="" width={28} height={28} />
+          <img src={theme === "dark" ? logoBlanc : logo} alt="" width={28} height={28} />
           <span>FutureKawa</span>
         </div>
         <div className="sg-topbar-right">
@@ -109,7 +109,7 @@ export function ComponentsGallery() {
       <main className="sg-main">
         <div className="sg-hero">
           <div className="sg-eyebrow">
-            <span className="fk-caption">Design system</span>{' '}
+            <span className="fk-caption">Design system</span>{" "}
             <span className="sg-chip">
               <span className="dot" aria-hidden="true" />
               <span>Phase 2 · composants</span>
@@ -150,11 +150,11 @@ export function ComponentsGallery() {
               variant="primary"
               loading={loading}
               onClick={() => {
-                setLoading(true)
-                setTimeout(() => setLoading(false), 1600)
+                setLoading(true);
+                setTimeout(() => setLoading(false), 1600);
               }}
             >
-              {loading ? 'Envoi…' : 'Cliquer pour charger'}
+              {loading ? "Envoi…" : "Cliquer pour charger"}
             </Button>
             <Button variant="primary" disabled>
               Désactivé
@@ -247,7 +247,7 @@ export function ComponentsGallery() {
               </THead>
               <TBody>
                 {SAMPLE_LOTS.map((lot) => (
-                  <Tr key={lot.id} muted={lot.status.label === 'EXPÉDIÉ'}>
+                  <Tr key={lot.id} muted={lot.status.label === "EXPÉDIÉ"}>
                     <Td mono>{lot.id}</Td>
                     <Td>{lot.warehouse}</Td>
                     <Td mono>{lot.entry}</Td>
@@ -283,8 +283,8 @@ export function ComponentsGallery() {
           <Tabs
             items={[
               {
-                id: 'apercu',
-                label: 'Aperçu',
+                id: "apercu",
+                label: "Aperçu",
                 content: (
                   <div className="gal-grid-2">
                     <Card>
@@ -320,8 +320,8 @@ export function ComponentsGallery() {
                   </div>
                 ),
               },
-              { id: 'lots', label: 'Lots', badge: 40, content: <p>Contenu des lots…</p> },
-              { id: 'alertes', label: 'Alertes', badge: 3, content: <p>File des alertes…</p> },
+              { id: "lots", label: "Lots", badge: 40, content: <p>Contenu des lots…</p> },
+              { id: "alertes", label: "Alertes", badge: 3, content: <p>File des alertes…</p> },
             ]}
           />
         </section>
@@ -339,9 +339,9 @@ export function ComponentsGallery() {
               variant="ghost"
               onClick={() =>
                 toast({
-                  variant: 'success',
-                  title: 'Alerte traitée',
-                  description: 'EC-GUA-2025-0088',
+                  variant: "success",
+                  title: "Alerte traitée",
+                  description: "EC-GUA-2025-0088",
                 })
               }
             >
@@ -351,9 +351,9 @@ export function ComponentsGallery() {
               variant="ghost"
               onClick={() =>
                 toast({
-                  variant: 'warning',
-                  title: 'Dérive détectée',
-                  description: 'Guayaquil-02 · 34.1°C',
+                  variant: "warning",
+                  title: "Dérive détectée",
+                  description: "Guayaquil-02 · 34.1°C",
                 })
               }
             >
@@ -363,9 +363,9 @@ export function ComponentsGallery() {
               variant="ghost"
               onClick={() =>
                 toast({
-                  variant: 'error',
-                  title: 'Envoi e-mail échoué',
-                  description: 'retry dans 30 s',
+                  variant: "error",
+                  title: "Envoi e-mail échoué",
+                  description: "retry dans 30 s",
                 })
               }
             >
@@ -427,8 +427,8 @@ export function ComponentsGallery() {
             <Button
               variant="primary"
               onClick={() => {
-                setModalOpen(false)
-                toast({ variant: 'success', title: 'Export lancé', description: '40 lots · CSV' })
+                setModalOpen(false);
+                toast({ variant: "success", title: "Export lancé", description: "40 lots · CSV" });
               }}
             >
               Exporter
@@ -442,5 +442,5 @@ export function ComponentsGallery() {
         </p>
       </Modal>
     </div>
-  )
+  );
 }
