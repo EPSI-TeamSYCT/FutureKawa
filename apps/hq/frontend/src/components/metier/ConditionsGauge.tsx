@@ -32,7 +32,11 @@ export function ConditionsGauge({ label, value, ideal, tolerance, unit }: Condit
           {unit}
         </span>
       </div>
-      <div className="fk-gauge-track" role="img" aria-label={`${label} : ${value}${unit}, idéal ${ideal}±${tolerance}${unit}`}>
+      <div
+        className="fk-gauge-track"
+        role="img"
+        aria-label={`${label} : ${value}${unit}, idéal ${ideal}±${tolerance}${unit}`}
+      >
         <span className="fk-gauge-seg seg-danger" style={{ width: '20%' }} />
         <span className="fk-gauge-seg seg-warn" style={{ width: '12%' }} />
         <span className="fk-gauge-seg seg-ideal" style={{ width: '36%' }} />

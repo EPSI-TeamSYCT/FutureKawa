@@ -42,7 +42,11 @@ export function EntrepotDetail() {
           description={entrepotQ.error.message}
           action={
             <Link to="/entrepots">
-              <Button variant="secondary" size="sm" leftIcon={<ArrowLeft size={15} strokeWidth={1.75} />}>
+              <Button
+                variant="secondary"
+                size="sm"
+                leftIcon={<ArrowLeft size={15} strokeWidth={1.75} />}
+              >
                 Retour aux entrepôts
               </Button>
             </Link>

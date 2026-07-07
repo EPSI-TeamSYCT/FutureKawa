@@ -81,7 +81,9 @@ export function Lots() {
   }, [data, query, sort])
 
   function toggleSort(key: SortKey) {
-    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }))
+    setSort((s) =>
+      s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' },
+    )
   }
   const sortDir = (key: SortKey) => (sort.key === key ? sort.dir : null)
 

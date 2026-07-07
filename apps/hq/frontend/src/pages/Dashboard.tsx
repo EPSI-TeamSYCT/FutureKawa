@@ -180,7 +180,9 @@ export function Dashboard() {
                   <AlertRow
                     key={a.id}
                     alerte={a}
-                    onOpen={() => navigate(a.lotId ? `/lots/${a.lotId}` : `/entrepots/${a.entrepotId}`)}
+                    onOpen={() =>
+                      navigate(a.lotId ? `/lots/${a.lotId}` : `/entrepots/${a.entrepotId}`)
+                    }
                   />
                 ))}
               </ul>

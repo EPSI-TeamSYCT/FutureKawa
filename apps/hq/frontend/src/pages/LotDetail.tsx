@@ -11,7 +11,12 @@ import {
   PageHeader,
   Skeleton,
 } from '@/components/ui'
-import { LotStatusBadge, LotTimeline, TempHumidityChart, type TimelineStep } from '@/components/metier'
+import {
+  LotStatusBadge,
+  LotTimeline,
+  TempHumidityChart,
+  type TimelineStep,
+} from '@/components/metier'
 import { useAsync } from '@/hooks/useAsync'
 import { getLot } from '@/api/lots'
 import { getLotMesures } from '@/api/mesures'
@@ -63,7 +68,11 @@ export function LotDetail() {
           description={lotQ.error.message}
           action={
             <Link to="/lots">
-              <Button variant="secondary" size="sm" leftIcon={<ArrowLeft size={15} strokeWidth={1.75} />}>
+              <Button
+                variant="secondary"
+                size="sm"
+                leftIcon={<ArrowLeft size={15} strokeWidth={1.75} />}
+              >
                 Retour aux lots
               </Button>
             </Link>
@@ -115,7 +124,9 @@ export function LotDetail() {
             />
             <Meta
               label="Conditions"
-              value={lot.conditions ? `${lot.conditions.temp}°C · ${lot.conditions.humidity}%` : '—'}
+              value={
+                lot.conditions ? `${lot.conditions.temp}°C · ${lot.conditions.humidity}%` : '—'
+              }
               mono
             />
           </div>
@@ -176,15 +187,7 @@ export function LotDetail() {
   )
 }
 
-function Meta({
-  label,
-  value,
-  mono = false,
-}: {
-  label: string
-  value: ReactNode
-  mono?: boolean
-}) {
+function Meta({ label, value, mono = false }: { label: string; value: ReactNode; mono?: boolean }) {
   return (
     <div className="lotd-meta-item">
       <span className="fk-caption">{label}</span>

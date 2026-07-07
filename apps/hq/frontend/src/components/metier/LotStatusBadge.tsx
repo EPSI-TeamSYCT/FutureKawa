@@ -24,7 +24,11 @@ export interface LotStatusBadgeProps {
 export function LotStatusBadge({ statut, size = 'md' }: LotStatusBadgeProps) {
   const { tone, label, icon: Icon } = CONFIG[statut]
   return (
-    <Badge tone={tone} size={size} icon={<Icon size={size === 'sm' ? 13 : 14} strokeWidth={1.75} />}>
+    <Badge
+      tone={tone}
+      size={size}
+      icon={<Icon size={size === 'sm' ? 13 : 14} strokeWidth={1.75} />}
+    >
       {label}
     </Badge>
   )
