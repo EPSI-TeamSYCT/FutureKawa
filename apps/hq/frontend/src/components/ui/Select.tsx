@@ -1,25 +1,25 @@
-import { forwardRef, useId, type ReactNode, type SelectHTMLAttributes } from 'react'
-import { ChevronDown } from 'lucide-react'
-import './Field.css'
+import { forwardRef, useId, type ReactNode, type SelectHTMLAttributes } from "react";
+import { ChevronDown } from "lucide-react";
+import "./Field.css";
 
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
-  label?: ReactNode
-  hint?: ReactNode
-  error?: string
+  label?: ReactNode;
+  hint?: ReactNode;
+  error?: string;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { label, hint, error, id, className = '', children, ...rest },
+  { label, hint, error, id, className = "", children, ...rest },
   ref,
 ) {
-  const autoId = useId()
-  const selectId = id ?? autoId
-  let describedBy: string | undefined
-  if (error) describedBy = `${selectId}-err`
-  else if (hint) describedBy = `${selectId}-hint`
+  const autoId = useId();
+  const selectId = id ?? autoId;
+  let describedBy: string | undefined;
+  if (error) describedBy = `${selectId}-err`;
+  else if (hint) describedBy = `${selectId}-hint`;
 
   return (
-    <div className={`fk-field ${error ? 'is-error' : ''} ${className}`.trim()}>
+    <div className={`fk-field ${error ? "is-error" : ""} ${className}`.trim()}>
       {label && (
         <label className="fk-field-label" htmlFor={selectId}>
           {label}
@@ -55,5 +55,5 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         )
       )}
     </div>
-  )
-})
+  );
+});

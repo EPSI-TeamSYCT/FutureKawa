@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { RotateCcw, Search } from 'lucide-react'
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { RotateCcw, Search } from "lucide-react";
 import {
   Badge,
   Button,
@@ -16,40 +16,40 @@ import {
   Th,
   THead,
   Tr,
-} from '@/components/ui'
-import { LotStatusBadge } from '@/components/metier'
-import { useCountryFilter } from '@/hooks/country-context'
-import { useAsync } from '@/hooks/useAsync'
-import { getLots } from '@/api/lots'
-import { ageTone } from '@/lib/conditions'
-import { getCountry, scopeName } from '@/lib/countries'
-import { WAREHOUSES, warehousesByCountry } from '@/lib/warehouses'
-import type { Lot, LotStatut } from '@/api/types'
-import './Lots.css'
+} from "@/components/ui";
+import { LotStatusBadge } from "@/components/metier";
+import { useCountryFilter } from "@/hooks/country-context";
+import { useAsync } from "@/hooks/useAsync";
+import { getLots } from "@/api/lots";
+import { ageTone } from "@/lib/conditions";
+import { getCountry, scopeName } from "@/lib/countries";
+import { WAREHOUSES, warehousesByCountry } from "@/lib/warehouses";
+import type { Lot, LotStatut } from "@/api/types";
+import "./Lots.css";
 
-type SortKey = 'id' | 'entrepotNom' | 'dateEntree' | 'ageJours' | 'statut'
-const STATUTS: LotStatut[] = ['CONFORME', 'EN_ALERTE', 'PERIME', 'EXPEDIE']
-const ROW_SKELETONS = ['r0', 'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7']
+type SortKey = "id" | "entrepotNom" | "dateEntree" | "ageJours" | "statut";
+const STATUTS: LotStatut[] = ["CONFORME", "EN_ALERTE", "PERIME", "EXPEDIE"];
+const ROW_SKELETONS = ["r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"];
 
 export function Lots() {
-  const { scope } = useCountryFilter()
-  const navigate = useNavigate()
-  const [entrepot, setEntrepot] = useState('')
-  const [statut, setStatut] = useState('')
-  const [query, setQuery] = useState('')
-  const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({
-    key: 'dateEntree',
-    dir: 'asc',
-  })
+  const { scope } = useCountryFilter();
+  const navigate = useNavigate();
+  const [entrepot, setEntrepot] = useState("");
+  const [statut, setStatut] = useState("");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({
+    key: "dateEntree",
+    dir: "asc",
+  });
 
   useEffect(() => {
-    document.title = 'FutureKawa — Lots'
-  }, [])
+    document.title = "FutureKawa — Lots";
+  }, []);
 
   // Reset the warehouse filter when the country scope changes.
   useEffect(() => {
-    setEntrepot('')
-  }, [scope])
+    setEntrepot("");
+  }, [scope]);
 
   const { data, loading, error, refetch } = useAsync(
     (signal) =>
@@ -62,33 +62,33 @@ export function Lots() {
         signal,
       ),
     [scope, entrepot, statut],
-  )
+  );
 
-  const warehouseOptions = scope === 'siege' ? WAREHOUSES : warehousesByCountry(scope)
+  const warehouseOptions = scope === "siege" ? WAREHOUSES : warehousesByCountry(scope);
 
   const rows = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    const filtered = (data ?? []).filter((l) => (q ? l.id.toLowerCase().includes(q) : true))
-    const dir = sort.dir === 'asc' ? 1 : -1
+    const q = query.trim().toLowerCase();
+    const filtered = (data ?? []).filter((l) => (q ? l.id.toLowerCase().includes(q) : true));
+    const dir = sort.dir === "asc" ? 1 : -1;
     return [...filtered].sort((a, b) => {
-      const av = a[sort.key]
-      const bv = b[sort.key]
+      const av = a[sort.key];
+      const bv = b[sort.key];
       const cmp =
-        typeof av === 'number' && typeof bv === 'number'
+        typeof av === "number" && typeof bv === "number"
           ? av - bv
-          : String(av).localeCompare(String(bv))
-      return cmp * dir
-    })
-  }, [data, query, sort])
+          : String(av).localeCompare(String(bv));
+      return cmp * dir;
+    });
+  }, [data, query, sort]);
 
   function toggleSort(key: SortKey) {
     setSort((s) =>
-      s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' },
-    )
+      s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" },
+    );
   }
-  const sortDir = (key: SortKey) => (sort.key === key ? sort.dir : null)
+  const sortDir = (key: SortKey) => (sort.key === key ? sort.dir : null);
 
-  const hasFilters = Boolean(entrepot || statut || query)
+  const hasFilters = Boolean(entrepot || statut || query);
 
   return (
     <>
@@ -133,7 +133,7 @@ export function Lots() {
           <option value="">Tous les statuts</option>
           {STATUTS.map((s) => (
             <option key={s} value={s}>
-              {s.replace('_', ' ')}
+              {s.replace("_", " ")}
             </option>
           ))}
         </Select>
@@ -143,9 +143,9 @@ export function Lots() {
             size="sm"
             leftIcon={<RotateCcw size={15} strokeWidth={1.75} />}
             onClick={() => {
-              setEntrepot('')
-              setStatut('')
-              setQuery('')
+              setEntrepot("");
+              setStatut("");
+              setQuery("");
             }}
           >
             Réinitialiser
@@ -168,33 +168,33 @@ export function Lots() {
           <Table stickyHeader maxHeight="calc(100vh - 320px)">
             <THead>
               <Tr>
-                <Th sortable sortDirection={sortDir('id')} onClick={() => toggleSort('id')}>
+                <Th sortable sortDirection={sortDir("id")} onClick={() => toggleSort("id")}>
                   ID lot
                 </Th>
                 <Th>Pays</Th>
                 <Th
                   sortable
-                  sortDirection={sortDir('entrepotNom')}
-                  onClick={() => toggleSort('entrepotNom')}
+                  sortDirection={sortDir("entrepotNom")}
+                  onClick={() => toggleSort("entrepotNom")}
                 >
                   Entrepôt
                 </Th>
                 <Th
                   sortable
-                  sortDirection={sortDir('dateEntree')}
-                  onClick={() => toggleSort('dateEntree')}
+                  sortDirection={sortDir("dateEntree")}
+                  onClick={() => toggleSort("dateEntree")}
                 >
                   Entrée
                 </Th>
                 <Th
                   align="right"
                   sortable
-                  sortDirection={sortDir('ageJours')}
-                  onClick={() => toggleSort('ageJours')}
+                  sortDirection={sortDir("ageJours")}
+                  onClick={() => toggleSort("ageJours")}
                 >
                   Âge
                 </Th>
-                <Th sortable sortDirection={sortDir('statut')} onClick={() => toggleSort('statut')}>
+                <Th sortable sortDirection={sortDir("statut")} onClick={() => toggleSort("statut")}>
                   Statut
                 </Th>
                 <Th align="right">Conditions</Th>
@@ -218,15 +218,15 @@ export function Lots() {
         </Card>
       )}
     </>
-  )
+  );
 }
 
 function LotRow({ lot, onOpen }: Readonly<{ lot: Lot; onOpen: () => void }>) {
   return (
     <Tr
-      muted={lot.statut === 'EXPEDIE'}
+      muted={lot.statut === "EXPEDIE"}
       onClick={onOpen}
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: "pointer" }}
       aria-label={`Ouvrir le lot ${lot.id}`}
     >
       <Td mono>
@@ -246,10 +246,10 @@ function LotRow({ lot, onOpen }: Readonly<{ lot: Lot; onOpen: () => void }>) {
         <LotStatusBadge statut={lot.statut} size="sm" />
       </Td>
       <Td align="right" mono>
-        {lot.conditions ? `${lot.conditions.temp}°C · ${lot.conditions.humidity}%` : '—'}
+        {lot.conditions ? `${lot.conditions.temp}°C · ${lot.conditions.humidity}%` : "—"}
       </Td>
     </Tr>
-  )
+  );
 }
 
 function LotRowSkeleton() {
@@ -268,14 +268,14 @@ function LotRowSkeleton() {
         <Skeleton variant="text" width={80} />
       </Td>
       <Td align="right">
-        <Skeleton variant="text" width={48} style={{ marginLeft: 'auto' }} />
+        <Skeleton variant="text" width={48} style={{ marginLeft: "auto" }} />
       </Td>
       <Td>
         <Skeleton variant="text" width={96} />
       </Td>
       <Td align="right">
-        <Skeleton variant="text" width={90} style={{ marginLeft: 'auto' }} />
+        <Skeleton variant="text" width={90} style={{ marginLeft: "auto" }} />
       </Td>
     </Tr>
-  )
+  );
 }

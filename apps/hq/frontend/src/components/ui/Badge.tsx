@@ -1,17 +1,17 @@
-import type { ReactNode } from 'react'
-import './Badge.css'
+import type { ReactNode } from "react";
+import "./Badge.css";
 
-export type BadgeTone = 'neutral' | 'success' | 'alert' | 'danger' | 'accent'
-export type BadgeSize = 'sm' | 'md'
+export type BadgeTone = "neutral" | "success" | "alert" | "danger" | "accent";
+export type BadgeSize = "sm" | "md";
 
 export interface BadgeProps {
-  tone?: BadgeTone
-  size?: BadgeSize
+  tone?: BadgeTone;
+  size?: BadgeSize;
   /** Small leading pastille dot (colour inherited from the tone). */
-  dot?: boolean
-  icon?: ReactNode
-  className?: string
-  children: ReactNode
+  dot?: boolean;
+  icon?: ReactNode;
+  className?: string;
+  children: ReactNode;
 }
 
 /**
@@ -19,16 +19,16 @@ export interface BadgeProps {
  * and a text label so meaning survives for colour-blind users.
  */
 export function Badge({
-  tone = 'neutral',
-  size = 'md',
+  tone = "neutral",
+  size = "md",
   dot = false,
   icon,
-  className = '',
+  className = "",
   children,
 }: Readonly<BadgeProps>) {
-  const classes = ['fk-badge', `fk-badge--${tone}`, `fk-badge--${size}`, className]
+  const classes = ["fk-badge", `fk-badge--${tone}`, `fk-badge--${size}`, className]
     .filter(Boolean)
-    .join(' ')
+    .join(" ");
 
   return (
     <span className={classes}>
@@ -40,5 +40,5 @@ export function Badge({
       )}
       {children}
     </span>
-  )
+  );
 }

@@ -1,11 +1,11 @@
-import { Moon, Sun } from 'lucide-react'
-import { useTheme } from '@/hooks/theme-context'
-import './ThemeToggle.css'
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/theme-context";
+import "./ThemeToggle.css";
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
-  const isDark = theme === 'dark'
-  const label = isDark ? 'Passer au thème clair' : 'Passer au thème sombre'
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+  const label = isDark ? "Passer au thème clair" : "Passer au thème sombre";
 
   return (
     <button
@@ -21,5 +21,5 @@ export function ThemeToggle() {
         <Moon size={18} strokeWidth={1.75} aria-hidden="true" />
       )}
     </button>
-  )
+  );
 }

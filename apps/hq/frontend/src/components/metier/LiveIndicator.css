@@ -17,7 +17,7 @@
   background: var(--fk-alert);
 }
 .fk-live-dot::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;

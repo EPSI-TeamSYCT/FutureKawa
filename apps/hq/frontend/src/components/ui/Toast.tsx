@@ -1,22 +1,22 @@
-import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from 'lucide-react'
-import type { ToastItem, ToastVariant } from './toast-context'
-import './Toast.css'
+import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from "lucide-react";
+import type { ToastItem, ToastVariant } from "./toast-context";
+import "./Toast.css";
 
 const ICONS: Record<ToastVariant, typeof Info> = {
   info: Info,
   success: CircleCheck,
   warning: TriangleAlert,
   error: CircleAlert,
-}
+};
 
 export interface ToastProps {
-  toast: ToastItem
-  onDismiss: (id: number) => void
+  toast: ToastItem;
+  onDismiss: (id: number) => void;
 }
 
 export function Toast({ toast, onDismiss }: Readonly<ToastProps>) {
-  const variant = toast.variant ?? 'info'
-  const Icon = ICONS[variant]
+  const variant = toast.variant ?? "info";
+  const Icon = ICONS[variant];
   return (
     <div className={`fk-toast fk-toast--${variant}`} role="status" aria-live="polite">
       <span className="fk-toast-icon" aria-hidden="true">
@@ -35,5 +35,5 @@ export function Toast({ toast, onDismiss }: Readonly<ToastProps>) {
         <X size={15} strokeWidth={1.75} aria-hidden="true" />
       </button>
     </div>
-  )
+  );
 }

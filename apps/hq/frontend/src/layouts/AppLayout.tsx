@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useCallback, useMemo, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
   Boxes,
@@ -10,122 +10,122 @@ import {
   Settings,
   Sun,
   Warehouse,
-} from 'lucide-react'
-import { CommandPalette, type CommandItem } from '@/components/ui/CommandPalette'
-import { CountrySelector } from '@/components/metier/CountrySelector'
-import { CountryProvider } from '@/hooks/CountryProvider'
-import { useCountryFilter } from '@/hooks/country-context'
-import { useTheme } from '@/hooks/theme-context'
-import { useHotkeys, type HotkeyDestination } from '@/hooks/useHotkeys'
-import { SCOPES } from '@/lib/countries'
-import { WAREHOUSES } from '@/lib/warehouses'
-import logoBlanc from '@/assets/brand/logo-blanc.svg'
-import './AppLayout.css'
+} from "lucide-react";
+import { CommandPalette, type CommandItem } from "@/components/ui/CommandPalette";
+import { CountrySelector } from "@/components/metier/CountrySelector";
+import { CountryProvider } from "@/hooks/CountryProvider";
+import { useCountryFilter } from "@/hooks/country-context";
+import { useTheme } from "@/hooks/theme-context";
+import { useHotkeys, type HotkeyDestination } from "@/hooks/useHotkeys";
+import { SCOPES } from "@/lib/countries";
+import { WAREHOUSES } from "@/lib/warehouses";
+import logoBlanc from "@/assets/brand/logo-blanc.svg";
+import "./AppLayout.css";
 
 interface NavItem {
-  to: string
-  label: string
-  icon: LucideIcon
-  end?: boolean
-  badge?: number
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  end?: boolean;
+  badge?: number;
 }
 
 const NAV: NavItem[] = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/lots', label: 'Lots', icon: Boxes },
-  { to: '/entrepots', label: 'Entrepôts', icon: Warehouse },
-  { to: '/alertes', label: 'Alertes', icon: Bell, badge: 3 },
-  { to: '/parametres', label: 'Paramètres', icon: Settings },
-]
+  { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/lots", label: "Lots", icon: Boxes },
+  { to: "/entrepots", label: "Entrepôts", icon: Warehouse },
+  { to: "/alertes", label: "Alertes", icon: Bell, badge: 3 },
+  { to: "/parametres", label: "Paramètres", icon: Settings },
+];
 
 const DEST_PATH: Record<HotkeyDestination, string> = {
-  dashboard: '/',
-  lots: '/lots',
-  entrepots: '/entrepots',
-  alertes: '/alertes',
-  parametres: '/parametres',
-}
+  dashboard: "/",
+  lots: "/lots",
+  entrepots: "/entrepots",
+  alertes: "/alertes",
+  parametres: "/parametres",
+};
 
 const CRUMB_LABELS: Record<string, string> = {
-  lots: 'Lots',
-  entrepots: 'Entrepôts',
-  alertes: 'Alertes',
-  parametres: 'Paramètres',
-}
+  lots: "Lots",
+  entrepots: "Entrepôts",
+  alertes: "Alertes",
+  parametres: "Paramètres",
+};
 
-const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform)
+const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
 
 function useBreadcrumb() {
-  const { pathname } = useLocation()
+  const { pathname } = useLocation();
   return useMemo(() => {
-    const segments = pathname.split('/').filter(Boolean)
-    if (segments.length === 0) return [{ label: 'Dashboard', to: '/' }]
-    const crumbs: { label: string; to: string }[] = []
-    let acc = ''
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length === 0) return [{ label: "Dashboard", to: "/" }];
+    const crumbs: { label: string; to: string }[] = [];
+    let acc = "";
     segments.forEach((seg) => {
-      acc += `/${seg}`
-      crumbs.push({ label: CRUMB_LABELS[seg] ?? seg, to: acc })
-    })
-    return crumbs
-  }, [pathname])
+      acc += `/${seg}`;
+      crumbs.push({ label: CRUMB_LABELS[seg] ?? seg, to: acc });
+    });
+    return crumbs;
+  }, [pathname]);
 }
 
 function AppShell() {
-  const navigate = useNavigate()
-  const { toggleTheme } = useTheme()
-  const { setScope } = useCountryFilter()
-  const [paletteOpen, setPaletteOpen] = useState(false)
-  const crumbs = useBreadcrumb()
+  const navigate = useNavigate();
+  const { toggleTheme } = useTheme();
+  const { setScope } = useCountryFilter();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const crumbs = useBreadcrumb();
 
-  const onGo = useCallback((dest: HotkeyDestination) => navigate(DEST_PATH[dest]), [navigate])
-  const openPalette = useCallback(() => setPaletteOpen(true), [])
+  const onGo = useCallback((dest: HotkeyDestination) => navigate(DEST_PATH[dest]), [navigate]);
+  const openPalette = useCallback(() => setPaletteOpen(true), []);
 
   useHotkeys({
     onOpenPalette: openPalette,
     onToggleTheme: toggleTheme,
     onGo,
     enabled: !paletteOpen,
-  })
+  });
 
   const commands = useMemo<CommandItem[]>(() => {
     const pages: CommandItem[] = NAV.map((item) => ({
       id: `page-${item.to}`,
       label: item.label,
-      group: 'Pages',
+      group: "Pages",
       icon: <item.icon size={16} strokeWidth={1.75} />,
-      keywords: 'aller naviguer page',
+      keywords: "aller naviguer page",
       perform: () => navigate(item.to),
-    }))
+    }));
     const warehouses: CommandItem[] = WAREHOUSES.map((w) => ({
       id: `wh-${w.id}`,
       label: w.name,
-      group: 'Entrepôts',
+      group: "Entrepôts",
       hint: w.city,
       icon: <Warehouse size={16} strokeWidth={1.75} />,
       keywords: `entrepot ${w.city} ${w.country}`,
       perform: () => navigate(`/entrepots/${w.id}`),
-    }))
+    }));
     const actions: CommandItem[] = [
       {
-        id: 'action-theme',
-        label: 'Basculer le thème clair / sombre',
-        group: 'Actions',
+        id: "action-theme",
+        label: "Basculer le thème clair / sombre",
+        group: "Actions",
         icon: <Moon size={16} strokeWidth={1.75} />,
-        hint: 't',
-        keywords: 'theme sombre clair dark light',
+        hint: "t",
+        keywords: "theme sombre clair dark light",
         perform: toggleTheme,
       },
       ...SCOPES.map((s) => ({
         id: `scope-${s.code}`,
         label: `Vue ${s.name}`,
-        group: 'Actions',
+        group: "Actions",
         icon: <Bell size={16} strokeWidth={1.75} />,
         keywords: `pays filtre ${s.name}`,
         perform: () => setScope(s.code),
       })),
-    ]
-    return [...pages, ...warehouses, ...actions]
-  }, [navigate, toggleTheme, setScope])
+    ];
+    return [...pages, ...warehouses, ...actions];
+  }, [navigate, toggleTheme, setScope]);
 
   return (
     <div className="fk-app">
@@ -141,7 +141,7 @@ function AppShell() {
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) => `fk-nav-item ${isActive ? 'is-active' : ''}`.trim()}
+              className={({ isActive }) => `fk-nav-item ${isActive ? "is-active" : ""}`.trim()}
             >
               <item.icon className="fk-nav-icon" size={18} strokeWidth={1.75} aria-hidden="true" />
               <span className="fk-nav-label">{item.label}</span>
@@ -183,7 +183,7 @@ function AppShell() {
             >
               <Search size={15} strokeWidth={1.75} aria-hidden="true" />
               <span className="fk-search-trigger-label">Rechercher…</span>
-              <kbd className="fk-search-kbd">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+              <kbd className="fk-search-kbd">{isMac ? "⌘K" : "Ctrl K"}</kbd>
             </button>
 
             <CountrySelector />
@@ -214,16 +214,16 @@ function AppShell() {
         commands={commands}
       />
     </div>
-  )
+  );
 }
 
 function ThemeGlyph() {
-  const { theme } = useTheme()
-  return theme === 'dark' ? (
+  const { theme } = useTheme();
+  return theme === "dark" ? (
     <Sun size={18} strokeWidth={1.75} aria-hidden="true" />
   ) : (
     <Moon size={18} strokeWidth={1.75} aria-hidden="true" />
-  )
+  );
 }
 
 export function AppLayout() {
@@ -231,5 +231,5 @@ export function AppLayout() {
     <CountryProvider>
       <AppShell />
     </CountryProvider>
-  )
+  );
 }

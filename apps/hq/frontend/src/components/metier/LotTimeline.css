@@ -17,7 +17,7 @@
 }
 /* connector line */
 .fk-timeline-step::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 11px;
   left: 24px;

@@ -1,14 +1,14 @@
-import type { ReactNode } from 'react'
-import grain from '@/assets/brand/logo.svg'
-import './EmptyState.css'
+import type { ReactNode } from "react";
+import grain from "@/assets/brand/logo.svg";
+import "./EmptyState.css";
 
 export interface EmptyStateProps {
   /** Lucide icon element shown above the title. */
-  icon?: ReactNode
-  title: string
-  description?: ReactNode
-  action?: ReactNode
-  className?: string
+  icon?: ReactNode;
+  title: string;
+  description?: ReactNode;
+  action?: ReactNode;
+  className?: string;
 }
 
 /** Drawn empty state with the grain picto as a faint watermark — never a blank panel. */
@@ -17,7 +17,7 @@ export function EmptyState({
   title,
   description,
   action,
-  className = '',
+  className = "",
 }: Readonly<EmptyStateProps>) {
   return (
     <div className={`fk-empty ${className}`.trim()}>
@@ -33,5 +33,5 @@ export function EmptyState({
         {action && <div className="fk-empty-action">{action}</div>}
       </div>
     </div>
-  )
+  );
 }

@@ -1,20 +1,20 @@
-import type { ReactNode } from 'react'
-import { TrendingDown, TrendingUp } from 'lucide-react'
-import { Sparkline } from './Sparkline'
-import './KpiCard.css'
+import type { ReactNode } from "react";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { Sparkline } from "./Sparkline";
+import "./KpiCard.css";
 
 export interface KpiCardProps {
-  label: string
-  value: ReactNode
-  unit?: string
-  icon?: ReactNode
+  label: string;
+  value: ReactNode;
+  unit?: string;
+  icon?: ReactNode;
   /** Signed delta vs the previous period. */
-  delta?: number
-  deltaSuffix?: string
+  delta?: number;
+  deltaSuffix?: string;
   /** Whether a positive delta is good (green) or bad (caramel). */
-  positiveIsGood?: boolean
-  trend?: number[]
-  trendColor?: string
+  positiveIsGood?: boolean;
+  trend?: number[];
+  trendColor?: string;
 }
 
 export function KpiCard({
@@ -23,14 +23,14 @@ export function KpiCard({
   unit,
   icon,
   delta,
-  deltaSuffix = '',
+  deltaSuffix = "",
   positiveIsGood = true,
   trend,
   trendColor,
 }: Readonly<KpiCardProps>) {
-  const up = (delta ?? 0) >= 0
-  const good = delta === undefined ? true : up === positiveIsGood
-  const DeltaIcon = up ? TrendingUp : TrendingDown
+  const up = (delta ?? 0) >= 0;
+  const good = delta === undefined ? true : up === positiveIsGood;
+  const DeltaIcon = up ? TrendingUp : TrendingDown;
 
   return (
     <div className="fk-kpi">
@@ -48,10 +48,10 @@ export function KpiCard({
       </div>
       <div className="fk-kpi-foot">
         {delta !== undefined && (
-          <span className={`fk-kpi-delta ${good ? 'is-good' : 'is-bad'}`}>
+          <span className={`fk-kpi-delta ${good ? "is-good" : "is-bad"}`}>
             <DeltaIcon size={14} strokeWidth={1.75} aria-hidden="true" />
             <span className="fk-mono">
-              {up ? '+' : ''}
+              {up ? "+" : ""}
               {delta}
               {deltaSuffix}
             </span>
@@ -62,5 +62,5 @@ export function KpiCard({
         )}
       </div>
     </div>
-  )
+  );
 }

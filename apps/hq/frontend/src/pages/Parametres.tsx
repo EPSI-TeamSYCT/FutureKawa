@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Moon, Sun } from 'lucide-react'
+import { useEffect } from "react";
+import { Moon, Sun } from "lucide-react";
 import {
   Card,
   CardHeader,
@@ -11,35 +11,35 @@ import {
   Th,
   THead,
   Tr,
-} from '@/components/ui'
-import { useTheme, type Theme } from '@/hooks/theme-context'
-import { COUNTRIES } from '@/lib/countries'
-import './Parametres.css'
+} from "@/components/ui";
+import { useTheme, type Theme } from "@/hooks/theme-context";
+import { COUNTRIES } from "@/lib/countries";
+import "./Parametres.css";
 
-const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform)
-const cmd = isMac ? '⌘' : 'Ctrl'
+const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
+const cmd = isMac ? "⌘" : "Ctrl";
 
 const SHORTCUTS: { keys: string[]; label: string }[] = [
-  { keys: [`${cmd} K`], label: 'Ouvrir la palette de commandes' },
-  { keys: ['/'], label: 'Rechercher' },
-  { keys: ['t'], label: 'Basculer le thème clair / sombre' },
-  { keys: ['g', 'd'], label: 'Aller au Dashboard' },
-  { keys: ['g', 'l'], label: 'Aller aux Lots' },
-  { keys: ['g', 'e'], label: 'Aller aux Entrepôts' },
-  { keys: ['g', 'a'], label: 'Aller aux Alertes' },
-  { keys: ['g', 'p'], label: 'Aller aux Paramètres' },
-]
+  { keys: [`${cmd} K`], label: "Ouvrir la palette de commandes" },
+  { keys: ["/"], label: "Rechercher" },
+  { keys: ["t"], label: "Basculer le thème clair / sombre" },
+  { keys: ["g", "d"], label: "Aller au Dashboard" },
+  { keys: ["g", "l"], label: "Aller aux Lots" },
+  { keys: ["g", "e"], label: "Aller aux Entrepôts" },
+  { keys: ["g", "a"], label: "Aller aux Alertes" },
+  { keys: ["g", "p"], label: "Aller aux Paramètres" },
+];
 
 const THEMES: { id: Theme; label: string; icon: typeof Sun }[] = [
-  { id: 'light', label: 'Clair', icon: Sun },
-  { id: 'dark', label: 'Sombre', icon: Moon },
-]
+  { id: "light", label: "Clair", icon: Sun },
+  { id: "dark", label: "Sombre", icon: Moon },
+];
 
 export function Parametres() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
   useEffect(() => {
-    document.title = 'FutureKawa — Paramètres'
-  }, [])
+    document.title = "FutureKawa — Paramètres";
+  }, []);
 
   return (
     <>
@@ -59,7 +59,7 @@ export function Parametres() {
               <button
                 key={t.id}
                 type="button"
-                className={`param-theme ${theme === t.id ? 'is-active' : ''}`.trim()}
+                className={`param-theme ${theme === t.id ? "is-active" : ""}`.trim()}
                 aria-pressed={theme === t.id}
                 onClick={() => setTheme(t.id)}
               >
@@ -158,5 +158,5 @@ export function Parametres() {
         </dl>
       </Card>
     </>
-  )
+  );
 }

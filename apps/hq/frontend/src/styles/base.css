@@ -75,7 +75,7 @@ a:hover {
   border-radius: 2px;
 }
 /* Elements that manage their own ring opt out of the generic one. */
-[data-fk-ring='self']:focus-visible {
+[data-fk-ring="self"]:focus-visible {
   outline: none;
 }
 
@@ -155,7 +155,7 @@ a:hover {
 .fk-mono {
   font-family: var(--fk-font-mono);
   font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1;
+  font-feature-settings: "tnum" 1;
 }
 
 /* Screen-reader-only, for icon-only controls that still need a label. */
