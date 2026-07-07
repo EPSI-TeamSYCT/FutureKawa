@@ -34,6 +34,8 @@ JSON object, validated by [`measurement.schema.json`](measurement.schema.json).
 {
   "warehouse_id": "wh-01",
   "country": "brazil",
+  "model": "DHT11",
+  "hardware_id": "ref43320",
   "temperature": 27.4,
   "humidity": 58.0,
   "timestamp": 1751808000
@@ -44,6 +46,8 @@ JSON object, validated by [`measurement.schema.json`](measurement.schema.json).
 |---|---|---|
 | `warehouse_id` | string | Warehouse identifier |
 | `country` | string | `brazil` \| `ecuador` \| `colombia` |
+| `model` | string | Sensor model, e.g. `DHT11` |
+| `hardware_id` | string | Unique device reference, e.g. `ref43320` |
 | `temperature` | number | °C |
 | `humidity` | number | % relative humidity |
 | `timestamp` | integer | UNIX epoch seconds, UTC (device clock via NTP; the backend may re-stamp on receipt) |
