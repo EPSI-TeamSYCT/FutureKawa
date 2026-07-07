@@ -87,4 +87,4 @@ jobs:
           cache: npm
           cache-dependency-path: apps/hq/frontend/package-lock.json
       - run: npm ci
-      - run: npm run test
+      - run: npm run test:coverage
