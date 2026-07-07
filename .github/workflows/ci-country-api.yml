@@ -53,7 +53,7 @@ jobs:
           tools: composer:v2
           coverage: none
       - run: composer validate --strict
-      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
       # composer quality = lint:yaml · lint:container · php-cs-fixer check · phpstan
       - run: composer quality
 
@@ -74,7 +74,7 @@ jobs:
           php-version: "8.4"
           tools: composer:v2
           coverage: none
-      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
       - run: composer audit # CVE audit of the dependencies
 
   tests:
@@ -110,7 +110,7 @@ jobs:
           extensions: mbstring, intl, pdo_pgsql
           tools: composer:v2
           coverage: pcov
-      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
       - run: php bin/console doctrine:migrations:migrate --no-interaction
       # Needs a test suite under tests/ (see the API spec).
       # TODO(api): enforce an 80% coverage gate to match the other services.

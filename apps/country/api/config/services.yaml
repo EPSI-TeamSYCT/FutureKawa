@@ -7,8 +7,9 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    # Defaults for the env vars used by the MQTT ingest worker. The real
-    # environment (docker compose / .env) overrides these.
+    # Defaults for the env vars used by the app. The real environment (docker
+    # compose / .env) overrides these.
+    env(DEFAULT_URI): 'http://localhost'
     env(COUNTRY): 'brazil'
     env(MQTT_HOST): 'localhost'
     env(MQTT_PORT): '1883'
