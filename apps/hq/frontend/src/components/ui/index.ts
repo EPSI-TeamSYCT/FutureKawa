@@ -30,6 +30,12 @@ export type { EmptyStateProps } from './EmptyState'
 
 export { ThemeToggle } from './ThemeToggle'
 
+export { PageHeader } from './PageHeader'
+export type { PageHeaderProps } from './PageHeader'
+
+export { CommandPalette } from './CommandPalette'
+export type { CommandPaletteProps, CommandItem } from './CommandPalette'
+
 export { Toast } from './Toast'
 export { ToastProvider } from './ToastProvider'
 export { useToast } from './toast-context'
