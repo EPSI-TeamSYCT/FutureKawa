@@ -1,25 +1,32 @@
-.fk-cmdk-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 150;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 12vh var(--fk-sp-16) var(--fk-sp-16);
+/* Native <dialog> — reset UA styles, anchored near the top. */
+.fk-cmdk-dialog {
+  padding: 0;
+  border: 0;
+  margin: 12vh auto auto;
+  max-width: none;
+  max-height: 76vh;
+  overflow: visible;
+  background: transparent;
+}
+.fk-cmdk-dialog::backdrop {
   background: color-mix(in srgb, var(--fk-espresso-950) 50%, transparent);
   backdrop-filter: blur(2px);
+}
+.fk-cmdk-dialog[open]::backdrop {
   animation: fk-modal-overlay-in var(--fk-dur-2) var(--fk-ease);
+}
+.fk-cmdk-dialog[open] .fk-cmdk {
+  animation: fk-modal-in var(--fk-dur-3) var(--fk-ease);
 }
 
 .fk-cmdk {
-  width: 100%;
+  width: calc(100vw - 2 * var(--fk-sp-16));
   max-width: 560px;
   background: var(--fk-surface);
   border: 1px solid var(--fk-border);
   border-radius: var(--fk-radius-modal);
   box-shadow: var(--fk-shadow-3);
   overflow: hidden;
-  animation: fk-modal-in var(--fk-dur-3) var(--fk-ease);
 }
 
 .fk-cmdk-search {
