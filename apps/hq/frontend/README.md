@@ -48,6 +48,7 @@ The app boots on the MSW mock layer by default — no backend required.
 | `npm run build` | Type-check (`tsc -b`) and build for production |
 | `npm run preview` | Preview the production build locally |
 | `npm test` | Run the Vitest suite once |
+| `npm run test:coverage` | Run tests with coverage (CI gate: 80% on `src/lib`) |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run typecheck` | Type-check only (`tsc -b`) |
 | `npm run lint` | Lint with oxlint |
