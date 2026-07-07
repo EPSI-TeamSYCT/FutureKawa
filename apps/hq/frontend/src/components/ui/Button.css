@@ -1,0 +1,117 @@
+.fk-btn {
+  --_ring: var(--fk-ring);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1.5px solid transparent;
+  border-radius: var(--fk-radius-btn);
+  font-family: var(--fk-font-ui);
+  font-size: var(--fk-fs-body);
+  font-weight: var(--fk-fw-semibold);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--fk-dur-2) var(--fk-ease),
+    border-color var(--fk-dur-2) var(--fk-ease),
+    color var(--fk-dur-2) var(--fk-ease),
+    box-shadow var(--fk-dur-1) var(--fk-ease);
+}
+
+.fk-btn--sm {
+  padding: 6px 12px;
+  font-size: var(--fk-fs-small);
+  gap: 6px;
+}
+.fk-btn--block {
+  width: 100%;
+}
+
+.fk-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--fk-bg),
+    0 0 0 4px var(--_ring);
+}
+
+.fk-btn:disabled {
+  cursor: not-allowed;
+  background: var(--fk-inset);
+  border-color: transparent;
+  color: var(--fk-text-meta);
+  box-shadow: none;
+}
+.fk-btn.is-loading {
+  cursor: progress;
+}
+
+/* ---- Primary (caramel CTA) -------------------------------------------- */
+.fk-btn--primary {
+  background: var(--fk-cta);
+  color: var(--fk-cta-text);
+}
+.fk-btn--primary:hover:not(:disabled) {
+  background: var(--fk-cta-hover);
+}
+
+/* ---- Secondary (outlined brun café) ----------------------------------- */
+.fk-btn--secondary {
+  background: transparent;
+  color: var(--fk-accent);
+  border-color: var(--fk-accent);
+}
+.fk-btn--secondary:hover:not(:disabled) {
+  background: var(--fk-inset);
+  color: var(--fk-accent-hover);
+  border-color: var(--fk-accent-hover);
+}
+.fk-btn--secondary:disabled {
+  background: transparent;
+  border-color: var(--fk-border);
+}
+
+/* ---- Ghost ------------------------------------------------------------- */
+.fk-btn--ghost {
+  background: transparent;
+  color: var(--fk-accent);
+}
+.fk-btn--ghost:hover:not(:disabled) {
+  background: var(--fk-inset);
+  color: var(--fk-accent-hover);
+}
+.fk-btn--ghost:disabled {
+  background: transparent;
+}
+
+/* ---- Destructive ------------------------------------------------------- */
+.fk-btn--destructive {
+  --_ring: var(--fk-ring-danger);
+  background: var(--fk-danger);
+  color: var(--fk-danger-text);
+}
+.fk-btn--destructive:hover:not(:disabled) {
+  background: var(--fk-danger-hover);
+}
+
+/* ---- Icons & spinner --------------------------------------------------- */
+.fk-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.fk-btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--fk-radius-full);
+  animation: fk-spin 0.7s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fk-btn-spinner {
+    animation: none;
+  }
+}

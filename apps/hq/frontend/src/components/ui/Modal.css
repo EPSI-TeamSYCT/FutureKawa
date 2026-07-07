@@ -1,0 +1,116 @@
+/* Native <dialog> — reset UA styles, position near the top, centred. */
+.fk-modal-dialog {
+  padding: 0;
+  border: 0;
+  margin: 10vh auto auto;
+  max-width: none;
+  max-height: 85vh;
+  overflow: auto;
+  background: transparent;
+}
+.fk-modal-dialog::backdrop {
+  background: color-mix(in srgb, var(--fk-espresso-950) 55%, transparent);
+  backdrop-filter: blur(2px);
+}
+.fk-modal-dialog[open]::backdrop {
+  animation: fk-modal-overlay-in var(--fk-dur-2) var(--fk-ease);
+}
+.fk-modal-dialog[open] .fk-modal {
+  animation: fk-modal-in var(--fk-dur-3) var(--fk-ease);
+}
+
+.fk-modal {
+  width: calc(100vw - 2 * var(--fk-sp-16));
+  background: var(--fk-surface);
+  border: 1px solid var(--fk-border);
+  border-radius: var(--fk-radius-modal);
+  box-shadow: var(--fk-shadow-3);
+}
+
+.fk-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--fk-sp-12);
+  padding: var(--fk-sp-24) var(--fk-sp-24) var(--fk-sp-16);
+}
+.fk-modal-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--fk-radius-card);
+  background: color-mix(in srgb, var(--fk-cta) 16%, transparent);
+  color: var(--fk-cta);
+}
+.fk-modal-heading {
+  flex: 1;
+  min-width: 0;
+}
+.fk-modal-title {
+  color: var(--fk-text);
+}
+.fk-modal-desc {
+  margin-top: 4px;
+  color: var(--fk-text-muted);
+  font-size: var(--fk-fs-body);
+  line-height: var(--fk-lh-body);
+}
+.fk-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  margin: -4px -4px 0 0;
+  border: none;
+  border-radius: var(--fk-radius-btn);
+  background: transparent;
+  color: var(--fk-text-meta);
+  cursor: pointer;
+  transition:
+    background var(--fk-dur-1) var(--fk-ease),
+    color var(--fk-dur-1) var(--fk-ease);
+}
+.fk-modal-close:hover {
+  background: var(--fk-inset);
+  color: var(--fk-text);
+}
+
+.fk-modal-body {
+  padding: 0 var(--fk-sp-24) var(--fk-sp-24);
+  color: var(--fk-text-muted);
+  font-size: var(--fk-fs-body);
+  line-height: var(--fk-lh-body);
+}
+
+.fk-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--fk-sp-12);
+  padding: var(--fk-sp-16) var(--fk-sp-24);
+  background: var(--fk-bg);
+  border-top: 1px solid var(--fk-border);
+  border-radius: 0 0 var(--fk-radius-modal) var(--fk-radius-modal);
+}
+
+@keyframes fk-modal-overlay-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fk-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fk-modal-dialog[open]::backdrop,
+  .fk-modal-dialog[open] .fk-modal {
+    animation: none;
+  }
+}

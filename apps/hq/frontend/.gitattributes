@@ -1,0 +1,10 @@
+# Normalise line endings to LF in the repo; let Git handle working-copy EOL.
+* text=auto eol=lf
+
+# Treat fonts and images as binary (never EOL-normalised or diffed as text).
+*.woff2 binary
+*.woff binary
+*.ttf binary
+*.png binary
+*.jpg binary
+*.ico binary

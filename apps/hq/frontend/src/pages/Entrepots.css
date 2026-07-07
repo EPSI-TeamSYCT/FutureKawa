@@ -1,0 +1,28 @@
+.ent-country {
+  margin-bottom: var(--fk-sp-32);
+}
+.ent-country:last-child {
+  margin-bottom: 0;
+}
+.ent-country-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fk-sp-12);
+  margin-bottom: var(--fk-sp-16);
+  padding-bottom: var(--fk-sp-8);
+  border-bottom: 1px solid var(--fk-border-subtle);
+}
+.ent-country-head h2 {
+  color: var(--fk-text);
+}
+.ent-country-meta {
+  font-size: var(--fk-fs-small);
+  color: var(--fk-text-meta);
+}
+
+.ent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--fk-sp-16);
+}
