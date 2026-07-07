@@ -70,19 +70,23 @@ pipeline {
     }
 
     // Prove the deployment is actually up (liveness), not just that compose ran.
+    // We curl over the stack's own Docker network (via a throwaway curl
+    // container), so it works whether Jenkins runs on the host or in a container.
     stage('Smoke test') {
       steps {
         sh '''
           set -eu
-          echo "Waiting for the backend health endpoint..."
-          for i in $(seq 1 20); do
-            if curl -fsS http://localhost:3000/health >/dev/null 2>&1; then
-              echo "backend /health OK"; break
-            fi
-            [ "$i" = 20 ] && { echo "backend health check FAILED"; exit 1; }
-            sleep 3
-          done
-          curl -fsS http://localhost:8080/ >/dev/null && echo "frontend reachable OK"
+          NET=futurekawa-hq_default
+          echo "Checking backend /health..."
+          docker run --rm --network "$NET" curlimages/curl:8.11.1 \
+            -fsS --retry 15 --retry-delay 3 --retry-all-errors \
+            http://backend:3000/health
+          echo "backend /health OK"
+          echo "Checking frontend..."
+          docker run --rm --network "$NET" curlimages/curl:8.11.1 \
+            -fsS --retry 10 --retry-delay 3 --retry-all-errors \
+            http://frontend:8080/ >/dev/null
+          echo "frontend reachable OK"
         '''
       }
     }
