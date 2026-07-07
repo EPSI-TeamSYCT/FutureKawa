@@ -35,14 +35,6 @@ function cssVar(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
 
-/** Convert a #rrggbb token value to an rgba() string with the given alpha. */
-function withAlpha(hex: string, alpha: number): string {
-  const m = /^#?([\da-f]{6})$/i.exec(hex.trim())
-  if (!m) return hex
-  const int = Number.parseInt(m[1], 16)
-  return `rgba(${(int >> 16) & 255}, ${(int >> 8) & 255}, ${int & 255}, ${alpha})`
-}
-
 const SUSTAINED_READINGS = 6
 
 /** Start timestamps of *sustained* drift episodes (≥6 consecutive out-of-range). */
@@ -108,16 +100,6 @@ export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidi
     const humOut = (i: number) => isHumidityOutOfRange(mesures[i].humidity, country)
 
     const annotations: Record<string, AnnotationOptions> = {
-      tempBand: {
-        type: 'box',
-        yScaleID: 'yTemp',
-        yMin: country.ideal.temp - country.tolerance.temp,
-        yMax: country.ideal.temp + country.tolerance.temp,
-        backgroundColor: c.band,
-        borderColor: c.bandLine,
-        borderWidth: 1,
-        borderDash: [2, 4],
-      },
       humMax: {
         type: 'line',
         yScaleID: 'yHum',
@@ -245,8 +227,7 @@ export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidi
           },
         },
         tooltip: {
-          enabled: false,
-          backgroundColor: withAlpha(c.tooltipBg, 0.8),
+          backgroundColor: c.tooltipBg,
           borderWidth: 0,
           titleColor: c.tooltipTitle,
           bodyColor: c.tooltipBody,
@@ -255,7 +236,8 @@ export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidi
           caretPadding: 8,
           titleFont: { family: "'IBM Plex Mono', monospace", size: 11, weight: 'normal' },
           bodyFont: { family: "'IBM Plex Mono', monospace", size: 13 },
-          displayColors: false,
+          displayColors: true,
+          usePointStyle: true,
           callbacks: {
             title: (items) => fullFmt.format(Number(items[0].parsed.x)),
             label: (item) => {
