@@ -13,8 +13,9 @@ jobs:
   iot-simulator:
     uses: ./.github/workflows/ci-iot-simulator.yml
 
-  # backend:
-  #   uses: ./.github/workflows/ci-backend.yml
+  hq-backend:
+    uses: ./.github/workflows/ci-backend.yml
+
   # api:
   #   uses: ./.github/workflows/ci-api.yml
   # frontend:
