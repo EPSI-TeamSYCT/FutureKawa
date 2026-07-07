@@ -2,28 +2,30 @@ import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { Errors } from "../enums/errors";
 import { HttpError } from "../middleware/errorHandler";
-import { getAllCountryData } from "../services/countryData";
-import { consolidateLots, findLot, measuresForWarehouse } from "../services/consolidation";
-import { resolveData } from "./helpers";
+import { getAggregate, getWarehouseMeasures } from "../services/aggregate";
+import { findLot, selectLots } from "../services/views";
+import { assertCountry, parseIntParam } from "./helpers";
 
 export const lotsRouter = Router();
 
 lotsRouter.get(
   "/lots",
   asyncHandler(async (req, res) => {
-    const results = await resolveData(req.query.country);
-    const { data, meta } = consolidateLots(results);
-    res.json({ lots: data, meta });
+    const countryId = parseIntParam(req.query.country);
+    const exploitationId = parseIntParam(req.query.exploitation);
+    const { data, ...meta } = await getAggregate();
+    assertCountry(data, countryId);
+    res.json({ lots: selectLots(data, { countryId, exploitationId }), meta });
   }),
 );
 
 lotsRouter.get(
   "/lots/:id",
   asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const results = await getAllCountryData();
-    const lot = id ? findLot(results, id) : null;
-    if (!lot) throw new HttpError(404, Errors.LOT_NOT_FOUND, id ?? "");
+    const id = parseIntParam(req.params.id)!;
+    const { data } = await getAggregate();
+    const lot = findLot(data, id);
+    if (!lot) throw new HttpError(404, Errors.LOT_NOT_FOUND, String(id));
     res.json({ lot });
   }),
 );
@@ -31,10 +33,15 @@ lotsRouter.get(
 lotsRouter.get(
   "/lots/:id/measures",
   asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const results = await getAllCountryData();
-    const lot = id ? findLot(results, id) : null;
-    if (!lot) throw new HttpError(404, Errors.LOT_NOT_FOUND, id ?? "");
-    res.json({ lotId: lot.id, warehouse: lot.warehouse, measures: measuresForWarehouse(results, lot.warehouse) });
+    const id = parseIntParam(req.params.id)!;
+    const { data } = await getAggregate();
+    const lot = findLot(data, id);
+    if (!lot) throw new HttpError(404, Errors.LOT_NOT_FOUND, String(id));
+    res.json({
+      lotId: lot.id,
+      reference: lot.reference,
+      warehouse: lot.warehouse,
+      measures: await getWarehouseMeasures(lot.warehouseId),
+    });
   }),
 );

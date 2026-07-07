@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
-import { getAllCountryData } from "../services/countryData";
-import { countryStates } from "../services/consolidation";
+import { getAggregate } from "../services/aggregate";
+import { summarizeCountries } from "../services/views";
 
 export const countriesRouter = Router();
 
 countriesRouter.get(
   "/countries",
   asyncHandler(async (_req, res) => {
-    const results = await getAllCountryData();
-    res.json({ countries: countryStates(results) });
+    const { data, ...meta } = await getAggregate();
+    res.json({ countries: summarizeCountries(data), meta });
   }),
 );

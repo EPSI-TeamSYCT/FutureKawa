@@ -1,8 +1,5 @@
 import "dotenv/config";
 
-export const COUNTRIES = ["brazil", "ecuador", "colombia"] as const;
-export type Country = (typeof COUNTRIES)[number];
-
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing required env var: ${name}`);
@@ -19,13 +16,8 @@ function intEnv(name: string, fallback: number): number {
 export const config = {
   port: intEnv("PORT", 3000),
   logLevel: process.env.LOG_LEVEL ?? "info",
-  databaseUrl: requireEnv("DATABASE_URL"),
+  countryApiUrl: requireEnv("COUNTRY_API_URL"),
+  countryApiKey: requireEnv("COUNTRY_API_KEY"),
   countryTimeoutMs: intEnv("COUNTRY_TIMEOUT_MS", 4000),
-  snapshotStaleMs: intEnv("SNAPSHOT_STALE_MS", 5 * 60 * 1000),
-
-  countryUrls: {
-    brazil: requireEnv("COUNTRY_BRAZIL_URL"),
-    ecuador: requireEnv("COUNTRY_ECUADOR_URL"),
-    colombia: requireEnv("COUNTRY_COLOMBIA_URL"),
-  } satisfies Record<Country, string>,
+  cacheStaleMs: intEnv("CACHE_STALE_MS", 5 * 60 * 1000),
 } as const;

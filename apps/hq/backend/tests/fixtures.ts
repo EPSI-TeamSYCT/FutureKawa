@@ -1,48 +1,58 @@
-import type { Country } from "../src/config";
-import type { Alert, Lot, Measure } from "../src/types/domain";
-import type { CountryData, Freshness } from "../src/services/countryData";
+import type { Cached } from "../src/lib/cache";
+import type { Aggregate } from "../src/services/aggregate";
+import type { Alert, Country, Lot } from "../src/types/domain";
 
-export function lot(
-  over: Partial<Lot> & Pick<Lot, "id" | "country" | "storageDate">,
-): Lot {
+export function country(over: Partial<Country> & Pick<Country, "id">): Country {
   return {
-    exploitation: "Fazenda A",
-    warehouse: "WH-1",
-    status: "conforme",
+    name: "Brazil",
+    isoCode: "BR",
+    ideal: { temperature: 29, humidity: 55 },
+    tolerance: { temperature: 3, humidity: 2 },
     ...over,
   };
 }
 
-export function measure(
-  over: Partial<Measure> & Pick<Measure, "id" | "warehouse" | "timestamp">,
-): Measure {
-  return { temperature: 20, humidity: 55, ...over };
+export function lot(
+  over: Partial<Lot> & Pick<Lot, "id" | "storageDate">,
+): Lot {
+  return {
+    reference: `LOT-${over.id}`,
+    status: "conforme",
+    countryId: 1,
+    country: "Brazil",
+    exploitationId: 1,
+    exploitation: "Fazenda A",
+    warehouseId: 1,
+    warehouse: "WH-1",
+    ...over,
+  };
 }
 
 export function alert(
-  over: Partial<Alert> & Pick<Alert, "id" | "country" | "timestamp">,
+  over: Partial<Alert> & Pick<Alert, "id" | "createdAt">,
 ): Alert {
-  return { type: "conditions", message: "check", ...over };
+  return {
+    type: "conditions",
+    message: "check",
+    emailSent: false,
+    countryId: 1,
+    country: "Brazil",
+    warehouseId: 1,
+    warehouse: "WH-1",
+    batchId: null,
+    ...over,
+  };
 }
 
-export function live(
-  country: Country,
-  payload: CountryData["payload"],
-  fetchedAt = "2026-07-06T10:00:00.000Z",
-): CountryData {
-  const freshness: Freshness = {
-    country,
+export function aggregate(over: Partial<Aggregate> = {}): Aggregate {
+  return { countries: [], lots: [], alerts: [], ...over };
+}
+
+export function live(data: Aggregate): Cached<Aggregate> {
+  return {
+    data,
     source: "live",
     stale: false,
-    fetchedAt,
-  };
-  return { country, payload, freshness };
-}
-
-export function unavailable(country: Country): CountryData {
-  return {
-    country,
-    payload: null,
-    freshness: { country, source: "unavailable", stale: true, fetchedAt: null },
+    fetchedAt: "2026-07-07T10:00:00.000Z",
   };
 }

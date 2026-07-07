@@ -1,24 +1,19 @@
-import { COUNTRIES, type Country } from "../config";
 import { Errors } from "../enums/errors";
 import { HttpError } from "../middleware/errorHandler";
-import {
-  getAllCountryData,
-  getCountryData,
-  type CountryData,
-} from "../services/countryData";
+import type { Aggregate } from "../services/aggregate";
 
-function isCountry(value: string): value is Country {
-  return COUNTRIES.some((country) => country === value);
+export function parseIntParam(value: unknown): number | undefined {
+  if (value === undefined) return undefined;
+  const n = Number(value);
+  if (!Number.isInteger(n)) {
+    throw new HttpError(400, Errors.INVALID_PARAM, String(value));
+  }
+  return n;
 }
 
-export async function resolveData(
-  countryQuery: unknown,
-): Promise<CountryData[]> {
-  if (countryQuery === undefined) {
-    return getAllCountryData();
+export function assertCountry(agg: Aggregate, countryId?: number): void {
+  if (countryId === undefined) return;
+  if (!agg.countries.some((c) => c.id === countryId)) {
+    throw new HttpError(400, Errors.UNKNOWN_COUNTRY, String(countryId));
   }
-  if (typeof countryQuery !== "string" || !isCountry(countryQuery)) {
-    throw new HttpError(400, Errors.UNKNOWN_COUNTRY, String(countryQuery));
-  }
-  return getCountryData(countryQuery).then((data) => [data]);
 }

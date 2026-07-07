@@ -5,45 +5,19 @@ services:
       - "3000:3000"
     environment:
       PORT: 3000
-      DATABASE_URL: postgresql://futurekawa:futurekawa@postgres:5432/hq?schema=public
-      # Ces URLs pointeront vers les backends pays une fois branchés (voir plus bas).
-      COUNTRY_BRAZIL_URL: http://host.docker.internal:4001
-      COUNTRY_ECUADOR_URL: http://host.docker.internal:4002
-      COUNTRY_COLOMBIA_URL: http://host.docker.internal:4003
+      # Point these at the country API once it runs (host.docker.internal
+      # reaches the host from inside the container).
+      COUNTRY_API_URL: http://host.docker.internal:8080
+      COUNTRY_API_KEY: change-me
       COUNTRY_TIMEOUT_MS: 4000
-      SNAPSHOT_STALE_MS: 300000
-    depends_on:
-      postgres:
-        condition: service_healthy
+      CACHE_STALE_MS: 300000
 
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: futurekawa
-      POSTGRES_PASSWORD: futurekawa
-      POSTGRES_DB: hq
-    ports:
-      - "5433:5432"
-    volumes:
-      - hq_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U futurekawa -d hq"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  # --- Services externes ---
-  # Les backends pays et le frontend ne sont PAS gérés ici. Quand ils tourneront,
-  # brancher leurs URLs sur COUNTRY_*_URL ci-dessus. Exemple si on les ajoutait au compose :
-  #
-  # brazil-backend:
-  #   image: futurekawa/country-backend:brazil
-  #   ports: ["4001:4000"]
+  # --- External services ---
+  # The country API and the frontend are NOT managed here (other teams own
+  # them). Point COUNTRY_API_URL/KEY at the country API above. Example if the
+  # frontend were added to this compose:
   #
   # frontend:
   #   image: futurekawa/hq-frontend
   #   environment:
   #     API_URL: http://central-backend:3000
-
-volumes:
-  hq_pgdata:

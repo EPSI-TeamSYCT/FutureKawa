@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { asyncHandler } from "../middleware/asyncHandler";
-import { getAllCountryData } from "../services/countryData";
-import { buildOverview } from "../services/consolidation";
+import { getAggregate } from "../services/aggregate";
+import { buildOverview } from "../services/views";
 
 export const overviewRouter = Router();
 
 overviewRouter.get(
   "/overview",
   asyncHandler(async (_req, res) => {
-    const results = await getAllCountryData();
-    res.json(buildOverview(results));
+    const { data, ...meta } = await getAggregate();
+    res.json({ ...buildOverview(data), meta });
   }),
 );

@@ -2,28 +2,25 @@
 
 ## Overview
 
-Central backend for FutureKawa. It is an **aggregator / BFF**: it queries the three
-country backends (Brazil, Ecuador, Colombia) over HTTP, consolidates their data, and
-exposes a clean API to the frontend. It holds **no business logic** of its own: no MQTT,
-no IoT, no alerting. It only consumes and consolidates.
+Central backend for FutureKawa. It is a **BFF / aggregator**: it queries the
+country API (a single shared API Platform service that already holds the three
+countries) over HTTP, resolves its relational data, and exposes a clean,
+frontend-friendly API. It holds **no business logic** of its own: no MQTT, no
+IoT, no alerting, no database. It only consumes, normalizes and consolidates.
 
 ## Stack
 
 - Express + TypeScript (strict, CommonJS)
-- Prisma 7 + PostgreSQL, **only** to cache country snapshots
-  (connection via the `@prisma/adapter-pg` driver adapter; CLI/Migrate URL in `prisma.config.ts`)
-- axios (simple timeout, no retry) + zod (validates country responses)
+- axios (single client, shared API key, timeout, no retry)
+- zod (validates the country API responses at the boundary)
 - pino / pino-http (logs)
 - vitest + supertest (tests)
 
 ## Setup
 
 ```bash
-cp .env.example .env         # then adjust the COUNTRY_*_URL and DATABASE_URL
+cp .env.example .env          # then set COUNTRY_API_URL and COUNTRY_API_KEY
 npm install
-docker compose up -d postgres  # Postgres must run before migrate (host port 5433)
-npm run prisma:generate
-npm run prisma:migrate         # creates the CountrySnapshot table
 ```
 
 ## Run
@@ -34,62 +31,94 @@ Local (dev, hot reload):
 npm run dev
 ```
 
-Docker (backend + postgres):
+Docker:
 
 ```bash
 docker compose up --build
 ```
 
-The country backends and the frontend are **not** part of this compose file (other teams
-own them). Point `COUNTRY_*_URL` at them once they run. See the commented block in
-`docker-compose.yml`.
+The country API and the frontend are **not** part of this compose file (other
+teams own them). Point `COUNTRY_API_URL` / `COUNTRY_API_KEY` at the country API
+once it runs.
+
+## Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | HTTP port |
+| `LOG_LEVEL` | `info` | pino level |
+| `COUNTRY_API_URL` | — (required) | Base URL of the country API (paths add `/api/...`) |
+| `COUNTRY_API_KEY` | — (required) | Shared key sent as `X-API-KEY` |
+| `COUNTRY_TIMEOUT_MS` | `4000` | Per-request timeout to the country API |
+| `CACHE_STALE_MS` | `300000` | Age above which the fallback snapshot is flagged `stale` |
 
 ## Endpoints
 
 | Method | Path | Description |
 |---|---|---|
 | GET | `/health` | Liveness probe |
-| GET | `/countries` | Per-country state: source, stale, lot/alert counts |
-| GET | `/lots?country=` | Consolidated lots, sorted by `storageDate` ascending (FIFO). Optional country filter |
-| GET | `/lots/:id` | Lot detail (searched across the three countries) |
-| GET | `/lots/:id/measures` | Measures of the lot's warehouse (temperature/humidity curves) |
-| GET | `/alerts?country=` | Consolidated alerts, most recent first. Optional country filter |
-| GET | `/overview` | Dashboard: per-country summary + global counters + freshness |
+| GET | `/countries` | Countries with their ideal conditions + lot/alert counts |
+| GET | `/lots?country=&exploitation=` | Lots sorted by `storageDate` ascending (FIFO). Optional `country`/`exploitation` id filters |
+| GET | `/lots/:id` | Lot detail |
+| GET | `/lots/:id/measures` | Temperature/humidity measures of the lot's warehouse (time series, ascending) |
+| GET | `/alerts?country=` | Alerts, most recent first. Optional `country` id filter |
+| GET | `/overview` | Dashboard: totals + lot status breakdown |
 
-Every consolidated response carries per-country freshness in `meta` (or `countries`):
-`{ country, source, stale, fetchedAt }`.
+Every aggregated response carries upstream freshness in `meta`:
+`{ source: "live" | "cache", stale, fetchedAt }`.
 
-## Resilience (cache & fallback)
+## Country API integration
 
-A single function, `getCountryData(country)`, is the only path to country data and is
-reused by every route:
+The country API is API Platform (Symfony): camelCase fields, relations expressed
+as IRIs (e.g. `"/api/countries/1"`), authenticated with `X-API-KEY`. The client
+requests `Accept: application/json` to receive plain arrays.
 
-1. **Live**: HTTP call within `COUNTRY_TIMEOUT_MS`. On success the snapshot is saved
-   (`source: "live"`, `stale: false`).
-2. **Cache**: on failure (timeout/error) it reads the last snapshot from PostgreSQL.
-   If one exists, it is served with `source: "cache"` and `stale` = older than
-   `SNAPSHOT_STALE_MS`.
-3. **Unavailable**: if no snapshot exists at all, `source: "unavailable"` and `payload`
-   is `null`; that country is skipped in the consolidation but still reported.
+The HQ backend consumes: `/api/countries`, `/api/exploitations`,
+`/api/warehouses`, `/api/batches`, `/api/alerts`, and
+`/api/measures?sensor.warehouse=:id` for a lot's readings. The **only** place
+coupled to that wire format is the raw zod schemas in `src/types/domain.ts`; if
+a field is renamed upstream, change it there and the rest of the backend
+follows.
 
-There is **no retry**: a slow country degrades to cache instead of blocking the response.
-Cached JSON is re-validated with the same zod schemas before being served, so a corrupted
-snapshot is rejected rather than returned.
+Lots and alerts are enriched with their country by resolving
+`batch/alert → warehouse → country`. A lot's country is the country of the
+warehouse where it is physically stored (what the IoT sensors monitor). Measures
+belong to sensors, so a lot's readings are the measures of its warehouse,
+fetched via the `sensor.warehouse` filter.
+
+## Resilience (fallback cache)
+
+A single in-memory `FallbackCache` fronts the aggregate:
+
+1. **Live**: every request refetches the country API within `COUNTRY_TIMEOUT_MS`
+   and stores the result (`source: "live"`).
+2. **Cache**: on failure it serves the last successful snapshot (`source:
+   "cache"`, `stale` = older than `CACHE_STALE_MS`).
+3. If the country API has **never** answered, the error propagates (5xx).
+
+There is **no retry** and **no database**: a brief upstream outage degrades to
+the last-known-good snapshot instead of blocking. Cached data was already
+validated by zod when first fetched.
 
 ## Tests
 
 ```bash
-npm run test
+npm run test        # vitest
+npm run typecheck   # tsc --noEmit
 ```
 
-- Pure consolidation functions (FIFO sort, multi-country merge, unavailable country).
-- `getCountryData` resilience (live / fresh cache / stale cache / unavailable).
-- API routes via supertest, mocking the data layer (no real HTTP, no DB).
+- `domain` — IRI parsing and relational mapping (country resolved via warehouse).
+- `views` — FIFO sort, filters, per-country counts, overview (pure functions).
+- `cache` — live / fresh-cache / stale-cache / no-cache fallback.
+- API routes via supertest, mocking the aggregate layer (no real HTTP).
 
 ## Local decisions
 
-- **Single source of truth for config** (`src/config`): country list, URLs, timeouts.
-- **One data path** (`getCountryData`) + **pure consolidation functions**: DRY, easy to test.
-- Prisma/PostgreSQL is a cache, not a system of record: one table, `CountrySnapshot`.
-- Prisma 7: the datasource `url` lives in `prisma.config.ts` (CLI/Migrate) and the runtime
-  client uses a `pg` driver adapter. `DATABASE_URL` is read from `.env` for both.
+- **Single source of truth for config** (`src/config`): API URL, key, timeouts.
+- **Anti-corruption layer**: raw (API Platform, IRIs) vs normalized (camelCase,
+  resolved names) shapes are kept separate in `src/types/domain.ts`, so the
+  frontend contract is decoupled from the country API.
+- **One data path** (`getAggregate`) + **pure view functions** (`src/services/views`):
+  DRY and easy to unit-test.
+- **No database**: HQ is a stateless aggregator; resilience is an in-memory
+  fallback cache. A store will be reintroduced only when authentication needs it.
