@@ -1,38 +1,36 @@
 import { createBrowserRouter } from 'react-router-dom'
-import { AppLayout } from '@/layouts/AppLayout'
-import { Dashboard } from '@/pages/Dashboard'
-import { Lots } from '@/pages/Lots'
-import { LotDetail } from '@/pages/LotDetail'
-import { Entrepots } from '@/pages/Entrepots'
-import { EntrepotDetail } from '@/pages/EntrepotDetail'
-import { Alertes } from '@/pages/Alertes'
-import { Parametres } from '@/pages/Parametres'
-import { NotFound } from '@/pages/NotFound'
-import { StyleGuide } from '@/pages/StyleGuide'
-import { ComponentsGallery } from '@/pages/ComponentsGallery'
 
 /*
- * The app lives under AppLayout (sidebar + topbar + country filter).
- * The two design-system references stay outside the layout, under /design.
+ * Every page is code-split via route.lazy, so the initial bundle only carries
+ * the shell. The two design-system references stay outside the app layout.
  */
 export const router = createBrowserRouter(
   [
     {
       path: '/',
-      element: <AppLayout />,
+      lazy: async () => ({ Component: (await import('@/layouts/AppLayout')).AppLayout }),
       children: [
-        { index: true, element: <Dashboard /> },
-        { path: 'lots', element: <Lots /> },
-        { path: 'lots/:id', element: <LotDetail /> },
-        { path: 'entrepots', element: <Entrepots /> },
-        { path: 'entrepots/:id', element: <EntrepotDetail /> },
-        { path: 'alertes', element: <Alertes /> },
-        { path: 'parametres', element: <Parametres /> },
-        { path: '*', element: <NotFound /> },
+        { index: true, lazy: async () => ({ Component: (await import('@/pages/Dashboard')).Dashboard }) },
+        { path: 'lots', lazy: async () => ({ Component: (await import('@/pages/Lots')).Lots }) },
+        { path: 'lots/:id', lazy: async () => ({ Component: (await import('@/pages/LotDetail')).LotDetail }) },
+        { path: 'entrepots', lazy: async () => ({ Component: (await import('@/pages/Entrepots')).Entrepots }) },
+        {
+          path: 'entrepots/:id',
+          lazy: async () => ({ Component: (await import('@/pages/EntrepotDetail')).EntrepotDetail }),
+        },
+        { path: 'alertes', lazy: async () => ({ Component: (await import('@/pages/Alertes')).Alertes }) },
+        {
+          path: 'parametres',
+          lazy: async () => ({ Component: (await import('@/pages/Parametres')).Parametres }),
+        },
+        { path: '*', lazy: async () => ({ Component: (await import('@/pages/NotFound')).NotFound }) },
       ],
     },
-    { path: '/design', element: <StyleGuide /> },
-    { path: '/design/components', element: <ComponentsGallery /> },
+    { path: '/design', lazy: async () => ({ Component: (await import('@/pages/StyleGuide')).StyleGuide }) },
+    {
+      path: '/design/components',
+      lazy: async () => ({ Component: (await import('@/pages/ComponentsGallery')).ComponentsGallery }),
+    },
   ],
   {
     future: {
