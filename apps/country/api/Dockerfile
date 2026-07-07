@@ -19,9 +19,21 @@ COPY composer.json composer.lock symfony.lock ./
 RUN composer install --no-dev --no-scripts --no-progress --prefer-dist \
     --no-interaction --ignore-platform-reqs
 
-# Application code, then finalize the autoloader.
-COPY . .
-RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
+# Application code — copied explicitly (never `COPY . .`) so no dev/secret file
+# ever lands in the image.
+COPY bin ./bin
+COPY config ./config
+COPY migrations ./migrations
+COPY public ./public
+COPY src ./src
+COPY translations ./translations
+
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative \
+ && mkdir -p var /data/caddy /config/caddy \
+ && chown -R www-data:www-data /app /data /config
+
+# Run as a non-root user (binds :8000, a non-privileged port).
+USER www-data
 
 # FrankenPHP serves public/ on :8000 (SERVER_NAME above).
 EXPOSE 8000
