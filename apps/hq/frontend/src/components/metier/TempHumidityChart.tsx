@@ -68,7 +68,11 @@ export interface TempHumidityChartProps {
   height?: number
 }
 
-export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidityChartProps) {
+export function TempHumidityChart({
+  mesures,
+  country,
+  height = 340,
+}: Readonly<TempHumidityChartProps>) {
   const { theme } = useTheme()
 
   // `theme` is listed in the memo deps below so colours refresh on theme change.

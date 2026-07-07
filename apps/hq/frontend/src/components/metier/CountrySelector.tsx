@@ -6,7 +6,7 @@ import './CountrySelector.css'
 export function CountrySelector() {
   const { scope, setScope } = useCountryFilter()
   return (
-    <div className="fk-country" role="group" aria-label="Filtrer par pays">
+    <fieldset className="fk-country" aria-label="Filtrer par pays">
       {SCOPES.map((s) => {
         const active = scope === s.code
         return (
@@ -21,6 +21,6 @@ export function CountrySelector() {
           </button>
         )
       })}
-    </div>
+    </fieldset>
   )
 }

@@ -7,7 +7,7 @@ export interface LiveIndicatorProps {
 }
 
 /** Small pulsing dot marking a real-time / live value. */
-export function LiveIndicator({ label = 'live', tone = 'success' }: LiveIndicatorProps) {
+export function LiveIndicator({ label = 'live', tone = 'success' }: Readonly<LiveIndicatorProps>) {
   return (
     <span className={`fk-live fk-live--${tone}`}>
       <span className="fk-live-dot" aria-hidden="true" />

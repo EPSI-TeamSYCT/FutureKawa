@@ -16,7 +16,13 @@ export interface ConditionsGaugeProps {
  */
 const HALF_SPAN_FACTOR = 100 / 36 / 2 // ≈ 1.389 → per-side span in tolerances
 
-export function ConditionsGauge({ label, value, ideal, tolerance, unit }: ConditionsGaugeProps) {
+export function ConditionsGauge({
+  label,
+  value,
+  ideal,
+  tolerance,
+  unit,
+}: Readonly<ConditionsGaugeProps>) {
   const span = tolerance * 2 * HALF_SPAN_FACTOR
   const min = ideal - span
   const max = ideal + span

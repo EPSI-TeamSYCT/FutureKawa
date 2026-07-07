@@ -20,7 +20,7 @@ export interface LotTimelineProps {
 }
 
 /** Horizontal lot timeline — done (green) / alert (caramel) / pending (neutral). */
-export function LotTimeline({ steps }: LotTimelineProps) {
+export function LotTimeline({ steps }: Readonly<LotTimelineProps>) {
   return (
     <ol className="fk-timeline">
       {steps.map((step, i) => {

@@ -18,7 +18,7 @@ export interface AlertItemProps {
   treating?: boolean
 }
 
-export function AlertItem({ alerte, onTraiter, treating = false }: AlertItemProps) {
+export function AlertItem({ alerte, onTraiter, treating = false }: Readonly<AlertItemProps>) {
   const drift = alerte.type === 'DERIVE'
   const email = EMAIL[alerte.emailStatut]
   const EmailIcon = email.icon

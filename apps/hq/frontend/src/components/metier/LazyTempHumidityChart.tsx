@@ -7,7 +7,7 @@ const Chart = lazy(() =>
   import('./TempHumidityChart').then((m) => ({ default: m.TempHumidityChart })),
 )
 
-export function LazyTempHumidityChart(props: TempHumidityChartProps) {
+export function LazyTempHumidityChart(props: Readonly<TempHumidityChartProps>) {
   return (
     <Suspense fallback={<Skeleton height={props.height ?? 340} />}>
       <Chart {...props} />

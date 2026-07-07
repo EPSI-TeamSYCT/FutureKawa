@@ -19,8 +19,7 @@ export function Sparkline({
   color = 'var(--fk-spark)',
   strokeWidth = 1.75,
   fill = false,
-  ariaLabel,
-}: SparklineProps) {
+}: Readonly<SparklineProps>) {
   const gradId = useId()
   if (data.length < 2) return <svg width={width} height={height} aria-hidden="true" />
 
@@ -40,9 +39,7 @@ export function Sparkline({
       height={height}
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
-      role={ariaLabel ? 'img' : undefined}
-      aria-label={ariaLabel}
-      aria-hidden={ariaLabel ? undefined : 'true'}
+      aria-hidden="true"
     >
       {fill && (
         <>

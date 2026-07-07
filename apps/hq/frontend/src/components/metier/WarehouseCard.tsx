@@ -11,7 +11,7 @@ export interface WarehouseCardProps {
   entrepot: EntrepotStatut
 }
 
-export function WarehouseCard({ entrepot }: WarehouseCardProps) {
+export function WarehouseCard({ entrepot }: Readonly<WarehouseCardProps>) {
   const { data, loading } = useAsync(
     (signal) => getEntrepotMesures(entrepot.id, '24h', signal),
     [entrepot.id],

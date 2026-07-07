@@ -27,7 +27,7 @@ export function KpiCard({
   positiveIsGood = true,
   trend,
   trendColor,
-}: KpiCardProps) {
+}: Readonly<KpiCardProps>) {
   const up = (delta ?? 0) >= 0
   const good = delta === undefined ? true : up === positiveIsGood
   const DeltaIcon = up ? TrendingUp : TrendingDown

@@ -21,7 +21,7 @@ export interface LotStatusBadgeProps {
 }
 
 /** Lot status as colour + icon + label — never colour alone. */
-export function LotStatusBadge({ statut, size = 'md' }: LotStatusBadgeProps) {
+export function LotStatusBadge({ statut, size = 'md' }: Readonly<LotStatusBadgeProps>) {
   const { tone, label, icon: Icon } = CONFIG[statut]
   return (
     <Badge
