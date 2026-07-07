@@ -6,27 +6,36 @@ from models import Measurement, now_epoch
 
 
 def build_generators(settings, rng_factory):
-    generators = {}
-    for wh in settings.warehouse_ids:
-        generators[wh] = ReadingGenerator(
-            settings.temp_threshold,
-            settings.humidity_threshold,
-            settings.temp_tolerance,
-            settings.humidity_tolerance,
-            settings.anomaly_probability,
-            rng_factory(),
+    """One generator per device (each device is its own reading stream)."""
+    return [
+        (
+            device,
+            ReadingGenerator(
+                settings.temp_threshold,
+                settings.humidity_threshold,
+                settings.temp_tolerance,
+                settings.humidity_tolerance,
+                settings.anomaly_probability,
+                rng_factory(),
+            ),
         )
-    return generators
+        for device in settings.devices
+    ]
 
 
-def publish_round(settings, generators, publisher, now=now_epoch):
-    hardware_ids = settings.hardware_id_map
-    for wh, gen in generators.items():
+def publish_round(settings, device_generators, publisher, now=now_epoch):
+    for device, gen in device_generators:
         temp, hum = gen.next()
         measurement = Measurement(
-            wh, settings.country, settings.model, hardware_ids[wh], temp, hum, now()
+            device.warehouse,
+            settings.country,
+            device.model,
+            device.hardware_id,
+            temp,
+            hum,
+            now(),
         )
-        topic = f"futurekawa/{settings.country}/{wh}/measurements"
+        topic = f"futurekawa/{settings.country}/{device.warehouse}/measurements"
         publisher.publish(topic, measurement.to_json())
 
 

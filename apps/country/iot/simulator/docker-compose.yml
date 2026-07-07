@@ -12,7 +12,7 @@ services:
     environment:
       MQTT_HOST: mosquitto
       COUNTRY: brazil
-      WAREHOUSES: wh-01,wh-02
+      DEVICES: '[{"warehouse":"wh-01","hardware_id":"br-wh-01"},{"warehouse":"wh-02","hardware_id":"br-wh-02"}]'
       TEMP_THRESHOLD: "29"
       HUMIDITY_THRESHOLD: "55"
       PUBLISH_INTERVAL: "10"
@@ -23,7 +23,7 @@ services:
     environment:
       MQTT_HOST: mosquitto
       COUNTRY: ecuador
-      WAREHOUSES: wh-01
+      DEVICES: '[{"warehouse":"wh-01","hardware_id":"ec-wh-01"}]'
       TEMP_THRESHOLD: "31"
       HUMIDITY_THRESHOLD: "60"
       PUBLISH_INTERVAL: "10"
@@ -34,7 +34,7 @@ services:
     environment:
       MQTT_HOST: mosquitto
       COUNTRY: colombia
-      WAREHOUSES: wh-01
+      DEVICES: '[{"warehouse":"wh-01","hardware_id":"co-wh-01"}]'
       TEMP_THRESHOLD: "26"
       HUMIDITY_THRESHOLD: "80"
       PUBLISH_INTERVAL: "10"

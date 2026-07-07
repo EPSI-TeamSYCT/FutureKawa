@@ -54,6 +54,8 @@ JSON object, validated by [`measurement.schema.json`](measurement.schema.json).
 
 ## Notes
 
+- A warehouse may host **several devices**. They all publish to the same
+  `.../<warehouse_id>/measurements` topic; consumers tell them apart by `hardware_id`.
 - The device is **publish-only** in this iteration; it does not subscribe to any
   topic. Alert evaluation (threshold ± tolerance, batch age) lives in the backend.
 - A future `futurekawa/<country>/<warehouse_id>/commands` topic (backend → device)

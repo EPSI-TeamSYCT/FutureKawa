@@ -42,12 +42,26 @@ All env-driven. Required vars have no default.
 | `MQTT_HOST` / `MQTT_PORT` | `localhost` / `1883` | Broker |
 | `MQTT_QOS` | `1` | Publish QoS |
 | `COUNTRY` | *(required)* | Country label (free-form) |
-| `WAREHOUSES` | `wh-01` | Comma-separated ids |
+| `DEVICES` | 1 device on `wh-01` | JSON list of devices — see below |
 | `TEMP_THRESHOLD` / `HUMIDITY_THRESHOLD` | *(required)* | Country thresholds |
 | `TEMP_TOLERANCE` / `HUMIDITY_TOLERANCE` | `3.0` / `2.0` | ± tolerances |
 | `PUBLISH_INTERVAL` | `30` | Seconds between rounds |
 | `ANOMALY_PROBABILITY` | `0.1` | Chance of an out-of-range reading |
 | `RANDOM_SEED` | *(optional)* | Reproducible readings |
+
+**`DEVICES`** is a JSON list — one object per IoT device (`warehouse`, `hardware_id`,
+optional `model`). A warehouse may hold **several** devices:
+
+```json
+DEVICES=[
+  {"warehouse":"wh-01","hardware_id":"ref43320","model":"DHT11"},
+  {"warehouse":"wh-01","hardware_id":"ref43321"},
+  {"warehouse":"wh-02","hardware_id":"ref50001"}
+]
+```
+
+All devices in a warehouse publish to the same `.../<warehouse>/measurements` topic;
+the backend tells them apart by `hardware_id` in the payload.
 
 ➕ **Add a country** = add a service block in `docker-compose.yml` with its env. No code change.
 

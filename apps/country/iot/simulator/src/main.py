@@ -22,8 +22,9 @@ def main() -> None:
         settings.mqtt_qos,
         client_id=f"iot-sim-{settings.country}",
     )
+    devices = [f"{d.warehouse}/{d.hardware_id}" for d in settings.devices]
     print(
-        f"IoT simulator | {settings.country} | warehouses={settings.warehouse_ids} "
+        f"IoT simulator | {settings.country} | devices={devices} "
         f"| broker={settings.mqtt_host}:{settings.mqtt_port} "
         f"| every {settings.publish_interval}s"
     )
