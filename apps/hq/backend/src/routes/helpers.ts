@@ -4,9 +4,12 @@ import type { Aggregate } from "../services/aggregate";
 
 export function parseIntParam(value: unknown): number | undefined {
   if (value === undefined) return undefined;
+  if (typeof value !== "string") {
+    throw new HttpError(400, Errors.INVALID_PARAM);
+  }
   const n = Number(value);
   if (!Number.isInteger(n)) {
-    throw new HttpError(400, Errors.INVALID_PARAM, String(value));
+    throw new HttpError(400, Errors.INVALID_PARAM, value);
   }
   return n;
 }
