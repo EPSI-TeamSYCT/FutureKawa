@@ -1,24 +1,28 @@
-// FutureKawa — Continuous Deployment (Jenkins).
+// FutureKawa — full CI/CD pipeline (Jenkins).
 //
-// Hybrid CI/CD (see docs/architecture/adr-001-ci-github-actions-cd-jenkins.md):
-//   - GitHub Actions owns CI + builds/pushes images to GHCR.
-//   - Jenkins (this file) owns CD: it deploys those images onto the target VPS.
+// This is the industrialisation pipeline required by the brief (deliverable 5):
+// it runs EVERY stage — quality, tests, packaging — and then deploys. It is
+// meant to run on / next to the target VPS and is triggered manually, so a
+// deploy that happens days after the last GitHub Actions run still re-validates
+// everything from scratch before shipping (no stale artifact is ever deployed).
 //
-// This pipeline never builds anything — it pulls pre-built GHCR images and runs
-// `docker compose up -d` on the VPS over SSH. Setup & prerequisites:
-//   infra/deploy/README.md
+// GitHub Actions stays as the fast per-PR gate; Jenkins owns the complete
+// build → test → quality → package → deploy chain (see
+// docs/architecture/adr-001-ci-github-actions-cd-jenkins.md).
 //
-// Required Jenkins credentials:
-//   - futurekawa-vps-ssh : SSH private key for the deploy user on the VPS
-//   - ghcr-pull          : username = GitHub user, password = PAT (read:packages)
+// Requirements on the Jenkins node (see infra/deploy/README.md):
+//   - Docker + the Docker Pipeline plugin (per-stage container agents)
+//   - access to the Docker daemon (build/push/deploy)
+//   - credentials: `ghcr-pull` (GitHub user + PAT with write:packages)
 
 pipeline {
-  agent any
+  agent none
 
   parameters {
-    string(name: 'IMAGE_TAG',   defaultValue: 'latest',           description: 'GHCR tag to deploy: latest | X.Y.Z | sha-xxxxxxx')
-    string(name: 'DEPLOY_HOST', defaultValue: 'deployer@vps',     description: 'SSH target (user@host) of the VPS')
-    string(name: 'DEPLOY_DIR',  defaultValue: '/opt/futurekawa',  description: 'Deploy directory on the VPS')
+    string(name: 'IMAGE_TAG',   defaultValue: 'latest',          description: 'Tag to build/push/deploy (latest | X.Y.Z | sha-xxxxxxx)')
+    booleanParam(name: 'PUSH_IMAGES', defaultValue: true,        description: 'Push the built images to GHCR')
+    booleanParam(name: 'DEPLOY',      defaultValue: true,        description: 'Roll the HQ stack after packaging')
+    string(name: 'DEPLOY_DIR',  defaultValue: '/opt/futurekawa', description: 'Deploy directory on the host')
   }
 
   environment {
@@ -32,68 +36,111 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
-    }
-
-    // Push the (declarative) compose file to the VPS. The .env on the VPS holds
-    // the environment-specific values (tags, keys) and is NOT overwritten here.
-    stage('Ship compose file') {
-      steps {
-        sshagent(credentials: ['futurekawa-vps-ssh']) {
-          sh '''
-            set -eu
-            ssh -o StrictHostKeyChecking=accept-new "$DEPLOY_HOST" "mkdir -p '$DEPLOY_DIR'"
-            scp -o StrictHostKeyChecking=accept-new docker-compose.yml "$DEPLOY_HOST:$DEPLOY_DIR/docker-compose.yml"
-          '''
-        }
-      }
-    }
-
-    stage('Deploy on VPS') {
-      steps {
-        sshagent(credentials: ['futurekawa-vps-ssh']) {
-          withCredentials([usernamePassword(
-              credentialsId: 'ghcr-pull',
-              usernameVariable: 'GHCR_USER',
-              passwordVariable: 'GHCR_TOKEN')]) {
-            sh '''
-              set -eu
-
-              # 1) Authenticate to GHCR on the VPS (token via stdin, never in argv).
-              printf '%s' "$GHCR_TOKEN" | ssh -o StrictHostKeyChecking=accept-new "$DEPLOY_HOST" \
-                "docker login ghcr.io -u '$GHCR_USER' --password-stdin"
-
-              # 2) Pull the requested tag and roll the stack.
-              ssh -o StrictHostKeyChecking=accept-new "$DEPLOY_HOST" \
-                REGISTRY="$REGISTRY" IMAGE_TAG="$IMAGE_TAG" DEPLOY_DIR="$DEPLOY_DIR" 'bash -s' <<'REMOTE'
-                set -euo pipefail
-                cd "$DEPLOY_DIR"
-                export REGISTRY IMAGE_TAG
-                docker compose pull
-                docker compose up -d --remove-orphans
-                docker logout ghcr.io
-                docker image prune -f
-                docker compose ps
-REMOTE
-            '''
+    // 1) Quality + security + tests, per service, in parallel. Each runs in the
+    //    right toolchain container so the Jenkins node only needs Docker.
+    stage('Quality & Tests') {
+      parallel {
+        stage('iot-simulator') {
+          agent { docker { image 'ghcr.io/astral-sh/uv:python3.12-bookworm' } }
+          steps {
+            checkout scm
+            dir('apps/country/iot/simulator') {
+              // poe ci = quality (ruff/mypy/vulture) + security (pip-audit) + tests (pytest, 80% gate)
+              sh 'uv run poe ci'
+            }
           }
         }
+        stage('hq-backend') {
+          agent { docker { image 'node:22-bookworm' } }
+          steps {
+            checkout scm
+            dir('apps/hq/backend') {
+              sh 'npm ci'
+              sh 'npm run lint'
+              sh 'npm run format:check'
+              sh 'npm run typecheck'
+              sh 'npm run build'
+              sh 'npm audit --omit=dev --audit-level=high'
+              sh 'npm run test:coverage'
+            }
+          }
+        }
+        stage('hq-frontend') {
+          agent { docker { image 'node:22-bookworm' } }
+          steps {
+            checkout scm
+            dir('apps/hq/frontend') {
+              sh 'npm ci'
+              sh 'npm run lint'
+              sh 'npm run format:check'
+              sh 'npm run typecheck'
+              sh 'npm run build'
+              sh 'npm audit --omit=dev --audit-level=high'
+              sh 'npm run test:coverage'
+            }
+          }
+        }
+      }
+    }
+
+    // 2) Package each service as a Docker image and (optionally) push to GHCR.
+    stage('Package & Push') {
+      agent any
+      steps {
+        checkout scm
+        script {
+          def services = [
+            'iot-simulator': 'apps/country/iot/simulator',
+            'hq-backend'   : 'apps/hq/backend',
+            'hq-frontend'  : 'apps/hq/frontend',
+          ]
+          if (params.PUSH_IMAGES) {
+            withCredentials([usernamePassword(credentialsId: 'ghcr-pull',
+                usernameVariable: 'GHCR_USER', passwordVariable: 'GHCR_TOKEN')]) {
+              sh 'printf "%s" "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin'
+            }
+          }
+          services.each { name, ctx ->
+            def image = "${REGISTRY}/futurekawa-${name}:${params.IMAGE_TAG}"
+            sh "docker build -t ${image} ${ctx}"
+            if (params.PUSH_IMAGES) {
+              sh "docker push ${image}"
+            }
+          }
+          if (params.PUSH_IMAGES) {
+            sh 'docker logout ghcr.io'
+          }
+        }
+      }
+    }
+
+    // 3) Deploy the HQ stack locally on the host (Jenkins runs on/next to the VPS).
+    stage('Deploy') {
+      agent any
+      when { expression { params.DEPLOY } }
+      steps {
+        checkout scm
+        sh '''
+          set -eu
+          mkdir -p "$DEPLOY_DIR"
+          cp docker-compose.yml "$DEPLOY_DIR/docker-compose.yml"
+          cd "$DEPLOY_DIR"
+          export REGISTRY IMAGE_TAG
+          docker compose pull
+          docker compose up -d --remove-orphans
+          docker image prune -f
+          docker compose ps
+        '''
       }
     }
   }
 
   post {
     success {
-      echo "Deployed tag '${params.IMAGE_TAG}' to ${params.DEPLOY_HOST}:${params.DEPLOY_DIR}"
+      echo "Pipeline OK — images @ '${params.IMAGE_TAG}'" + (params.DEPLOY ? " · deployed to ${params.DEPLOY_DIR}" : '')
     }
     failure {
-      echo 'Deploy failed — check the stage log above.'
-    }
-    always {
-      cleanWs()
+      echo 'Pipeline failed — see the stage logs above.'
     }
   }
 }
