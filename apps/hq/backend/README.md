@@ -126,16 +126,24 @@ validated by zod when first fetched.
 ## Tests
 
 ```bash
-npm run test        # vitest
-npm run typecheck   # tsc --noEmit
+npm run test           # vitest (run once)
+npm run test:coverage  # vitest + coverage (fails under 80%)
+npm run typecheck      # tsc --noEmit
 ```
 
-Co-located `*.spec.ts` files:
+Tests are **co-located** as `*.spec.ts` next to the code they cover; shared
+fixtures/harness live in `src/testing/`.
 
 - `mappers/domain.mapper.spec` — IRI parsing and relational mapping (country resolved via warehouse).
+- `schemas` via `adapters/country-api.adapter.spec` — HTTP calls + zod validation (axios mocked).
+- `services/aggregate.service.spec` — normalization pipeline + measure fetch (adapter mocked).
 - `services/views.service.spec` — FIFO sort, filters, per-country counts, overview (pure functions).
 - `lib/cache.spec` — live / fresh-cache / stale-cache / no-cache fallback.
-- `app.spec` — API routes via supertest, mocking the aggregate layer (no real HTTP).
+- `controllers/*.controller.spec` — each router in isolation via supertest (service layer mocked).
+- `app.spec` — app wiring (health probe + routers mounted).
+
+Coverage is enforced at **80%** (lines/statements/functions/branches) in
+`vitest.config.ts`; the suite currently sits around **98%** lines.
 
 ## Local decisions
 
