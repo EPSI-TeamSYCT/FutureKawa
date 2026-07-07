@@ -16,7 +16,8 @@ jobs:
   hq-backend:
     uses: ./.github/workflows/ci-backend.yml
 
+  hq-frontend:
+    uses: ./.github/workflows/ci-frontend.yml
+
   # api:
   #   uses: ./.github/workflows/ci-api.yml
-  # frontend:
-  #   uses: ./.github/workflows/ci-frontend.yml

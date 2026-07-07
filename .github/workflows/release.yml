@@ -16,6 +16,7 @@ jobs:
       bump: ${{ steps.bump.outputs.bump }}
       simulator: ${{ steps.filter.outputs.simulator }}
       backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -50,6 +51,15 @@ jobs:
               - 'apps/hq/backend/package-lock.json'
               - 'apps/hq/backend/tsconfig*.json'
               - 'apps/hq/backend/Dockerfile'
+            frontend:
+              - 'apps/hq/frontend/src/**'
+              - 'apps/hq/frontend/index.html'
+              - 'apps/hq/frontend/package.json'
+              - 'apps/hq/frontend/package-lock.json'
+              - 'apps/hq/frontend/tsconfig*.json'
+              - 'apps/hq/frontend/vite.config.ts'
+              - 'apps/hq/frontend/Dockerfile'
+              - 'apps/hq/frontend/nginx.conf'
 
   iot-simulator:
     needs: meta
@@ -69,6 +79,17 @@ jobs:
       contents: write
       packages: write
     uses: ./.github/workflows/cd-backend.yml
+    with:
+      bump: ${{ needs.meta.outputs.bump }}
+    secrets: inherit
+
+  hq-frontend:
+    needs: meta
+    if: ${{ needs.meta.outputs.frontend == 'true' }}
+    permissions:
+      contents: write
+      packages: write
+    uses: ./.github/workflows/cd-frontend.yml
     with:
       bump: ${{ needs.meta.outputs.bump }}
     secrets: inherit
