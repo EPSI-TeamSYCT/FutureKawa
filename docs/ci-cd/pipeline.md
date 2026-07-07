@@ -98,31 +98,27 @@ builds/pushes only the services with image-relevant changes.
 - **Per service:** each keeps its own version line via git tags `<service>-vX.Y.Z`.
 - **Traceability:** the `:sha-<commit>` tag ties every image to its exact commit.
 
-## Full pipeline & CD (Jenkins)
+## CD — deployment (Jenkins)
 
-The brief's industrialisation deliverable is a **complete Jenkins pipeline** (root
-[`Jenkinsfile`](../../Jenkinsfile)) that runs **every stage and then deploys**, in
-one run, on/next to the VPS — see
-[ADR-001](../architecture/adr-001-ci-github-actions-cd-jenkins.md).
+Deployment is owned by **Jenkins** — the self-hosted CD half of the hybrid (see
+[ADR-001](../architecture/adr-001-ci-github-actions-cd-jenkins.md)). It **pulls the
+immutable image** that `release.yml` built and **deploys it** — it never rebuilds,
+so it ships exactly what CI tested.
 
 ```
-Quality & Tests (parallel, per service) ─► Package (Docker) ─► Push (GHCR) ─► Deploy (docker compose up)
+release.yml ──build+push──► GHCR ──pull──► Jenkins ──► docker compose up -d ──► smoke test
 ```
 
-1. **Quality & Tests** — each service in its toolchain container: simulator
-   `uv run poe ci`; backend/frontend `lint · format:check · typecheck · build ·
-   npm audit · test:coverage`.
-2. **Package & Push** — `docker build` each service → `docker push` to GHCR.
-3. **Deploy** — `docker compose pull` + `up -d` the HQ stack locally.
+The pipeline is the root [`Jenkinsfile`](../../Jenkinsfile):
 
-Crucially, Jenkins **rebuilds and retests at deploy time**, so a manual deploy
-long after the last merge still ships a freshly-validated artifact — never a
-stale one. Parameterised by `IMAGE_TAG` (so **rollback = deploy a previous tag**).
-Setup, credentials and the local-Jenkins proof-of-execution recipe live in
-[`infra/deploy/`](../../infra/deploy/README.md).
+1. **Checkout** the repo (for `docker-compose.yml`).
+2. **Pull images** — `docker login ghcr.io` → `docker compose pull` the tag.
+3. **Deploy** — `docker compose up -d` + prune.
+4. **Smoke test** — `/health` (backend) + frontend reachable, so green = actually up.
 
-GitHub Actions (above) stays as the **fast per-PR gate**; Jenkins owns the
-**complete build → test → quality → package → deploy** chain.
+Parameterised by `IMAGE_TAG`, so **rollback = deploy a previous tag**. Its console
+log is the **proof of execution**. Setup, credentials and the local-Jenkins recipe
+live in [`infra/deploy/`](../../infra/deploy/README.md).
 
 ## Security hardening
 

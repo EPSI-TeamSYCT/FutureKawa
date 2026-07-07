@@ -19,32 +19,33 @@ the level of critical judgement expected at the end of M1.
 
 ## Decision
 
-Adopt a **hybrid** where each tool plays to its strength, with **Jenkins owning
-the complete industrialisation pipeline**:
+Adopt a **hybrid split at the container-registry boundary**, each tool playing to
+its strength:
 
 | Tool | Role | Responsibility |
 |---|---|---|
-| **GitHub Actions** | Fast **per-PR gate** | lint · format · typecheck · CVE audit · tests (coverage) on every pull request — quick, cloud-native feedback before merge |
-| **Jenkins** (self-hosted) | **Full CI/CD pipeline** (the graded deliverable) | re-runs **quality · security · tests · packaging (Docker → GHCR) · deploy** in one run, on/next to the VPS |
+| **GitHub Actions — `ci.yml`** | Per-PR gate | lint · format · typecheck · CVE audit · tests (coverage) on every pull request |
+| **GitHub Actions — `release.yml`** | **Packaging** | on merge to `main`: **build + push images to GHCR** (branch-based SemVer + `:sha` + `:latest`) |
+| **Jenkins** (self-hosted) | **Continuous Deployment** | **pull** the immutable images + **deploy** (`docker compose up -d`) + **smoke test**, on/next to the VPS |
 
-The Jenkins pipeline (root [`Jenkinsfile`](../../Jenkinsfile)) runs **every stage
-from scratch and then deploys**, triggered manually. This is deliberate: a deploy
-may happen days after the last PR merge, so re-validating build/tests/quality at
-deploy time guarantees **no stale artifact is ever shipped**. Setup in
+**GHCR is the handoff**: GitHub Actions produces the immutable artifact, Jenkins
+consumes it. Jenkins never rebuilds — it deploys *exactly* the image that CI built
+and tested. The pipeline is the root [`Jenkinsfile`](../../Jenkinsfile); setup in
 [`infra/deploy/`](../../infra/deploy/README.md).
 
 ## Rationale
 
-- **Right tool for each job.** GHA gives fast, zero-maintenance feedback on every
-  PR; Jenkins, self-hosted next to the VPS, industrialises the whole chain and
-  deploys on-prem where it holds the Docker credentials.
-- **Freshness guarantee.** Because Jenkins rebuilds and retests at deploy time, a
-  manual deployment long after the last CI run is still fully validated.
-- **Satisfies the brief.** Deliverable 5 asks for a Jenkins pipeline covering
-  build, tests, quality and packaging (+ proof of execution) — Jenkins owns
-  exactly that, end to end.
-- **Separation of concerns.** The registry boundary keeps build and deploy
-  independent and each auditable.
+- **Right tool for each job.** GHA gives fast, zero-maintenance feedback and
+  cloud-native image builds; Jenkins, self-hosted next to the VPS, deploys on-prem
+  where it holds the Docker credentials.
+- **Reproducibility.** Building once in CI and deploying the *same* immutable image
+  everywhere avoids the "works in CI, differs at deploy" class of bug — better than
+  rebuilding at deploy time.
+- **No duplication.** Images are built in exactly one place (`release.yml`).
+- **Satisfies the brief.** Deliverable 5 (build · tests · quality · packaging + a
+  Jenkins pipeline with proof of execution) is covered across the CI/CD system:
+  GHA owns build/tests/quality/packaging, Jenkins owns the documented, auditable
+  deploy — its console log is the proof of execution.
 
 ## Alternatives considered
 
