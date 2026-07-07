@@ -3,9 +3,9 @@ name: CI · country-api
 # Reusable per-service pipeline (PHP / Symfony API). Called by the ci.yml orchestrator.
 # Same gating as every other service (changes → quality → security → tests).
 #
-# Prerequisites in apps/country/api (see the API spec) for a green run:
-#   - require-dev: phpunit (symfony/test-pack), and ideally phpstan + php-cs-fixer
-#   - a test suite under tests/ + a coverage gate to match the other services
+# The API already ships the tooling + composer scripts (quality/security/test:coverage).
+# Remaining for a fully green run (see the API spec):
+#   - a test suite under tests/ (+ an 80% coverage gate to match the other services)
 #   - a Dockerfile (used by cd-country-api.yml)
 on:
   workflow_call:
@@ -46,17 +46,14 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: mbstring, intl, pdo_pgsql
           tools: composer:v2
           coverage: none
       - run: composer validate --strict
       - run: composer install --no-interaction --no-progress --prefer-dist
-      - run: php bin/console lint:yaml config --parse-tags
-      - run: php bin/console lint:container
-      # Enable once added to require-dev (see the API spec):
-      # - run: vendor/bin/php-cs-fixer check --diff
-      # - run: vendor/bin/phpstan analyse
+      # composer quality = lint:yaml · lint:container · php-cs-fixer check · phpstan
+      - run: composer quality
 
   # Runs after quality, INCLUDING when quality was skipped, but NOT when it
   # failed — keeps the CVE audit running on every PR (status functions required).
@@ -72,7 +69,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           tools: composer:v2
           coverage: none
       - run: composer install --no-interaction --no-progress --prefer-dist
@@ -107,12 +104,12 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: mbstring, intl, pdo_pgsql
           tools: composer:v2
           coverage: pcov
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: php bin/console doctrine:migrations:migrate --no-interaction
-      # Requires phpunit in require-dev + a test suite (see the API spec).
+      # Needs a test suite under tests/ (see the API spec).
       # TODO(api): enforce an 80% coverage gate to match the other services.
-      - run: vendor/bin/phpunit --coverage-text
+      - run: composer test:coverage
