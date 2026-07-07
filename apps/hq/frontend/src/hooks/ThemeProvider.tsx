@@ -3,14 +3,14 @@ import { ThemeContext, THEME_STORAGE_KEY, type Theme } from './theme-context'
 
 /** Read the theme the no-flash script already committed to <html data-theme>. */
 function readInitialTheme(): Theme {
-  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(readInitialTheme)
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
+    document.documentElement.dataset.theme = theme
     try {
       localStorage.setItem(THEME_STORAGE_KEY, theme)
     } catch {

@@ -17,8 +17,8 @@
         try {
           var t = localStorage.getItem('fk-theme')
           if (t !== 'light' && t !== 'dark') t = 'light'
-          document.documentElement.setAttribute('data-theme', t)
-        } catch (e) {
+          document.documentElement.dataset.theme = t
+        } catch {
           /* localStorage unavailable — keep the light default from the markup. */
         }
       })()

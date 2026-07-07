@@ -71,9 +71,8 @@ export interface TempHumidityChartProps {
 export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidityChartProps) {
   const { theme } = useTheme()
 
+  // `theme` is listed in the memo deps below so colours refresh on theme change.
   const { data, options } = useMemo(() => {
-    // theme is the intentional recompute trigger for CSS-var colours.
-    void theme
     const c = {
       temp: cssVar('--fk-chart-temp'),
       hum: cssVar('--fk-chart-hum'),
@@ -251,6 +250,8 @@ export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidi
     }
 
     return { data: chartData, options: chartOptions }
+    // `theme` triggers the recompute so CSS-var colours refresh on theme change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mesures, country, theme])
 
   return (
