@@ -42,16 +42,12 @@ async function getList<T>(
 // Thin HTTP layer: every method `fetch*` hits the country API and returns raw
 // (unnormalized) shapes. Normalization happens in the mappers, one layer up.
 export const countryClient = {
-  fetchCountries: (): Promise<RawCountry[]> =>
-    getList("/api/countries", rawCountrySchema),
+  fetchCountries: (): Promise<RawCountry[]> => getList("/api/countries", rawCountrySchema),
   fetchExploitations: (): Promise<RawExploitation[]> =>
     getList("/api/exploitations", rawExploitationSchema),
-  fetchWarehouses: (): Promise<RawWarehouse[]> =>
-    getList("/api/warehouses", rawWarehouseSchema),
-  fetchBatches: (): Promise<RawBatch[]> =>
-    getList("/api/batches", rawBatchSchema),
-  fetchAlerts: (): Promise<RawAlert[]> =>
-    getList("/api/alerts", rawAlertSchema),
+  fetchWarehouses: (): Promise<RawWarehouse[]> => getList("/api/warehouses", rawWarehouseSchema),
+  fetchBatches: (): Promise<RawBatch[]> => getList("/api/batches", rawBatchSchema),
+  fetchAlerts: (): Promise<RawAlert[]> => getList("/api/alerts", rawAlertSchema),
   fetchWarehouseMeasures: (warehouseId: number): Promise<RawMeasure[]> =>
     getList("/api/measures", rawMeasureSchema, {
       "sensor.warehouse": warehouseId,

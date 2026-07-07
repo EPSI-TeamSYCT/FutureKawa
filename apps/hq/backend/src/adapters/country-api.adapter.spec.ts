@@ -33,9 +33,7 @@ describe("countryClient", () => {
 
   it("filters measures by the sensor's warehouse", async () => {
     get.mockResolvedValueOnce({
-      data: [
-        { id: 1, temperature: 21.4, humidity: 58, measuredAt: "2026-07-07T14:30:00.000Z" },
-      ],
+      data: [{ id: 1, temperature: 21.4, humidity: 58, measuredAt: "2026-07-07T14:30:00.000Z" }],
     });
 
     await countryClient.fetchWarehouseMeasures(3);

@@ -25,9 +25,7 @@ export function lot(over: Partial<Lot> & Pick<Lot, "id" | "storageDate">): Lot {
   };
 }
 
-export function alert(
-  over: Partial<Alert> & Pick<Alert, "id" | "createdAt">,
-): Alert {
+export function alert(over: Partial<Alert> & Pick<Alert, "id" | "createdAt">): Alert {
   return {
     type: "conditions",
     message: "check",
@@ -57,9 +55,7 @@ export function scene(): Aggregate {
       lot({ id: 1, storageDate: "2026-01-01T00:00:00.000Z", countryId: 1 }),
       lot({ id: 3, storageDate: "2026-02-01T00:00:00.000Z", countryId: 2, country: "Colombia" }),
     ],
-    alerts: [
-      alert({ id: 5, createdAt: "2026-05-01T00:00:00.000Z", countryId: 2 }),
-    ],
+    alerts: [alert({ id: 5, createdAt: "2026-05-01T00:00:00.000Z", countryId: 2 })],
   });
 }
 
