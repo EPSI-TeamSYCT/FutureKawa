@@ -118,7 +118,10 @@ export function StyleGuide() {
           <span>FutureKawa</span>
         </div>
         <div className="sg-topbar-right">
-          <Link className="sg-nav-link fk-mono" to="/components">
+          <Link className="sg-nav-link fk-mono" to="/">
+            ← app
+          </Link>
+          <Link className="sg-nav-link fk-mono" to="/design/components">
             composants <ArrowRight size={14} strokeWidth={1.75} aria-hidden="true" />
           </Link>
           <ThemeToggle />

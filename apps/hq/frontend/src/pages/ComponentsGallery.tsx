@@ -99,7 +99,7 @@ export function ComponentsGallery() {
           <span>FutureKawa</span>
         </div>
         <div className="sg-topbar-right">
-          <Link className="gal-nav-link fk-mono" to="/">
+          <Link className="gal-nav-link fk-mono" to="/design">
             <ArrowLeft size={14} strokeWidth={1.75} aria-hidden="true" /> tokens
           </Link>
           <ThemeToggle />
