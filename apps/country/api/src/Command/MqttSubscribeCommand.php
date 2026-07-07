@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Command;
 
 use App\Entity\Measure;
 use App\Repository\SensorRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use PhpMqtt\Client\ConnectionSettings;
 use PhpMqtt\Client\MqttClient;
@@ -12,7 +14,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Doctrine\ORM\EntityManagerInterface;
 
 #[AsCommand(name: 'app:mqtt:subscribe', description: 'Écoute le broker et enregistre les mesures')]
 class MqttSubscribeCommand extends Command
@@ -39,11 +40,11 @@ class MqttSubscribeCommand extends Command
             ->setUsername($this->user)
             ->setPassword($this->password)
             ->setKeepAliveInterval(60)
-            ->setLastWillTopic('futurekawa/bresil/worker/status')
+            ->setLastWillTopic('futurekawa/brazil/worker/status')
             ->setLastWillMessage('offline')
             ->setLastWillQualityOfService(1);
 
-        $this->mqtt = new MqttClient($this->host, $this->port, 'worker-ingestion-bresil');
+        $this->mqtt = new MqttClient($this->host, $this->port, 'worker-ingestion-brazil');
         $this->mqtt->connect($settings, true);
         $io->success("Connecté au broker {$this->host}:{$this->port}");
 
@@ -57,7 +58,7 @@ class MqttSubscribeCommand extends Command
 
         // (3) Abonnement : le callback tourne à CHAQUE message reçu
         $this->mqtt->subscribe(
-            'futurekawa/bresil/+/+/mesures',
+            'futurekawa/brazil/+/measurements',
             fn (string $topic, string $message) => $this->traiter($message, $io),
             1
         );
@@ -67,53 +68,56 @@ class MqttSubscribeCommand extends Command
         $this->mqtt->loop(true);
 
         $this->mqtt->disconnect();
+
         return Command::SUCCESS;
     }
 
     private function traiter(string $message, SymfonyStyle $io): void
-{
-    $data = json_decode($message, true);
+    {
+        $data = json_decode($message, true);
 
-    // Validation alignée sur le contrat MQTT
-    if (!is_array($data) || !isset(
-        $data['sensor_id'], $data['temperature'], $data['humidity'], $data['timestamp']
-    )) {
-        $io->warning('Message ignoré (invalide)');
-        return;
-    }
+        // Validation alignée sur le contrat MQTT
+        if (!is_array($data) || !isset(
+            $data['hardware_id'], $data['temperature'], $data['humidity'], $data['timestamp']
+        )) {
+            $io->warning('Message ignoré (invalide)');
 
-    $em = $this->doctrine->getManager();
-    \assert($em instanceof EntityManagerInterface); // corrige "isOpen() undefined"
-    if (!$em->isOpen()) {
-        $this->doctrine->resetManager();
-        $em = $this->doctrine->getManager();
-        \assert($em instanceof EntityManagerInterface);
-    }
-
-    try {
-        $capteur = $this->sensor->findOneBy(['hardwareId' => $data['sensor_id']]); // hardwareId, pas hardwareID
-        if (!$capteur) {
-            $io->warning("Capteur inconnu : {$data['sensor_id']}");
             return;
         }
 
-        $mesure = (new Measure())
-            ->setTemperature((float) $data['temperature'])
-            ->setHumidity((float) $data['humidity'])
-            ->setMeasuredAt((new \DateTimeImmutable())->setTimestamp((int) $data['timestamp']))
-            ->setSensor($capteur);
+        $em = $this->doctrine->getManager();
+        \assert($em instanceof EntityManagerInterface); // corrige "isOpen() undefined"
+        if (!$em->isOpen()) {
+            $this->doctrine->resetManager();
+            $em = $this->doctrine->getManager();
+            \assert($em instanceof EntityManagerInterface);
+        }
 
-        $capteur->setLastCom(new \DateTime());
+        try {
+            $capteur = $this->sensor->findOneBy(['hardwareId' => $data['hardware_id']]); // hardwareId, pas hardwareID
+            if (!$capteur) {
+                $io->warning("Capteur inconnu : {$data['hardware_id']}");
 
-        $em->persist($mesure);
-        $em->flush();
-        $em->clear();
+                return;
+            }
 
-        $io->writeln(sprintf('✓ %s : %.1f°C / %.0f%%',
-            $data['sensor_id'], $data['temperature'], $data['humidity']));
-    } catch (\Throwable $e) {
-        $io->error('Erreur : ' . $e->getMessage());
-        $this->doctrine->getConnection()->close();
+            $mesure = (new Measure())
+                ->setTemperature((float) $data['temperature'])
+                ->setHumidity((float) $data['humidity'])
+                ->setMeasuredAt((new \DateTimeImmutable())->setTimestamp((int) $data['timestamp']))
+                ->setSensor($capteur);
+
+            $capteur->setLastCom(new \DateTime());
+
+            $em->persist($mesure);
+            $em->flush();
+            $em->clear();
+
+            $io->writeln(sprintf('✓ %s : %.1f°C / %.0f%%',
+                $data['hardware_id'], $data['temperature'], $data['humidity']));
+        } catch (\Throwable $e) {
+            $io->error('Erreur : '.$e->getMessage());
+            $this->doctrine->getConnection()->close();
+        }
     }
-}
 }

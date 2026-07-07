@@ -50,6 +50,11 @@ class Sensor
         return $this->id;
     }
 
+    public function __toString(): string
+    {
+        return $this->hardwareId ?? '';
+    }
+
     public function getHardwareId(): ?string
     {
         return $this->hardwareId;
@@ -130,11 +135,9 @@ class Sensor
 
     public function removeMeasure(Measure $measure): static
     {
-        if ($this->measures->removeElement($measure)) {
+        if ($this->measures->removeElement($measure) && $measure->getSensor() === $this) {
             // set the owning side to null (unless already changed)
-            if ($measure->getSensor() === $this) {
-                $measure->setSensor(null);
-            }
+            $measure->setSensor(null);
         }
 
         return $this;

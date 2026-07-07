@@ -54,6 +54,11 @@ class Warehouse
         return $this->id;
     }
 
+    public function __toString(): string
+    {
+        return $this->name ?? '';
+    }
+
     public function getName(): ?string
     {
         return $this->name;
@@ -98,11 +103,9 @@ class Warehouse
 
     public function removeSensor(Sensor $sensor): static
     {
-        if ($this->sensors->removeElement($sensor)) {
+        if ($this->sensors->removeElement($sensor) && $sensor->getWarehouse() === $this) {
             // set the owning side to null (unless already changed)
-            if ($sensor->getWarehouse() === $this) {
-                $sensor->setWarehouse(null);
-            }
+            $sensor->setWarehouse(null);
         }
 
         return $this;
@@ -128,11 +131,9 @@ class Warehouse
 
     public function removeBatch(Batch $batch): static
     {
-        if ($this->batches->removeElement($batch)) {
+        if ($this->batches->removeElement($batch) && $batch->getWarehouse() === $this) {
             // set the owning side to null (unless already changed)
-            if ($batch->getWarehouse() === $this) {
-                $batch->setWarehouse(null);
-            }
+            $batch->setWarehouse(null);
         }
 
         return $this;
@@ -158,11 +159,9 @@ class Warehouse
 
     public function removeAlert(Alert $alert): static
     {
-        if ($this->alerts->removeElement($alert)) {
+        if ($this->alerts->removeElement($alert) && $alert->getWarehouse() === $this) {
             // set the owning side to null (unless already changed)
-            if ($alert->getWarehouse() === $this) {
-                $alert->setWarehouse(null);
-            }
+            $alert->setWarehouse(null);
         }
 
         return $this;

@@ -65,6 +65,11 @@ class Country
         return $this->id;
     }
 
+    public function __toString(): string
+    {
+        return $this->name ?? '';
+    }
+
     public function getName(): ?string
     {
         return $this->name;
@@ -157,11 +162,9 @@ class Country
 
     public function removeExploitation(Exploitation $exploitation): static
     {
-        if ($this->exploitations->removeElement($exploitation)) {
+        if ($this->exploitations->removeElement($exploitation) && $exploitation->getCountry() === $this) {
             // set the owning side to null (unless already changed)
-            if ($exploitation->getCountry() === $this) {
-                $exploitation->setCountry(null);
-            }
+            $exploitation->setCountry(null);
         }
 
         return $this;
@@ -187,11 +190,9 @@ class Country
 
     public function removeResponsible(Responsible $responsible): static
     {
-        if ($this->responsibles->removeElement($responsible)) {
+        if ($this->responsibles->removeElement($responsible) && $responsible->getCountry() === $this) {
             // set the owning side to null (unless already changed)
-            if ($responsible->getCountry() === $this) {
-                $responsible->setCountry(null);
-            }
+            $responsible->setCountry(null);
         }
 
         return $this;
@@ -217,11 +218,9 @@ class Country
 
     public function removeWarehouse(Warehouse $warehouse): static
     {
-        if ($this->warehouses->removeElement($warehouse)) {
+        if ($this->warehouses->removeElement($warehouse) && $warehouse->getCountry() === $this) {
             // set the owning side to null (unless already changed)
-            if ($warehouse->getCountry() === $this) {
-                $warehouse->setCountry(null);
-            }
+            $warehouse->setCountry(null);
         }
 
         return $this;

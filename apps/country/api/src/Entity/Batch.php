@@ -50,6 +50,11 @@ class Batch
         return $this->id;
     }
 
+    public function __toString(): string
+    {
+        return $this->ref ?? '';
+    }
+
     public function getRef(): ?string
     {
         return $this->ref;
@@ -130,11 +135,9 @@ class Batch
 
     public function removeAlert(Alert $alert): static
     {
-        if ($this->alerts->removeElement($alert)) {
+        if ($this->alerts->removeElement($alert) && $alert->getBatch() === $this) {
             // set the owning side to null (unless already changed)
-            if ($alert->getBatch() === $this) {
-                $alert->setBatch(null);
-            }
+            $alert->setBatch(null);
         }
 
         return $this;
