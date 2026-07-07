@@ -146,8 +146,9 @@ changes → quality → security → tests
 - On merge to `main`, changed services are **built and pushed to GHCR** with
   **branch-based SemVer** (`feat/`→minor, `fix/`→patch) plus `:sha` and `:latest`.
 - All GitHub Actions are **pinned to commit SHAs**.
-- **CD**: Jenkins pulls the GHCR images and rolls the stack on the VPS
-  (`docker compose up -d`) — [`Jenkinsfile`](Jenkinsfile) · [`infra/deploy/`](infra/deploy/README.md).
+- **Full pipeline (Jenkins)**: a complete `quality → tests → package → deploy`
+  pipeline that re-validates and rolls the stack at deploy time —
+  [`Jenkinsfile`](Jenkinsfile) · [`infra/deploy/`](infra/deploy/README.md).
 
 Details in [`docs/ci-cd/pipeline.md`](docs/ci-cd/pipeline.md).
 

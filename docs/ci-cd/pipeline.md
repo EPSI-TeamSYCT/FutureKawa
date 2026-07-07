@@ -98,27 +98,31 @@ builds/pushes only the services with image-relevant changes.
 - **Per service:** each keeps its own version line via git tags `<service>-vX.Y.Z`.
 - **Traceability:** the `:sha-<commit>` tag ties every image to its exact commit.
 
-## CD — deployment (Jenkins)
+## Full pipeline & CD (Jenkins)
 
-Deployment to the VPS is owned by **Jenkins** — the self-hosted half of the
-hybrid (see [ADR-001](../architecture/adr-001-ci-github-actions-cd-jenkins.md)).
-It does **not build** anything; it consumes the GHCR images GitHub Actions
-produced.
+The brief's industrialisation deliverable is a **complete Jenkins pipeline** (root
+[`Jenkinsfile`](../../Jenkinsfile)) that runs **every stage and then deploys**, in
+one run, on/next to the VPS — see
+[ADR-001](../architecture/adr-001-ci-github-actions-cd-jenkins.md).
 
 ```
-GitHub Actions ──build+push──► GHCR ──pull──► Jenkins ──ssh──► VPS: docker compose up -d
+Quality & Tests (parallel, per service) ─► Package (Docker) ─► Push (GHCR) ─► Deploy (docker compose up)
 ```
 
-The pipeline is the root [`Jenkinsfile`](../../Jenkinsfile):
+1. **Quality & Tests** — each service in its toolchain container: simulator
+   `uv run poe ci`; backend/frontend `lint · format:check · typecheck · build ·
+   npm audit · test:coverage`.
+2. **Package & Push** — `docker build` each service → `docker push` to GHCR.
+3. **Deploy** — `docker compose pull` + `up -d` the HQ stack locally.
 
-1. **Checkout** the repo (for `docker-compose.yml`).
-2. **Ship** the compose file to the VPS (`scp`).
-3. **Deploy** over SSH: `docker login ghcr.io` → `docker compose pull` →
-   `docker compose up -d` → prune.
+Crucially, Jenkins **rebuilds and retests at deploy time**, so a manual deploy
+long after the last merge still ships a freshly-validated artifact — never a
+stale one. Parameterised by `IMAGE_TAG` (so **rollback = deploy a previous tag**).
+Setup, credentials and the local-Jenkins proof-of-execution recipe live in
+[`infra/deploy/`](../../infra/deploy/README.md).
 
-Parameterised by `IMAGE_TAG` (`latest` / `X.Y.Z` / `sha-xxxxxxx`), so **rollback
-is just deploying a previous tag**. Setup, credentials and VPS prerequisites live
-in [`infra/deploy/`](../../infra/deploy/README.md).
+GitHub Actions (above) stays as the **fast per-PR gate**; Jenkins owns the
+**complete build → test → quality → package → deploy** chain.
 
 ## Security hardening
 
