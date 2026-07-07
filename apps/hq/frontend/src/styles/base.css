@@ -11,6 +11,8 @@
 
 * {
   margin: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fk-border) transparent;
 }
 
 html {
@@ -83,11 +85,7 @@ a:hover {
   color: var(--fk-selection-text);
 }
 
-/* ---- Styled scrollbars ------------------------------------------------- */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--fk-border) transparent;
-}
+/* ---- Styled scrollbars (thin/colour set on the `*` reset above) -------- */
 *::-webkit-scrollbar {
   width: 10px;
   height: 10px;

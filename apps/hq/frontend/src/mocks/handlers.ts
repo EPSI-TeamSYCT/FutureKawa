@@ -5,9 +5,9 @@ import { alertes, entrepots, lots, measuresByWarehouse, paysInfo } from './data'
 
 const PERIOD_HOURS: Record<Periode, number> = { '24h': 24, '7j': 168, '30j': 720, tout: 100000 }
 
-/** Small latency so loading skeletons are visible during the demo. */
+/** Small fixed latency so loading skeletons are visible during the demo. */
 async function lag() {
-  await delay(300 + Math.floor(Math.random() * 300))
+  await delay(400)
 }
 
 function paysFilter(param: string | null): (item: { pays: string }) => boolean {
