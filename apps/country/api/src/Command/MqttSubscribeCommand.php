@@ -27,6 +27,7 @@ class MqttSubscribeCommand extends Command
         #[Autowire('%env(int:MQTT_PORT)%')] private readonly int $port,
         #[Autowire('%env(MQTT_USER)%')] private readonly string $user,
         #[Autowire('%env(MQTT_PASSWORD)%')] private readonly string $password,
+        #[Autowire('%env(COUNTRY)%')] private readonly string $country,
     ) {
         parent::__construct();
     }
@@ -40,11 +41,11 @@ class MqttSubscribeCommand extends Command
             ->setUsername($this->user)
             ->setPassword($this->password)
             ->setKeepAliveInterval(60)
-            ->setLastWillTopic('futurekawa/brazil/worker/status')
+            ->setLastWillTopic("futurekawa/{$this->country}/worker/status")
             ->setLastWillMessage('offline')
             ->setLastWillQualityOfService(1);
 
-        $this->mqtt = new MqttClient($this->host, $this->port, 'worker-ingestion-brazil');
+        $this->mqtt = new MqttClient($this->host, $this->port, "worker-ingestion-{$this->country}");
         $this->mqtt->connect($settings, true);
         $io->success("Connecté au broker {$this->host}:{$this->port}");
 
@@ -58,7 +59,7 @@ class MqttSubscribeCommand extends Command
 
         // (3) Abonnement : le callback tourne à CHAQUE message reçu
         $this->mqtt->subscribe(
-            'futurekawa/brazil/+/measurements',
+            "futurekawa/{$this->country}/+/measurements",
             fn (string $topic, string $message) => $this->traiter($message, $io),
             1
         );
