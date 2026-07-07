@@ -1,0 +1,38 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: futurekawa-mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ../../../../infra/docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  brazil:
+    build: .
+    environment:
+      MQTT_HOST: mosquitto
+      COUNTRY: brazil
+      WAREHOUSES: wh-01,wh-02
+      TEMP_THRESHOLD: "29"
+      HUMIDITY_THRESHOLD: "55"
+    depends_on: [mosquitto]
+
+  ecuador:
+    build: .
+    environment:
+      MQTT_HOST: mosquitto
+      COUNTRY: ecuador
+      WAREHOUSES: wh-01
+      TEMP_THRESHOLD: "31"
+      HUMIDITY_THRESHOLD: "60"
+    depends_on: [mosquitto]
+
+  colombia:
+    build: .
+    environment:
+      MQTT_HOST: mosquitto
+      COUNTRY: colombia
+      WAREHOUSES: wh-01
+      TEMP_THRESHOLD: "26"
+      HUMIDITY_THRESHOLD: "80"
+    depends_on: [mosquitto]
