@@ -1,0 +1,22 @@
+.fk-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--fk-radius-btn);
+  border: 1.5px solid var(--fk-border);
+  background: var(--fk-surface);
+  color: var(--fk-text-muted);
+  cursor: pointer;
+  transition:
+    background var(--fk-dur-2) var(--fk-ease),
+    color var(--fk-dur-2) var(--fk-ease),
+    border-color var(--fk-dur-2) var(--fk-ease);
+}
+
+.fk-theme-toggle:hover {
+  color: var(--fk-text);
+  border-color: var(--fk-accent);
+  background: var(--fk-inset);
+}

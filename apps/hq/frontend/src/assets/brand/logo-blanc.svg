@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="256" height="256" role="img" aria-label="FutureKawa">
+  <title>FutureKawa</title>
+  <mask id="fkw" maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="48">
+    <ellipse cx="24" cy="24" rx="14" ry="18.5" fill="#fff" transform="rotate(-20 24 24)"></ellipse>
+    <path d="M24 8.5 C 18.6 15.5, 29 22.5, 24 29 C 19.4 35, 27 37.5, 24 39.6" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none" transform="rotate(-20 24 24)"></path>
+  </mask>
+  <rect width="48" height="48" fill="#FFFFFF" mask="url(#fkw)"></rect>
+</svg>
