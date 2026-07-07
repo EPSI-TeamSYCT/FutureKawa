@@ -15,10 +15,10 @@ async function enableMocks(): Promise<void> {
 const rootEl = document.getElementById('root')
 if (!rootEl) throw new Error('Root element #root not found')
 
-enableMocks().then(() => {
-  createRoot(rootEl).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  )
-})
+await enableMocks()
+
+createRoot(rootEl).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)

@@ -14,6 +14,10 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
   },
+  // Top-level await in main.tsx requires a build target that supports it.
+  build: {
+    target: 'es2022',
+  },
   test: {
     globals: true,
     environment: 'jsdom',
