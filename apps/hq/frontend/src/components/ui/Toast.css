@@ -15,10 +15,8 @@
   align-items: flex-start;
   gap: var(--fk-sp-12);
   padding: var(--fk-sp-16);
-  padding-left: var(--fk-sp-16);
   background: var(--fk-surface);
   border: 1px solid var(--fk-border);
-  border-left: 4px solid var(--fk-accent);
   border-radius: var(--fk-radius-card);
   box-shadow: var(--fk-shadow-2);
   pointer-events: auto;
@@ -27,8 +25,13 @@
 
 .fk-toast-icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  margin-top: 1px;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--fk-radius-full);
+  background: color-mix(in srgb, var(--fk-accent) 14%, transparent);
   color: var(--fk-accent);
 }
 .fk-toast-body {
@@ -68,29 +71,17 @@
   color: var(--fk-text);
 }
 
-/* Variants — left accent + icon colour */
-.fk-toast--info {
-  border-left-color: var(--fk-accent);
-}
-.fk-toast--info .fk-toast-icon {
-  color: var(--fk-accent);
-}
-.fk-toast--success {
-  border-left-color: var(--fk-success);
-}
+/* Variants — colour lives in the icon tile, not a bar */
 .fk-toast--success .fk-toast-icon {
+  background: color-mix(in srgb, var(--fk-success) 16%, transparent);
   color: var(--fk-success);
 }
-.fk-toast--warning {
-  border-left-color: var(--fk-alert);
-}
 .fk-toast--warning .fk-toast-icon {
+  background: color-mix(in srgb, var(--fk-alert) 18%, transparent);
   color: var(--fk-status-alerte-text);
 }
-.fk-toast--error {
-  border-left-color: var(--fk-danger);
-}
 .fk-toast--error .fk-toast-icon {
+  background: color-mix(in srgb, var(--fk-danger) 16%, transparent);
   color: var(--fk-danger);
 }
 
