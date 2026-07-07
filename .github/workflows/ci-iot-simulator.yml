@@ -1,0 +1,80 @@
+name: CI · iot-simulator
+
+on:
+  pull_request:
+
+concurrency:
+  group: ci-iot-simulator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1) Detect whether the service CODE changed in this PR.
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'apps/country/iot/simulator/src/**'
+              - 'apps/country/iot/simulator/tests/**'
+              - 'apps/country/iot/simulator/pyproject.toml'
+              - 'apps/country/iot/simulator/uv.lock'
+
+  # 2) Quality — only when the code changed.
+  quality:
+    name: quality
+    needs: changes
+    if: ${{ needs.changes.outputs.code == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/iot/simulator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run poe quality
+
+  # 3) Security — runs after quality, INCLUDING when quality was skipped
+  #    (no code change), but NOT when quality failed. This keeps the CVE
+  #    dependency audit running on every PR.
+  security:
+    name: security
+    needs: quality
+    if: ${{ needs.quality.result == 'success' || needs.quality.result == 'skipped' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/iot/simulator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run poe security
+
+  # 4) Tests — only when the code changed and the previous jobs passed.
+  tests:
+    name: tests
+    needs: [changes, quality, security]
+    if: ${{ needs.changes.outputs.code == 'true' && needs.quality.result == 'success' && needs.security.result == 'success' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/iot/simulator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run poe test
