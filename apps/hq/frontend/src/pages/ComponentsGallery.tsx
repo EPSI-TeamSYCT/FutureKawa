@@ -112,7 +112,7 @@ export function ComponentsGallery() {
             <span className="fk-caption">Design system</span>{' '}
             <span className="sg-chip">
               <span className="dot" aria-hidden="true" />
-              Phase 2 · composants
+              <span>Phase 2 · composants</span>
             </span>
           </div>
           <h1 className="fk-h1">Composants UI</h1>

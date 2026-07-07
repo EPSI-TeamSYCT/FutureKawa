@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type MouseEvent, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import './Modal.css'
@@ -43,14 +43,21 @@ export function Modal({
     else if (!open && dlg.open) dlg.close()
   }, [open])
 
+  // Close on backdrop click — attached natively (not a JSX handler) since a
+  // <dialog> is not a generic interactive element for a11y linters.
+  useEffect(() => {
+    const dlg = dialogRef.current
+    if (!dlg || !closeOnOverlay) return
+    const onBackdropClick = (e: MouseEvent) => {
+      if (e.target === dlg) onClose()
+    }
+    dlg.addEventListener('click', onBackdropClick)
+    return () => dlg.removeEventListener('click', onBackdropClick)
+  }, [closeOnOverlay, onClose])
+
   // Escape / close() fire the native 'close' event — keep React state in sync.
   function handleClose() {
     if (open) onClose()
-  }
-
-  // A click whose target is the dialog element itself is a backdrop click.
-  function handleClick(e: MouseEvent<HTMLDialogElement>) {
-    if (closeOnOverlay && e.target === dialogRef.current) onClose()
   }
 
   return createPortal(
@@ -60,7 +67,6 @@ export function Modal({
       aria-labelledby={titleId}
       aria-describedby={description ? descId : undefined}
       onClose={handleClose}
-      onClick={handleClick}
     >
       <div className="fk-modal" style={{ maxWidth: width }}>
         <div className="fk-modal-head">

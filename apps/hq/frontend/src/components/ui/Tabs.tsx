@@ -17,6 +17,22 @@ export interface TabsProps {
   className?: string
 }
 
+/** Next tab index for an arrow/Home/End key, or null for any other key. */
+function nextIndex(key: string, index: number, last: number): number | null {
+  switch (key) {
+    case 'ArrowRight':
+      return index === last ? 0 : index + 1
+    case 'ArrowLeft':
+      return index === 0 ? last : index - 1
+    case 'Home':
+      return 0
+    case 'End':
+      return last
+    default:
+      return null
+  }
+}
+
 /** Accessible tabs: roving focus, ←/→/Home/End keyboard support. */
 export function Tabs({
   items,
@@ -33,21 +49,6 @@ export function Tabs({
   function select(id: string) {
     if (value === undefined) setInternal(id)
     onValueChange?.(id)
-  }
-
-  function nextIndex(key: string, index: number, last: number): number | null {
-    switch (key) {
-      case 'ArrowRight':
-        return index === last ? 0 : index + 1
-      case 'ArrowLeft':
-        return index === 0 ? last : index - 1
-      case 'Home':
-        return 0
-      case 'End':
-        return last
-      default:
-        return null
-    }
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, index: number) {

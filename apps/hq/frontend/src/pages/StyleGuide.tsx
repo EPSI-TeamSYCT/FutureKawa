@@ -134,7 +134,7 @@ export function StyleGuide() {
             <span className="fk-caption">Design system</span>{' '}
             <span className="sg-chip">
               <span className="dot" aria-hidden="true" />
-              Phase 1 · socle
+              <span>Phase 1 · socle</span>
             </span>
           </div>
           <h1 className="fk-h1">Socle visuel FutureKawa</h1>
