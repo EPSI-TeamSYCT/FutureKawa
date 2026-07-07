@@ -1,0 +1,61 @@
+# Jenkins Configuration as Code — the whole controller config lives here.
+# Values in ${...} are read from environment variables (see .env.example).
+jenkins:
+  numExecutors: 2
+  mode: NORMAL
+  systemMessage: "FutureKawa — CD controller (managed by Configuration as Code)"
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          # Pull the private GHCR images during deploy.
+          - usernamePassword:
+              scope: GLOBAL
+              id: "ghcr-pull"
+              username: "${GHCR_USER}"
+              password: "${GHCR_TOKEN}"
+          # Clone the (private) repo to read the Jenkinsfile + compose file.
+          - usernamePassword:
+              scope: GLOBAL
+              id: "github-repo"
+              username: "${GIT_USER}"
+              password: "${GIT_TOKEN}"
+
+unclassified:
+  location:
+    url: "http://localhost:8081/"
+
+jobs:
+  - script: |
+      pipelineJob('futurekawa-cd') {
+        description('FutureKawa CD — pull the GHCR images and deploy the HQ stack.')
+        parameters {
+          stringParam('IMAGE_TAG', 'latest', 'GHCR tag to deploy (latest | X.Y.Z | sha-xxxxxxx)')
+          stringParam('DEPLOY_DIR', '/opt/futurekawa', 'Deploy directory on the host')
+        }
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/EPSI-TeamSYCT/FutureKawa.git')
+                  credentials('github-repo')
+                }
+                branch('feat/jenkins-vps-deploy')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }

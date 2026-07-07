@@ -9,6 +9,7 @@ Local technical docs (setup, run, endpoints) live in each app's `README.md`.
   - [Overview](architecture/overview.md)
   - [Distributed System](architecture/distributed-system.md)
   - [Data Model](architecture/data-model.md)
+  - [ADR-001 — CI on GitHub Actions, CD on Jenkins](architecture/adr-001-ci-github-actions-cd-jenkins.md)
 - **Security**
   - [Authentication & Authorization](security/auth.md)
 - **Tests**

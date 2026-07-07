@@ -130,7 +130,11 @@ Full instructions, `.env` reference and dev-mode (per app) in the
 
 ## CI/CD
 
-Every service has an **identical pipeline shape**, run on pull requests only:
+**Hybrid**: **CI on GitHub Actions** (build + push images to GHCR), **CD on
+Jenkins** (deploy to the VPS) — see
+[ADR-001](docs/architecture/adr-001-ci-github-actions-cd-jenkins.md).
+
+Every service has an **identical CI pipeline shape**, run on pull requests only:
 
 ```
 changes → quality → security → tests
@@ -142,6 +146,9 @@ changes → quality → security → tests
 - On merge to `main`, changed services are **built and pushed to GHCR** with
   **branch-based SemVer** (`feat/`→minor, `fix/`→patch) plus `:sha` and `:latest`.
 - All GitHub Actions are **pinned to commit SHAs**.
+- **CD (Jenkins)**: pulls the immutable GHCR image and deploys it
+  (`docker compose up -d` + smoke test) — never rebuilds, ships exactly what CI
+  tested. [`Jenkinsfile`](Jenkinsfile) · [`infra/deploy/`](infra/deploy/README.md).
 
 Details in [`docs/ci-cd/pipeline.md`](docs/ci-cd/pipeline.md).
 

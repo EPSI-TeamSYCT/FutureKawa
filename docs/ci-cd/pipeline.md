@@ -1,8 +1,13 @@
 # 🔀 CI/CD Pipeline
 
-FutureKawa runs its CI/CD on **GitHub Actions**, with images published to the
-**GitHub Container Registry (GHCR)**. Every service follows the **same pipeline
-shape**, so the whole team shares one mental model.
+FutureKawa uses a **hybrid CI/CD**: **CI on GitHub Actions** (build + push images
+to the **GitHub Container Registry, GHCR**) and **CD on Jenkins** (deploy those
+images to the VPS). The registry is the handoff between the two. The rationale —
+including why Jenkins is kept for deployment — is recorded in
+[ADR-001](../architecture/adr-001-ci-github-actions-cd-jenkins.md).
+
+Every service follows the **same CI pipeline shape**, so the whole team shares
+one mental model.
 
 ## Table of contents
 
@@ -11,6 +16,7 @@ shape**, so the whole team shares one mental model.
 - [CI — the job chain](#ci--the-job-chain)
 - [Gating rules](#gating-rules)
 - [Release — build, push & versioning](#release--build-push--versioning)
+- [CD — deployment (Jenkins)](#cd--deployment-jenkins)
 - [Security hardening](#security-hardening)
 - [Running the pipeline locally](#running-the-pipeline-locally)
 - [Adding a service](#adding-a-service)
@@ -91,6 +97,28 @@ builds/pushes only the services with image-relevant changes.
   the built-in `GITHUB_TOKEN` — **no secrets to configure**.
 - **Per service:** each keeps its own version line via git tags `<service>-vX.Y.Z`.
 - **Traceability:** the `:sha-<commit>` tag ties every image to its exact commit.
+
+## CD — deployment (Jenkins)
+
+Deployment is owned by **Jenkins** — the self-hosted CD half of the hybrid (see
+[ADR-001](../architecture/adr-001-ci-github-actions-cd-jenkins.md)). It **pulls the
+immutable image** that `release.yml` built and **deploys it** — it never rebuilds,
+so it ships exactly what CI tested.
+
+```
+release.yml ──build+push──► GHCR ──pull──► Jenkins ──► docker compose up -d ──► smoke test
+```
+
+The pipeline is the root [`Jenkinsfile`](../../Jenkinsfile):
+
+1. **Checkout** the repo (for `docker-compose.yml`).
+2. **Pull images** — `docker login ghcr.io` → `docker compose pull` the tag.
+3. **Deploy** — `docker compose up -d` + prune.
+4. **Smoke test** — `/health` (backend) + frontend reachable, so green = actually up.
+
+Parameterised by `IMAGE_TAG`, so **rollback = deploy a previous tag**. Its console
+log is the **proof of execution**. Setup, credentials and the local-Jenkins recipe
+live in [`infra/deploy/`](../../infra/deploy/README.md).
 
 ## Security hardening
 
