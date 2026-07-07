@@ -1,5 +1,8 @@
 
 ###> symfony/framework-bundle ###
+# The base .env is committed (Symfony convention). Re-include it because the
+# repo-root .gitignore has a broad `.env` rule for infra/compose env files.
+!/.env
 /.env.local
 /.env.dev
 /.env.local.php
