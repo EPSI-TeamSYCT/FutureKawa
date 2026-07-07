@@ -45,8 +45,10 @@ function generateMeasures(country: CountryCode, drift?: DriftProfile): Mesure[] 
   for (let t = start; t <= NOW; t += HOUR_MS) {
     const hour = new Date(t).getHours()
     const daily = Math.sin((hour / 24) * Math.PI * 2)
-    let temp = ideal.temp + daily * 1.5 + (rand() - 0.5) * 0.8
-    let humidity = ideal.humidity + daily * 2 + (rand() - 0.5) * 1.5
+    // Amplitudes kept inside each country's tolerance so healthy warehouses
+    // stay in-band; only the planted drifts (below) break out.
+    let temp = ideal.temp + daily * 1.2 + (rand() - 0.5) * 0.7
+    let humidity = ideal.humidity + daily * 1.0 + (rand() - 0.5) * 0.7
 
     if (drift) {
       const driftStart = NOW - drift.daysAgo * DAY_MS
