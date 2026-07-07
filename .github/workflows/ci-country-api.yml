@@ -88,20 +88,6 @@ jobs:
     env:
       APP_ENV: test
       APP_SECRET: ci
-      # Trust auth on the throwaway CI database — no password to hardcode.
-      DATABASE_URL: "postgresql://app@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: app
-          POSTGRES_USER: app
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U app -d app"
-          --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
@@ -111,7 +97,7 @@ jobs:
           tools: composer:v2
           coverage: pcov
       - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
-      - run: php bin/console doctrine:migrations:migrate --no-interaction
-      # Needs a test suite under tests/ (see the API spec).
+      # Current tests are unit tests (no DB). When DB-backed functional tests are
+      # added, bring back a postgres service + doctrine:database:create + migrate.
       # TODO(api): enforce an 80% coverage gate to match the other services.
       - run: composer test:coverage
