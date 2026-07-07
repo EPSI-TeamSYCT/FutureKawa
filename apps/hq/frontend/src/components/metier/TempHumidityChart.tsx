@@ -87,6 +87,10 @@ export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidi
       surface: cssVar('--fk-surface'),
       text: cssVar('--fk-text'),
       border: cssVar('--fk-border'),
+      // Dark, opaque tooltip (same in both themes) so it never blends into the band.
+      tooltipBg: cssVar('--fk-log-bg'),
+      tooltipTitle: cssVar('--fk-log-meta'),
+      tooltipBody: cssVar('--fk-log-value'),
     }
 
     const points = mesures.map((m) => new Date(m.timestamp).getTime())
@@ -233,13 +237,13 @@ export function TempHumidityChart({ mesures, country, height = 340 }: TempHumidi
           },
         },
         tooltip: {
-          backgroundColor: c.surface,
-          borderColor: c.border,
-          borderWidth: 1,
-          titleColor: c.axisLabel,
-          bodyColor: c.text,
-          padding: 12,
+          backgroundColor: c.tooltipBg,
+          borderWidth: 0,
+          titleColor: c.tooltipTitle,
+          bodyColor: c.tooltipBody,
+          padding: 10,
           cornerRadius: 8,
+          caretPadding: 8,
           titleFont: { family: "'IBM Plex Mono', monospace", size: 11, weight: 'normal' },
           bodyFont: { family: "'IBM Plex Mono', monospace", size: 13 },
           displayColors: true,
