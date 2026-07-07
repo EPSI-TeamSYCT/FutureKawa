@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 class Measurement:
     warehouse_id: str
     country: str
+    model: str
+    hardware_id: str
     temperature: float
     humidity: float
     timestamp: int
@@ -16,6 +18,8 @@ class Measurement:
             {
                 "warehouse_id": self.warehouse_id,
                 "country": self.country,
+                "model": self.model,
+                "hardware_id": self.hardware_id,
                 "temperature": self.temperature,
                 "humidity": self.humidity,
                 "timestamp": self.timestamp,

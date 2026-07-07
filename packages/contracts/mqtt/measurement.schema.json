@@ -5,7 +5,15 @@
   "description": "A single temperature/humidity reading published by an IoT module.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["warehouse_id", "country", "temperature", "humidity", "timestamp"],
+  "required": [
+    "warehouse_id",
+    "country",
+    "model",
+    "hardware_id",
+    "temperature",
+    "humidity",
+    "timestamp"
+  ],
   "properties": {
     "warehouse_id": {
       "type": "string",
@@ -15,6 +23,16 @@
     "country": {
       "type": "string",
       "enum": ["brazil", "ecuador", "colombia"]
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["DHT11"]
+    },
+    "hardware_id": {
+      "type": "string",
+      "minLength": 1,
+      "examples": ["ref43320"]
     },
     "temperature": {
       "type": "number",

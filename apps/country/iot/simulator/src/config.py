@@ -1,5 +1,15 @@
-from pydantic import field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Device(BaseModel):
+    """One IoT device: a sensor in a warehouse. A warehouse may have several."""
+
+    model_config = ConfigDict(protected_namespaces=())
+
+    warehouse: str
+    hardware_id: str
+    model: str = "DHT11"
 
 
 class Settings(BaseSettings):
@@ -10,7 +20,10 @@ class Settings(BaseSettings):
     mqtt_qos: int = 1
 
     country: str
-    warehouses: str = "wh-01"  # comma-separated ids
+    # JSON list of devices, e.g.
+    # DEVICES='[{"warehouse":"wh-01","hardware_id":"ref43320","model":"DHT11"}]'
+    devices: list[Device] = [Device(warehouse="wh-01", hardware_id="wh-01")]
+
     temp_threshold: float
     humidity_threshold: float
     temp_tolerance: float = 3.0
@@ -26,7 +39,3 @@ class Settings(BaseSettings):
         if not v.strip():
             raise ValueError("COUNTRY must be a non-empty string")
         return v.strip()
-
-    @property
-    def warehouse_ids(self) -> list[str]:
-        return [w.strip() for w in self.warehouses.split(",") if w.strip()]
