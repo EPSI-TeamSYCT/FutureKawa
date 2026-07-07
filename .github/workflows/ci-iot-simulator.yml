@@ -1,0 +1,77 @@
+name: CI · iot-simulator
+
+# Reusable per-service pipeline. Called by the ci.yml orchestrator.
+on:
+  workflow_call:
+
+jobs:
+  # 1) Detect whether the service CODE changed in this PR.
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'apps/country/iot/simulator/src/**'
+              - 'apps/country/iot/simulator/tests/**'
+              - 'apps/country/iot/simulator/pyproject.toml'
+              - 'apps/country/iot/simulator/uv.lock'
+
+  # 2) Quality — only when the code changed.
+  quality:
+    name: quality
+    needs: changes
+    if: ${{ needs.changes.outputs.code == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/iot/simulator
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run poe quality
+
+  # 3) Security — runs after quality, INCLUDING when quality was skipped
+  #    (no code change), but NOT when quality failed. This keeps the CVE
+  #    dependency audit running on every PR.
+  security:
+    name: security
+    needs: quality
+    if: ${{ needs.quality.result == 'success' || needs.quality.result == 'skipped' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/iot/simulator
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run poe security
+
+  # 4) Tests — only when the code changed and the previous jobs passed.
+  tests:
+    name: tests
+    needs: [changes, quality, security]
+    if: ${{ needs.changes.outputs.code == 'true' && needs.quality.result == 'success' && needs.security.result == 'success' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/iot/simulator
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run poe test
