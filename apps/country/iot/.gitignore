@@ -1,0 +1,5 @@
+# PlatformIO build output
+.pio/
+
+# Local secrets — never commit
+include/config.h
