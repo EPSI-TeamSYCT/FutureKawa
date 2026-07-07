@@ -20,9 +20,12 @@ def build_generators(settings, rng_factory):
 
 
 def publish_round(settings, generators, publisher, now=now_epoch):
+    hardware_ids = settings.hardware_id_map
     for wh, gen in generators.items():
         temp, hum = gen.next()
-        measurement = Measurement(wh, settings.country, temp, hum, now())
+        measurement = Measurement(
+            wh, settings.country, settings.model, hardware_ids[wh], temp, hum, now()
+        )
         topic = f"futurekawa/{settings.country}/{wh}/measurements"
         publisher.publish(topic, measurement.to_json())
 
