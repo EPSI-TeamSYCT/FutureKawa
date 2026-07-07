@@ -1,0 +1,87 @@
+name: CI · hq-backend
+
+# Reusable per-service pipeline. Called by the ci.yml orchestrator.
+on:
+  workflow_call:
+
+jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'apps/hq/backend/src/**'
+              - 'apps/hq/backend/package.json'
+              - 'apps/hq/backend/package-lock.json'
+              - 'apps/hq/backend/tsconfig*.json'
+              - 'apps/hq/backend/vitest.config.ts'
+
+  quality:
+    name: quality
+    needs: changes
+    if: ${{ needs.changes.outputs.code == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/hq/backend
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/hq/backend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run build
+
+  # Runs after quality, INCLUDING when quality was skipped (no code change), but
+  # NOT when quality failed — keeps the CVE audit running on every PR. The `if`
+  # must use status functions (!failure/!cancelled): a plain
+  # `needs.quality.result == 'skipped'` never runs, because GitHub prepends an
+  # implicit success() that skips any job whose dependency was skipped.
+  security:
+    name: security
+    needs: quality
+    if: ${{ !failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/hq/backend
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/hq/backend/package-lock.json
+      - run: npm ci
+      # Audit the shipped (production) dependencies; dev/test tooling is not in the image.
+      - run: npm audit --omit=dev --audit-level=high
+
+  tests:
+    name: tests
+    needs: [changes, quality, security]
+    if: ${{ needs.changes.outputs.code == 'true' && needs.quality.result == 'success' && needs.security.result == 'success' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/hq/backend
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/hq/backend/package-lock.json
+      - run: npm ci
+      - run: npm run test:coverage

@@ -1,0 +1,4 @@
+# Force LF on checkout for every platform. oxfmt (and most JS formatters)
+# require LF, so without this a Windows checkout (core.autocrlf=true) gets CRLF
+# and `npm run format:check` fails locally while passing on the Linux CI.
+* text=auto eol=lf

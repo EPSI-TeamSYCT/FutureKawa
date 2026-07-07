@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { iriId, toAlert, toCountry, toLot, toRef } from "./domain.mapper";
-import type {
-  Lookups,
-  RawAlert,
-  RawBatch,
-  RawCountry,
-} from "../types/domain";
+import type { Lookups, RawAlert, RawBatch, RawCountry } from "../types/domain";
 
 const rawCountry: RawCountry = {
   id: 1,
@@ -19,12 +14,8 @@ const rawCountry: RawCountry = {
 
 const lookups: Lookups = {
   countries: new Map([[1, toCountry(rawCountry)]]),
-  exploitations: new Map([
-    [7, toRef({ id: 7, name: "Ferme Nord", country: "/api/countries/1" })],
-  ]),
-  warehouses: new Map([
-    [3, toRef({ id: 3, name: "Warehouse A", country: "/api/countries/1" })],
-  ]),
+  exploitations: new Map([[7, toRef({ id: 7, name: "Ferme Nord", country: "/api/countries/1" })]]),
+  warehouses: new Map([[3, toRef({ id: 3, name: "Warehouse A", country: "/api/countries/1" })]]),
 };
 
 describe("iriId", () => {

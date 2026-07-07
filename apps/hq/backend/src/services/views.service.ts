@@ -7,8 +7,7 @@ export function selectLots(agg: Aggregate, filter: LotFilter = {}): Lot[] {
     .filter(
       (lot) =>
         (filter.countryId === undefined || lot.countryId === filter.countryId) &&
-        (filter.exploitationId === undefined ||
-          lot.exploitationId === filter.exploitationId),
+        (filter.exploitationId === undefined || lot.exploitationId === filter.exploitationId),
     )
     .sort((a, b) => Date.parse(a.storageDate) - Date.parse(b.storageDate));
 }

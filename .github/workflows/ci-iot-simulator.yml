@@ -43,10 +43,13 @@ jobs:
   # 3) Security — runs after quality, INCLUDING when quality was skipped
   #    (no code change), but NOT when quality failed. This keeps the CVE
   #    dependency audit running on every PR.
+  #    The `if` MUST use status functions (!failure/!cancelled): a plain
+  #    `needs.quality.result == 'skipped'` never runs, because GitHub prepends an
+  #    implicit success() that skips any job whose dependency was skipped.
   security:
     name: security
     needs: quality
-    if: ${{ needs.quality.result == 'success' || needs.quality.result == 'skipped' }}
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     defaults:
       run:

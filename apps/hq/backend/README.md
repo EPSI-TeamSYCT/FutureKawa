@@ -145,6 +145,19 @@ fixtures/harness live in `src/testing/`.
 Coverage is enforced at **80%** (lines/statements/functions/branches) in
 `vitest.config.ts`; the suite currently sits around **98%** lines.
 
+## Lint & format
+
+Powered by the [oxc](https://oxc.rs) toolchain (Rust-based, fast):
+
+```bash
+npm run lint           # oxlint (static analysis)
+npm run format         # oxfmt --write (format in place)
+npm run format:check   # oxfmt --check (CI: fails if unformatted)
+```
+
+Formatting uses oxfmt defaults, pinned via `.oxfmtrc.json`. CI runs `lint` +
+`format:check` in the quality stage, so keep the tree formatted before pushing.
+
 ## Local decisions
 
 - **Single source of truth for config** (`src/config`): API URL, key, timeouts.
