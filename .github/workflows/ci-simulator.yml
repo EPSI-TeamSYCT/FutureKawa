@@ -1,0 +1,26 @@
+name: CI · IoT simulator
+
+# Reusable per-service workflow. Called by the ci.yml orchestrator.
+on:
+  workflow_call:
+
+jobs:
+  ci:
+    name: quality · security · tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/iot/simulator
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run the CI pipeline
+        run: uv run poe ci
