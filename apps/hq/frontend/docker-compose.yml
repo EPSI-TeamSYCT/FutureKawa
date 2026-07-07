@@ -1,0 +1,14 @@
+# One-command build + serve of the HQ frontend (self-contained MSW demo).
+#   docker compose up --build   →   http://localhost:8080
+#
+# For a real backend, set the build args (VITE_USE_MOCKS=false, VITE_API_URL=…).
+services:
+  hq-frontend:
+    build:
+      context: .
+      args:
+        VITE_USE_MOCKS: "true"
+        VITE_API_URL: ""
+    ports:
+      - "8080:80"
+    restart: unless-stopped
