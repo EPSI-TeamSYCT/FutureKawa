@@ -59,6 +59,7 @@ Per-service commands:
 | `iot-simulator` | ruff · mypy · vulture (`poe quality`) | `pytest --cov-fail-under=80` |
 | `hq-backend` | oxlint · oxfmt · tsc · build | `vitest --coverage` (80% thresholds) |
 | `hq-frontend` | oxlint · oxfmt · tsc · vite build | `vitest --coverage` (80% on `src/lib` business logic) |
+| `country-api` *(prepared, pending merge)* | `composer validate` · `lint:yaml` · `lint:container` (+ phpstan/cs-fixer) · `composer audit` | `phpunit` (+ 80% gate to add) |
 
 ## Gating rules
 

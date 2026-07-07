@@ -19,5 +19,7 @@ jobs:
   hq-frontend:
     uses: ./.github/workflows/ci-frontend.yml
 
-  # api:
-  #   uses: ./.github/workflows/ci-api.yml
+  # Ready to enable once Thomas's Symfony API is merged to main (otherwise the
+  # always-on security job would `composer install` a path that doesn't exist yet).
+  # country-api:
+  #   uses: ./.github/workflows/ci-country-api.yml

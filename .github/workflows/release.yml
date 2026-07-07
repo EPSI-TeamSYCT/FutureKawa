@@ -17,6 +17,7 @@ jobs:
       simulator: ${{ steps.filter.outputs.simulator }}
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      # country-api: ${{ steps.filter.outputs.country-api }}   # enable when the API is on main
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -60,6 +61,13 @@ jobs:
               - 'apps/hq/frontend/vite.config.ts'
               - 'apps/hq/frontend/Dockerfile'
               - 'apps/hq/frontend/nginx.conf'
+            # country-api:                     # enable when the API is on main
+            #   - 'apps/country/api/src/**'
+            #   - 'apps/country/api/config/**'
+            #   - 'apps/country/api/composer.json'
+            #   - 'apps/country/api/composer.lock'
+            #   - 'apps/country/api/migrations/**'
+            #   - 'apps/country/api/Dockerfile'
 
   iot-simulator:
     needs: meta
@@ -93,3 +101,15 @@ jobs:
     with:
       bump: ${{ needs.meta.outputs.bump }}
     secrets: inherit
+
+  # Enable when Thomas's Symfony API (+ its Dockerfile) is merged to main:
+  # country-api:
+  #   needs: meta
+  #   if: ${{ needs.meta.outputs.country-api == 'true' }}
+  #   permissions:
+  #     contents: write
+  #     packages: write
+  #   uses: ./.github/workflows/cd-country-api.yml
+  #   with:
+  #     bump: ${{ needs.meta.outputs.bump }}
+  #   secrets: inherit
