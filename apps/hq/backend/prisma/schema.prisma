@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Cache de snapshots : une ligne par pays, écrasée à chaque appel "live" réussi.
+// C'est la seule table : le siège ne persiste rien d'autre.
+model CountrySnapshot {
+  country   String   @id
+  lots      Json
+  measures  Json
+  alerts    Json
+  fetchedAt DateTime
+  updatedAt DateTime @updatedAt
+}
