@@ -1,4 +1,6 @@
 {
+    "name": "futurekawa/country-api",
+    "description": "FutureKawa — per-country REST API (Symfony / API Platform) + MQTT ingestion worker",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
@@ -26,6 +28,9 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^13.2",
         "symfony/maker-bundle": "^1.67"
     },
     "config": {
@@ -69,6 +74,24 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "lint": [
+            "php bin/console lint:yaml config --parse-tags",
+            "php bin/console lint:container",
+            "php-cs-fixer check --diff"
+        ],
+        "static": "phpstan analyse",
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-text --coverage-clover coverage.xml",
+        "quality": [
+            "@lint",
+            "@static"
+        ],
+        "security": "@composer audit",
+        "ci": [
+            "@quality",
+            "@security",
+            "@test:coverage"
         ]
     },
     "conflict": {
