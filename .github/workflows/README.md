@@ -2,15 +2,14 @@
 
 | File | Trigger | Role |
 |---|---|---|
-| `ci.yml` | `pull_request` | 🎯 **Main orchestrator** — the only entry point; calls each service's reusable pipeline |
-| `ci-<service>.yml` | `workflow_call` | ♻️ **Per-service reusable** pipeline — its own sequential job chain |
-| `cd.yml` / `cd-<service>.yml` | — | 🚀 Same pattern for deployment *(to come)* |
+| `ci.yml` | `pull_request` | 🎯 **CI orchestrator** — calls each service's reusable CI pipeline |
+| `ci-<service>.yml` | `workflow_call` | ♻️ **Per-service CI** — sequential job chain (below) |
+| `release.yml` | `pull_request` `closed` (merged) | 🏷️ **Release orchestrator** — derives the version bump + calls each changed service's build/push |
+| `cd-<service>.yml` | `workflow_call` | 📦 **Per-service build & push** to GHCR (+ SemVer tag) |
 
-Runs on **pull requests only** (no push → save resources).
+## CI — job chain (per service)
 
-## Job chain (inside each service pipeline)
-
-Jobs run **sequentially**, each depending on the previous one:
+Runs on **pull requests only** (save resources). Jobs run **sequentially**:
 
 ```
 changes → quality → security → tests
@@ -18,26 +17,36 @@ changes → quality → security → tests
 
 | Job | Runs when | Does |
 |---|---|---|
-| `changes` | always (first) | detects if the service **code** changed (`src/`, `tests/`, `pyproject.toml`, `uv.lock`) |
+| `changes` | always (first) | detects if the service **code** changed |
 | `quality` | code changed | lint · format · typecheck · deadcode — **skipped if no code change** |
-| `security` | quality passed **or was skipped** (not if it failed) | dependency/CVE audit — **runs on every PR**, even without a code change |
+| `security` | quality passed **or was skipped** (not if it failed) | dependency/CVE audit — **every PR**, even without a code change |
 | `tests` | code changed **and** quality + security passed | unit tests + coverage gate |
 
-### Why this shape
+## Release — build, push & versioning
 
-- **No code change → skip `quality` and `tests`, still run `security`.** A newly
-  disclosed **CVE** is caught on every PR even when nothing in the code moved.
-- **Fail-fast:** if `quality` fails, `security`/`tests` are skipped, thanks to
-  `if: ${{ needs.quality.result == 'success' || needs.quality.result == 'skipped' }}`
-  — run after quality *unless it failed*.
+Runs when a PR is **merged into `main`**. The version bump comes from the **source
+branch name** (read from the PR event, so it works with squash-merges):
 
-## Add a service to CI
+| Branch prefix | Version bump | Image tags |
+|---|---|---|
+| `feat/` · `feature/` | **minor** (`1.2.0` → `1.3.0`) | `:1.3.0` + `:sha-xxxxxxx` + `:latest` |
+| `fix/` | **patch** (`1.2.0` → `1.2.1`) | `:1.2.1` + `:sha-xxxxxxx` + `:latest` |
+| anything else (`docs/`, `ci/`, `chore/`…) | **none** | `:sha-xxxxxxx` + `:latest` (no SemVer) |
+| **major** | **manual** — create `<service>-vX.0.0` by hand; the automation continues from there | |
 
-1. Copy `ci-iot-simulator.yml` to `ci-<service>.yml` (keep `on: workflow_call`),
-   and adapt the `changes` paths + per-job commands to the service's stack
-   (npm/eslint/jest for the backend, Composer/PHPUnit for the API, etc.).
-2. In `ci.yml`, add one job: `uses: ./.github/workflows/ci-<service>.yml`.
+- **Per service:** only services with image-relevant changes (`src/`, deps, `Dockerfile`)
+  are versioned/pushed. Each keeps its own version via tags `<service>-vX.Y.Z`.
+- **Registry:** GitHub Container Registry (`ghcr.io/epsi-teamsyct/futurekawa-<service>`),
+  authenticated with the built-in `GITHUB_TOKEN` — **no secrets to configure**.
+- **Traceability:** the immutable `:sha-<commit>` tag ties each image to its exact commit.
 
-> Trade-off: separate jobs re-run setup (`uv sync`) each — mitigated by the uv cache.
-> `pull_request`-only means a CVE disclosed **between** PRs is caught at the next PR;
-> add an `on: schedule` nightly run later to close that window.
+## Add a service
+
+- **CI:** copy `ci-iot-simulator.yml` → `ci-<service>.yml` (adapt paths + commands),
+  add a job in `ci.yml`.
+- **CD:** copy `cd-iot-simulator.yml` → `cd-<service>.yml` (adapt `SERVICE`, `IMAGE`,
+  `CONTEXT`), add a `paths-filter` entry + a job in `release.yml`.
+
+> These `pull_request`-triggered workflows only take effect once they live on `main`
+> (GitHub runs them from the base branch). The release flow is first validated on the
+> next real `feat/`|`fix/` merge.
