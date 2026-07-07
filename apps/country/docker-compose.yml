@@ -1,0 +1,85 @@
+# FutureKawa — per-country edge stack.
+#
+# Deploy ONE instance of this file per country (Brazil, Ecuador, Colombia): each
+# country is sovereign and runs its own broker, sensors, ingest worker, API and
+# database. Configuration is driven by an .env file (see .env.example) so the
+# same compose ships to every country without code changes.
+#
+#   cp .env.example .env      # then set COUNTRY, DEVICES, thresholds
+#   docker compose up -d
+#
+# Images are pulled from GHCR (ghcr.io/epsi-teamsyct/*). Private packages:
+# `docker login ghcr.io` first, or make them public for the jury demo.
+
+name: futurekawa-${COUNTRY:-country}
+
+services:
+  # MQTT broker — the country's local message bus.
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ../../infra/docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  # IoT layer — the sensor publisher (real hardware in prod; this simulator for
+  # the demo). Publishes futurekawa/<country>/<warehouse>/measurements over MQTT.
+  iot-simulator:
+    image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-iot-simulator:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: "1883"
+      COUNTRY: ${COUNTRY:-brazil}
+      DEVICES: ${DEVICES}
+      TEMP_THRESHOLD: ${TEMP_THRESHOLD:-29}
+      HUMIDITY_THRESHOLD: ${HUMIDITY_THRESHOLD:-55}
+      PUBLISH_INTERVAL: ${PUBLISH_INTERVAL:-30}
+    depends_on:
+      - mosquitto
+
+  # ---------------------------------------------------------------------------
+  # TODO — components below are NOT built yet. Uncomment as they are delivered.
+  # ---------------------------------------------------------------------------
+  #
+  # ingest-worker — the "Worker subscribe" of the architecture diagram: an MQTT
+  # consumer that subscribes to futurekawa/${COUNTRY}/# and persists each
+  # measurement into the country database (directly or via country-api). Owner: TBD.
+  #
+  # ingest-worker:
+  #   image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-ingest:${IMAGE_TAG:-latest}
+  #   restart: unless-stopped
+  #   environment:
+  #     MQTT_HOST: mosquitto
+  #     COUNTRY: ${COUNTRY:-brazil}
+  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
+  #   depends_on: [mosquitto, country-db]
+  #
+  # country-api — Thomas's Symfony / API Platform service (apps/country/api).
+  # Image not published yet.
+  #
+  # country-api:
+  #   image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
+  #   restart: unless-stopped
+  #   environment:
+  #     APP_ENV: prod
+  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
+  #     API_KEY: ${COUNTRY_API_KEY:-change-me}
+  #   ports: ["8000:8000"]
+  #   depends_on: [country-db]
+  #
+  # country-db — the country's own datastore (data sovereignty).
+  #
+  # country-db:
+  #   image: postgres:16-alpine
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: ${DB_USER:-futurekawa}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:?set a strong password in .env}
+  #     POSTGRES_DB: ${DB_NAME:-futurekawa}
+  #   volumes:
+  #     - country-db-data:/var/lib/postgresql/data
+
+# volumes:
+#   country-db-data:
