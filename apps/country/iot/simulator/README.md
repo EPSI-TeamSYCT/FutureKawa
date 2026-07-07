@@ -18,6 +18,7 @@
 - 🚀 [Run the full fleet (broker + 3 countries)](#run-the-full-fleet-broker--3-countries)
 - 🔧 [How it works](#how-it-works)
 - ✅ [Tests](#tests)
+- 🔁 [CI (local pipeline)](#ci-local-pipeline)
 
 ## Overview
 
@@ -85,5 +86,23 @@ docker exec -it futurekawa-mosquitto mosquitto_sub -t "futurekawa/#" -v
 ## Tests
 
 ```bash
-uv run pytest
+uv run pytest        # 18 tests, coverage gate at 80% (currently ~98%)
 ```
+
+## CI (local pipeline)
+
+The CI stages are plain, runnable commands — the **same ones the CI server calls** —
+so the whole pipeline runs locally in one command:
+
+```bash
+uv run poe ci        # quality -> security -> tests
+```
+
+| Stage | Command | Tools |
+|---|---|---|
+| 🎨 Quality | `uv run poe quality` | `ruff` (lint + format), `mypy`, `vulture` |
+| 🔒 Security | `uv run poe security` | `pip-audit` |
+| ✅ Tests | `uv run poe test` | `pytest` + coverage (fails under **80 %**) |
+
+Individual tasks: `uv run poe lint | format | typecheck | deadcode | audit | test`.
+Auto-fix formatting with `uv run poe format`.

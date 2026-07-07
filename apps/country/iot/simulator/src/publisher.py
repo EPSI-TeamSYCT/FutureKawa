@@ -8,9 +8,7 @@ class MqttPublisher:
         self.host = host
         self.port = port
         self.qos = qos
-        self._client = client or mqtt.Client(
-            mqtt.CallbackAPIVersion.VERSION2, client_id=client_id
-        )
+        self._client = client or mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=client_id)
 
     def connect(self, retries: int = 10, delay: float = 2.0) -> None:
         last_exc = None
@@ -22,9 +20,7 @@ class MqttPublisher:
             except OSError as exc:
                 last_exc = exc
                 time.sleep(delay)
-        raise ConnectionError(
-            f"Could not reach broker at {self.host}:{self.port}: {last_exc}"
-        )
+        raise ConnectionError(f"Could not reach broker at {self.host}:{self.port}: {last_exc}")
 
     def publish(self, topic: str, payload: str) -> None:
         self._client.publish(topic, payload, qos=self.qos, retain=False)
