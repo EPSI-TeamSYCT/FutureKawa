@@ -1,0 +1,105 @@
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--fk-sp-16);
+  margin-bottom: var(--fk-sp-24);
+}
+.dash-kpi-total {
+  font-size: var(--fk-fs-h4);
+  color: var(--fk-text-meta);
+}
+.dash-kpi-skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fk-sp-12);
+  padding: var(--fk-sp-24);
+  background: var(--fk-surface);
+  border: 1px solid var(--fk-border);
+  border-radius: var(--fk-radius-panel);
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--fk-sp-24);
+}
+@media (min-width: 1040px) {
+  .dash-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  }
+}
+
+.dash-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--fk-sp-16);
+}
+.dash-section-head h2 {
+  color: var(--fk-text);
+}
+.dash-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fk-fs-small);
+  color: var(--fk-text-muted);
+}
+.dash-link:hover {
+  color: var(--fk-accent);
+  text-decoration: none;
+}
+
+.dash-wh-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--fk-sp-16);
+}
+
+/* Alert feed */
+.dash-alerts-head {
+  padding: var(--fk-sp-24) var(--fk-sp-24) 0;
+  margin-bottom: 0;
+}
+.dash-alert-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--fk-sp-8);
+}
+.dash-alert-empty {
+  margin: var(--fk-sp-16);
+  border: none;
+}
+.dash-alert-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: var(--fk-sp-12);
+  border-radius: var(--fk-radius-btn);
+}
+.dash-alert-row.is-clickable {
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--fk-dur-1) var(--fk-ease);
+}
+.dash-alert-row.is-clickable:hover {
+  background: var(--fk-inset);
+}
+.dash-alert-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fk-sp-8);
+}
+.dash-alert-time {
+  font-size: var(--fk-fs-caption);
+  color: var(--fk-text-meta);
+}
+.dash-alert-msg {
+  font-size: var(--fk-fs-small);
+  line-height: 1.45;
+  color: var(--fk-text-muted);
+}
