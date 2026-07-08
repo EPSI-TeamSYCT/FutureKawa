@@ -6,17 +6,20 @@ services:
       - "3000:3000"
     environment:
       PORT: 3000
-      # Point these at the country API once it runs (host.docker.internal
-      # reaches the host from inside the container).
-      COUNTRY_API_URL: http://host.docker.internal:8080
+      # Point these at each country API once they run (host.docker.internal
+      # reaches the host from inside the container). Configure only the
+      # countries you run; the shared key authenticates all of them.
+      COUNTRY_API_URL_BRAZIL: http://host.docker.internal:8081
+      COUNTRY_API_URL_ECUADOR: http://host.docker.internal:8082
+      COUNTRY_API_URL_COLOMBIA: http://host.docker.internal:8083
       COUNTRY_API_KEY: change-me
       COUNTRY_TIMEOUT_MS: 4000
       CACHE_STALE_MS: 300000
 
   # --- External services ---
-  # The country API and the frontend are NOT managed here (other teams own
-  # them). Point COUNTRY_API_URL/KEY at the country API above. Example if the
-  # frontend were added to this compose:
+  # The country APIs and the frontend are NOT managed here (other teams own
+  # them). Point the per-country URLs/KEY at the country APIs above. Example if
+  # the frontend were added to this compose:
   #
   # frontend:
   #   image: futurekawa/hq-frontend
