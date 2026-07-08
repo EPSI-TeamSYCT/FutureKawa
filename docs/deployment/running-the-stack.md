@@ -18,7 +18,7 @@ How to run FutureKawa with Docker Compose. Two entry points mirror the topology:
 - [Migration & seed](#migration--seed)
 - [Smoke test](#smoke-test)
 - [Verify the MQTT feed](#verify-the-mqtt-feed)
-- [Frontend: mocks vs real backend](#frontend-mocks-vs-real-backend)
+- [Frontend ↔ backend](#frontend--backend)
 - [Country stack (single country)](#country-stack-single-country)
 - [Developer mode (per app)](#developer-mode-per-app)
 
@@ -141,27 +141,18 @@ futurekawa/brazil/SAN-01/measurements {"warehouse_id":"SAN-01","country":"brazil
 The payload contract lives in
 [`packages/contracts`](../../packages/contracts/README.md).
 
-## Frontend: mocks vs real backend
+## Frontend ↔ backend
 
-The published frontend image is built with `VITE_USE_MOCKS=true`, so it serves a
-**fully offline** demo (MSW mock layer) — reliable for the jury, but it **ignores
-the backend**. To show the **real aggregated 3-country data** in the UI, edit the
-`frontend` service in `docker-compose.yml`: comment `image:` and uncomment the
-`build:` block (Vite inlines `VITE_*` at build time, so a rebuild is required):
+The SPA reaches the HQ backend through its built-in **`/hq` reverse proxy**
+(nginx → `central-backend:3000`), so it stays **same-origin** (no CORS). The
+offline MSW mock layer was removed, so the frontend **always** talks to the real
+backend — the published image works as-is, nothing to rebuild. It only needs the
+backend reachable under the **`central-backend`** network alias (set on the
+`backend` service in the compose).
 
-```yaml
-frontend:
-  # image: …
-  build:
-    context: ./apps/hq/frontend
-    args:
-      VITE_USE_MOCKS: "false"
-      VITE_API_URL: http://localhost:3000
-```
-
-```bash
-docker compose up -d --build frontend
-```
+> ⚠️ The API base path `/hq` is baked into the SPA (`const HQ = "/hq"`). Do **not**
+> also set `VITE_API_URL=/hq` at build time — that double-prefixes to `/hq/hq/…`
+> and every call 404s. Leave `VITE_API_URL` empty for the proxy setup.
 
 ## Country stack (single country)
 

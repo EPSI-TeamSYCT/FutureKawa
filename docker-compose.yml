@@ -308,18 +308,13 @@ services:
         aliases:
           - central-backend
 
-  # React SPA (nginx). The published image is built with VITE_USE_MOCKS=true, so
-  # it runs on its OFFLINE mock layer by default — reliable for the jury, but it
-  # ignores the backend. To show the REAL aggregated 3-country data in the UI,
-  # comment `image:` below and uncomment the `build:` block (Vite inlines the API
-  # URL at build time, so a rebuild is required — this is the one justified build).
+  # React SPA (nginx). It calls the HQ backend through its built-in `/hq` reverse
+  # proxy (nginx -> central-backend:3000), so it stays same-origin (no CORS). The
+  # offline mock layer was removed, so the SPA ALWAYS talks to the real backend —
+  # nothing to rebuild; the published image works as-is. It only needs the backend
+  # reachable under the `central-backend` alias (set on the backend service above).
   frontend:
     image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-hq-frontend:${IMAGE_TAG:-latest}
-    # build:
-    #   context: ./apps/hq/frontend
-    #   args:
-    #     VITE_USE_MOCKS: "false"
-    #     VITE_API_URL: /hq   # nginx proxies /hq/ -> central-backend:3000 (same-origin)
     restart: unless-stopped
     ports:
       - "8080:8080"
