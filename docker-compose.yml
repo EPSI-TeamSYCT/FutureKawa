@@ -47,6 +47,11 @@ x-db-healthcheck: &db-healthcheck
 x-migrate-cmd: &migrate-cmd
   ["sh", "-c", "php bin/console doctrine:migrations:migrate --no-interaction && php bin/console app:seed"]
 
+# Periodic alert scan (PR #22): every 60s evaluate recent measures against the
+# country band ± tolerance + stale batches, raise Alerts and e-mail the Responsible.
+x-alerter-cmd: &alerter-cmd
+  ["sh", "-c", "while true; do php bin/console app:alerts:check || true; sleep 60; done"]
+
 services:
   # ======================================================================
   # 🇧🇷 BRAZIL edge
@@ -275,6 +280,49 @@ services:
     depends_on:
       colombia-broker:
         condition: service_started
+
+  # ---- Periodic alerters (one per country, PR #22) --------------------
+  brazil-alerter:
+    image: *cty-image
+    restart: unless-stopped
+    command: *alerter-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: brazil
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@brazil-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      ALERT_MAIL_FROM: ${ALERT_MAIL_FROM:-alerts@futurekawa.example}
+    depends_on:
+      brazil-migrate:
+        condition: service_completed_successfully
+
+  ecuador-alerter:
+    image: *cty-image
+    restart: unless-stopped
+    command: *alerter-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: ecuador
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@ecuador-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      ALERT_MAIL_FROM: ${ALERT_MAIL_FROM:-alerts@futurekawa.example}
+    depends_on:
+      ecuador-migrate:
+        condition: service_completed_successfully
+
+  colombia-alerter:
+    image: *cty-image
+    restart: unless-stopped
+    command: *alerter-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: colombia
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@colombia-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      ALERT_MAIL_FROM: ${ALERT_MAIL_FROM:-alerts@futurekawa.example}
+    depends_on:
+      colombia-migrate:
+        condition: service_completed_successfully
 
   # ======================================================================
   # 🏛️ HQ — aggregator backend + frontend
