@@ -13,6 +13,16 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false,
+    // Reverse-proxy the HQ backend under /hq so the SPA stays same-origin (no
+    // CORS). Override the target with HQ_API_TARGET if the backend does not run
+    // on localhost:3000.
+    proxy: {
+      "/hq": {
+        target: process.env.HQ_API_TARGET ?? "http://localhost:3000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/hq/, ""),
+      },
+    },
   },
   // Top-level await in main.tsx requires a build target that supports it.
   build: {
@@ -27,7 +37,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       // Gate coverage on the pure business logic only — UI (components, pages,
-      // providers, Chart.js setup, MSW mocks) is intentionally out of scope.
+      // providers, Chart.js setup, api adapters) is intentionally out of scope.
       include: ['src/lib/**'],
       exclude: ['src/lib/chartSetup.ts', 'src/lib/**/*.{test,spec}.*'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

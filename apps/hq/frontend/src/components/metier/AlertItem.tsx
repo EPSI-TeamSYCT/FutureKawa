@@ -14,7 +14,9 @@ const EMAIL: Record<EmailStatut, { label: string; icon: typeof Mail; cls: string
 
 export interface AlertItemProps {
   alerte: Alerte;
-  onTraiter: (id: string) => void;
+  /** When provided, renders a "mark handled" action. Omitted while the backend
+   * has no acknowledgement state. */
+  onTraiter?: (id: string) => void;
   treating?: boolean;
 }
 
@@ -50,22 +52,24 @@ export function AlertItem({ alerte, onTraiter, treating = false }: Readonly<Aler
         </div>
       </div>
 
-      <div className="fk-alert-action">
-        {alerte.traitee ? (
-          <Badge tone="success" size="sm" icon={<Check size={13} strokeWidth={1.75} />}>
-            Traité
-          </Badge>
-        ) : (
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={treating}
-            onClick={() => onTraiter(alerte.id)}
-          >
-            Marquer traité
-          </Button>
-        )}
-      </div>
+      {onTraiter && (
+        <div className="fk-alert-action">
+          {alerte.traitee ? (
+            <Badge tone="success" size="sm" icon={<Check size={13} strokeWidth={1.75} />}>
+              Traité
+            </Badge>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={treating}
+              onClick={() => onTraiter(alerte.id)}
+            >
+              Marquer traité
+            </Button>
+          )}
+        </div>
+      )}
     </article>
   );
 }

@@ -11,6 +11,7 @@ import type {
   RawMeasure,
   RawWarehouse,
   Ref,
+  Warehouse,
 } from "../types/domain";
 
 // Pure transformations: raw country-API shapes (IRIs, wire format) into the
@@ -38,6 +39,39 @@ export function toCountry(raw: RawCountry): Country {
 
 export function toRef(raw: RawExploitation | RawWarehouse): Ref {
   return { id: raw.id, name: raw.name, countryId: iriId(raw.country) };
+}
+
+// A warehouse enriched with its country's conditions and its lot count.
+export function toWarehouse(
+  raw: RawWarehouse,
+  countries: Map<number, Country>,
+  lots: number,
+): Warehouse {
+  const country = countries.get(iriId(raw.country));
+  return {
+    id: raw.id,
+    name: raw.name,
+    countryId: country?.id ?? null,
+    country: country?.name ?? null,
+    isoCode: country?.isoCode ?? null,
+    ideal: country?.ideal ?? null,
+    tolerance: country?.tolerance ?? null,
+    lots,
+  };
+}
+
+// A reading drifts when temperature OR humidity leaves the country's ideal band.
+export function isOutOfRange(
+  m: Measure,
+  ideal: Country["ideal"] | null,
+  tolerance: Country["tolerance"] | null,
+): boolean {
+  if (!ideal || !tolerance) return false;
+  const tempOut =
+    m.temperature != null && Math.abs(m.temperature - ideal.temperature) > tolerance.temperature;
+  const humidityOut =
+    m.humidity != null && Math.abs(m.humidity - ideal.humidity) > tolerance.humidity;
+  return tempOut || humidityOut;
 }
 
 // Resolve a warehouse IRI to its warehouse and (via it) its country. Both are

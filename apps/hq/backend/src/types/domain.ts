@@ -60,6 +60,25 @@ export interface Alert {
   batchId: number | null;
 }
 
+// A warehouse enriched with its country's ideal conditions and its lot count
+// (bulk-derivable, part of the cached aggregate).
+export interface Warehouse {
+  id: number;
+  name: string;
+  countryId: number | null;
+  country: string | null;
+  isoCode: string | null;
+  ideal: { temperature: number; humidity: number } | null;
+  tolerance: { temperature: number; humidity: number } | null;
+  lots: number;
+}
+
+// A warehouse plus its live reading (fetched on demand, not cached).
+export interface WarehouseStatus extends Warehouse {
+  latestMeasure: Measure | null;
+  outOfRange: boolean;
+}
+
 // Foreign keys resolved once into these lookups, keyed by entity id.
 export interface Ref {
   id: number;
@@ -76,6 +95,7 @@ export interface Lookups {
 // The consolidated view of all countries, built once and cached.
 export interface Aggregate {
   countries: Country[];
+  warehouses: Warehouse[];
   lots: Lot[];
   alerts: Alert[];
 }

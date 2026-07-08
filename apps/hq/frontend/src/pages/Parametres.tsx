@@ -149,7 +149,7 @@ export function Parametres() {
           </div>
           <div>
             <dt>Données</dt>
-            <dd>mocks MSW</dd>
+            <dd>API HQ (temps réel)</dd>
           </div>
           <div>
             <dt>Thème actif</dt>

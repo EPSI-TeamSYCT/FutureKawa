@@ -1,17 +1,19 @@
-import { apiGet, apiPost } from "./client";
+import { fetchAlerts, fetchCountries } from "./backend";
+import { indexCodeByCountryId, mapAlerte } from "./mappers";
 import type { CountryScope } from "@/lib/countries";
 import type { Alerte } from "./types";
 
 export interface AlerteFilters {
   scope?: CountryScope;
-  traitee?: boolean;
 }
 
-export function getAlertes(filters: AlerteFilters = {}, signal?: AbortSignal): Promise<Alerte[]> {
-  const pays = filters.scope && filters.scope !== "siege" ? filters.scope : undefined;
-  return apiGet<Alerte[]>("/api/alertes", { pays, traitee: filters.traitee }, signal);
-}
-
-export function traiterAlerte(id: string): Promise<Alerte> {
-  return apiPost<Alerte>(`/api/alertes/${encodeURIComponent(id)}/traiter`);
+export async function getAlertes(filters: AlerteFilters = {}, signal?: AbortSignal): Promise<Alerte[]> {
+  const [countries, alerts] = await Promise.all([
+    fetchCountries(signal),
+    fetchAlerts(undefined, signal),
+  ]);
+  const codeById = indexCodeByCountryId(countries);
+  const scope = filters.scope && filters.scope !== "siege" ? filters.scope : undefined;
+  const mapped = alerts.map((a) => mapAlerte(a, codeById));
+  return scope ? mapped.filter((a) => a.pays === scope) : mapped;
 }

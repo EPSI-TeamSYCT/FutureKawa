@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { iriId, toAlert, toCountry, toLot, toRef } from "./domain.mapper";
-import type { Lookups, RawAlert, RawBatch, RawCountry } from "../types/domain";
+import {
+  iriId,
+  isOutOfRange,
+  toAlert,
+  toCountry,
+  toLot,
+  toRef,
+  toWarehouse,
+} from "./domain.mapper";
+import type { Lookups, Measure, RawAlert, RawBatch, RawCountry } from "../types/domain";
 
 const rawCountry: RawCountry = {
   id: 1,
@@ -25,6 +33,49 @@ describe("iriId", () => {
 
   it("throws on a malformed IRI", () => {
     expect(() => iriId("/api/countries/x")).toThrow();
+  });
+});
+
+describe("toWarehouse", () => {
+  it("resolves the country's conditions and carries the lot count", () => {
+    expect(
+      toWarehouse({ id: 3, name: "Warehouse A", country: "/api/countries/1" }, lookups.countries, 4),
+    ).toMatchObject({
+      id: 3,
+      name: "Warehouse A",
+      country: "Colombia",
+      isoCode: "CO",
+      ideal: { temperature: 26, humidity: 80 },
+      lots: 4,
+    });
+  });
+});
+
+describe("isOutOfRange", () => {
+  const ideal = { temperature: 26, humidity: 80 };
+  const tolerance = { temperature: 3, humidity: 2 };
+  const measure = (over: Partial<Measure>): Measure => ({
+    id: 1,
+    temperature: 26,
+    humidity: 80,
+    measuredAt: "2026-01-01T00:00:00.000Z",
+    ...over,
+  });
+
+  it("is false within the tolerance band", () => {
+    expect(isOutOfRange(measure({ temperature: 28 }), ideal, tolerance)).toBe(false);
+  });
+
+  it("is true when temperature or humidity drifts past tolerance", () => {
+    expect(isOutOfRange(measure({ temperature: 40 }), ideal, tolerance)).toBe(true);
+    expect(isOutOfRange(measure({ humidity: 90 }), ideal, tolerance)).toBe(true);
+  });
+
+  it("is false when the country has no reference conditions or the reading is null", () => {
+    expect(isOutOfRange(measure({ temperature: 40 }), null, null)).toBe(false);
+    expect(isOutOfRange(measure({ temperature: null, humidity: null }), ideal, tolerance)).toBe(
+      false,
+    );
   });
 });
 
