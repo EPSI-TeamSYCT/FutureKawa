@@ -60,9 +60,11 @@ export function createCountryClient(baseURL: string): CountryClient {
     fetchBatches: () => getList("/api/batches", rawBatchSchema),
     fetchAlerts: () => getList("/api/alerts", rawAlertSchema),
     fetchWarehouseMeasures: (warehouseId: number) =>
+      // The API returns measures newest-first; charts want them chronological,
+      // so reverse. `sensor.warehouse` scopes them to this warehouse.
       getList("/api/measures", rawMeasureSchema, {
         "sensor.warehouse": warehouseId,
-      }),
+      }).then((measures) => measures.reverse()),
   };
 }
 
