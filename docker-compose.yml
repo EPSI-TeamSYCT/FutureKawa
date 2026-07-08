@@ -301,6 +301,12 @@ services:
         condition: service_started
       colombia-api:
         condition: service_started
+    networks:
+      default:
+        # The frontend's nginx proxies /hq/ to `central-backend` (same-origin,
+        # no CORS); expose that alias so the real-backend frontend can reach it.
+        aliases:
+          - central-backend
 
   # React SPA (nginx). The published image is built with VITE_USE_MOCKS=true, so
   # it runs on its OFFLINE mock layer by default — reliable for the jury, but it
@@ -313,7 +319,7 @@ services:
     #   context: ./apps/hq/frontend
     #   args:
     #     VITE_USE_MOCKS: "false"
-    #     VITE_API_URL: http://localhost:3000
+    #     VITE_API_URL: /hq   # nginx proxies /hq/ -> central-backend:3000 (same-origin)
     restart: unless-stopped
     ports:
       - "8080:8080"
