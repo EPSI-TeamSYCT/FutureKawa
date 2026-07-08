@@ -1,15 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock axios so `axios.create()` returns a controllable `get`. Hoisted so the
-// mock exists before the adapter module builds its client at import time.
-const { get } = vi.hoisted(() => ({ get: vi.fn() }));
-vi.mock("axios", () => ({ default: { create: () => ({ get }) } }));
+// mock exists before the adapter module builds its clients at import time.
+const { get, create } = vi.hoisted(() => {
+  const get = vi.fn();
+  return { get, create: vi.fn(() => ({ get })) };
+});
+vi.mock("axios", () => ({ default: { create } }));
 
-import { countryClient } from "./country-api.adapter";
+import { createCountryClient, countryClients } from "./country-api.adapter";
+
+const client = createCountryClient("http://brazil.test");
 
 beforeEach(() => vi.clearAllMocks());
 
-describe("countryClient", () => {
+describe("createCountryClient", () => {
   it("fetches and validates a resource", async () => {
     get.mockResolvedValueOnce({
       data: [
@@ -25,7 +30,7 @@ describe("countryClient", () => {
       ],
     });
 
-    const countries = await countryClient.fetchCountries();
+    const countries = await client.fetchCountries();
 
     expect(countries[0]?.isoCode).toBe("CO");
     expect(get).toHaveBeenCalledWith("/api/countries", { params: undefined });
@@ -36,7 +41,7 @@ describe("countryClient", () => {
       data: [{ id: 1, temperature: 21.4, humidity: 58, measuredAt: "2026-07-07T14:30:00.000Z" }],
     });
 
-    await countryClient.fetchWarehouseMeasures(3);
+    await client.fetchWarehouseMeasures(3);
 
     expect(get).toHaveBeenCalledWith("/api/measures", {
       params: { "sensor.warehouse": 3 },
@@ -45,6 +50,12 @@ describe("countryClient", () => {
 
   it("rejects a payload that violates the schema", async () => {
     get.mockResolvedValueOnce({ data: [{ id: "not-a-number" }] });
-    await expect(countryClient.fetchBatches()).rejects.toThrow();
+    await expect(client.fetchBatches()).rejects.toThrow();
+  });
+
+  it("builds one client per configured country, keyed by code", () => {
+    expect(countryClients.get("BRAZIL")).toBeDefined();
+    expect(countryClients.get("ECUADOR")).toBeDefined();
+    expect(countryClients.get("COLOMBIA")).toBeDefined();
   });
 });

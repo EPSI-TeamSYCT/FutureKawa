@@ -1,19 +1,332 @@
-# FutureKawa — HQ aggregation stack (headquarters).
+# FutureKawa — full-stack compose (the "run the whole project" entrypoint).
 #
-# Brings up the central layer: the HQ backend (aggregator/BFF) and the frontend.
-# In the target topology each country is sovereign and exposes its own API; the
-# backend fans out to the three of them and consolidates. See apps/country/ for
-# the per-country edge stack (broker + sensors + API + DB).
+# ONE `docker compose up` brings up the COMPLETE system end-to-end for the jury:
+# the THREE sovereign country edges (Brazil, Ecuador, Colombia) + the central HQ
+# layer, all on one Docker network and wired together.
 #
+#   Per country <c> (c = brazil | ecuador | colombia):
+#     <c>-broker    MQTT broker (mosquitto)         internal
+#     <c>-db        PostgreSQL 16                    internal
+#     <c>-migrate   one-shot: doctrine migrate + app:seed, then exits
+#     <c>-api       Symfony / API Platform           published :800x (optional)
+#     <c>-worker    MQTT -> DB ingest (console cmd)   internal
+#     <c>-sim       IoT simulator (publishes MQTT)    internal
+#   HQ:
+#     backend       aggregator/BFF  :3000  -> the three <c>-api over the network
+#     frontend      React SPA       :8080  -> backend (mocks by default, see note)
+#
+# All custom images are PULLED from GHCR (built once by the CD). No build here.
 #   docker login ghcr.io            # images are private GHCR packages
-#   docker compose up -d            # backend :3000 · frontend :8080
+#   cp .env.example .env            # set APP_SECRET, DB_PASSWORD, COUNTRY_API_KEY
+#   docker compose up -d            # whole system, one command
 #
-# Images come from GHCR; override the tag with IMAGE_TAG (see .env.example).
+# The per-country edge in apps/country/docker-compose.yml is the single-country
+# PROD artifact; this file is the 3-country DEMO (Compose `include:` can't be
+# instantiated three times, so the edges are spelled out here with anchors).
 
-name: futurekawa-hq
+name: futurekawa
+
+# ---- Reusable fragments (YAML anchors) ------------------------------------
+x-cty-image: &cty-image ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
+x-sim-image: &sim-image ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-iot-simulator:${IMAGE_TAG:-latest}
+
+x-api-env: &api-env
+  APP_ENV: prod
+  APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+  # The API validates X-API-KEY against %env(COUNTRY_API_KEY)% (ApiKeySubscriber).
+  COUNTRY_API_KEY: ${COUNTRY_API_KEY:-change-me}
+
+x-db-healthcheck: &db-healthcheck
+  test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-futurekawa} -d ${DB_NAME:-futurekawa}"]
+  interval: 5s
+  timeout: 3s
+  retries: 10
+
+# The migrate one-shot: create the schema, then seed this country's demo data
+# (idempotent). serverVersion in the URL because the prod image ships no .env.
+x-migrate-cmd: &migrate-cmd
+  ["sh", "-c", "php bin/console doctrine:migrations:migrate --no-interaction && php bin/console app:seed"]
+
+# Periodic alert scan (PR #22): every 60s evaluate recent measures against the
+# country band ± tolerance + stale batches, raise Alerts and e-mail the Responsible.
+x-alerter-cmd: &alerter-cmd
+  ["sh", "-c", "while true; do php bin/console app:alerts:check || true; sleep 60; done"]
 
 services:
-  # HQ backend — aggregator/BFF over the country APIs.
+  # ======================================================================
+  # 🇧🇷 BRAZIL edge
+  # ======================================================================
+  brazil-broker:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    volumes:
+      - ./apps/country/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  brazil-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-futurekawa}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:-futurekawa}
+    volumes:
+      - brazil-db-data:/var/lib/postgresql/data
+    healthcheck: *db-healthcheck
+
+  brazil-migrate:
+    image: *cty-image
+    restart: "no"
+    command: *migrate-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: brazil
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@brazil-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    depends_on:
+      brazil-db:
+        condition: service_healthy
+
+  brazil-api:
+    image: *cty-image
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      COUNTRY: brazil
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@brazil-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    ports:
+      - "8001:8000" # optional: curl the Brazil API directly
+    depends_on:
+      brazil-migrate:
+        condition: service_completed_successfully
+
+  brazil-worker:
+    image: *cty-image
+    restart: unless-stopped
+    command: ["php", "bin/console", "app:mqtt:subscribe"]
+    environment:
+      <<: *api-env
+      COUNTRY: brazil
+      MQTT_HOST: brazil-broker
+      MQTT_PORT: "1883"
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@brazil-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    depends_on:
+      brazil-broker:
+        condition: service_started
+      brazil-migrate:
+        condition: service_completed_successfully
+
+  brazil-sim:
+    image: *sim-image
+    restart: unless-stopped
+    environment:
+      MQTT_HOST: brazil-broker
+      MQTT_PORT: "1883"
+      COUNTRY: brazil
+      TEMP_THRESHOLD: "29"
+      HUMIDITY_THRESHOLD: "55"
+      PUBLISH_INTERVAL: ${PUBLISH_INTERVAL:-30}
+      DEVICES: '[{"warehouse":"SAN-01","hardware_id":"br-san-01"},{"warehouse":"VAR-02","hardware_id":"br-var-02"}]'
+    depends_on:
+      brazil-broker:
+        condition: service_started
+
+  # ======================================================================
+  # 🇪🇨 ECUADOR edge
+  # ======================================================================
+  ecuador-broker:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    volumes:
+      - ./apps/country/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  ecuador-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-futurekawa}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:-futurekawa}
+    volumes:
+      - ecuador-db-data:/var/lib/postgresql/data
+    healthcheck: *db-healthcheck
+
+  ecuador-migrate:
+    image: *cty-image
+    restart: "no"
+    command: *migrate-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: ecuador
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@ecuador-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    depends_on:
+      ecuador-db:
+        condition: service_healthy
+
+  ecuador-api:
+    image: *cty-image
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      COUNTRY: ecuador
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@ecuador-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    ports:
+      - "8002:8000"
+    depends_on:
+      ecuador-migrate:
+        condition: service_completed_successfully
+
+  ecuador-worker:
+    image: *cty-image
+    restart: unless-stopped
+    command: ["php", "bin/console", "app:mqtt:subscribe"]
+    environment:
+      <<: *api-env
+      COUNTRY: ecuador
+      MQTT_HOST: ecuador-broker
+      MQTT_PORT: "1883"
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@ecuador-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    depends_on:
+      ecuador-broker:
+        condition: service_started
+      ecuador-migrate:
+        condition: service_completed_successfully
+
+  ecuador-sim:
+    image: *sim-image
+    restart: unless-stopped
+    environment:
+      MQTT_HOST: ecuador-broker
+      MQTT_PORT: "1883"
+      COUNTRY: ecuador
+      TEMP_THRESHOLD: "31"
+      HUMIDITY_THRESHOLD: "60"
+      PUBLISH_INTERVAL: ${PUBLISH_INTERVAL:-30}
+      DEVICES: '[{"warehouse":"GUA-02","hardware_id":"ec-gua-02"},{"warehouse":"MAN-01","hardware_id":"ec-man-01"}]'
+    depends_on:
+      ecuador-broker:
+        condition: service_started
+
+  # ======================================================================
+  # 🇨🇴 COLOMBIA edge
+  # ======================================================================
+  colombia-broker:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    volumes:
+      - ./apps/country/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  colombia-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-futurekawa}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:-futurekawa}
+    volumes:
+      - colombia-db-data:/var/lib/postgresql/data
+    healthcheck: *db-healthcheck
+
+  colombia-migrate:
+    image: *cty-image
+    restart: "no"
+    command: *migrate-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: colombia
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@colombia-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    depends_on:
+      colombia-db:
+        condition: service_healthy
+
+  colombia-api:
+    image: *cty-image
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      COUNTRY: colombia
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@colombia-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    ports:
+      - "8003:8000"
+    depends_on:
+      colombia-migrate:
+        condition: service_completed_successfully
+
+  colombia-worker:
+    image: *cty-image
+    restart: unless-stopped
+    command: ["php", "bin/console", "app:mqtt:subscribe"]
+    environment:
+      <<: *api-env
+      COUNTRY: colombia
+      MQTT_HOST: colombia-broker
+      MQTT_PORT: "1883"
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@colombia-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    depends_on:
+      colombia-broker:
+        condition: service_started
+      colombia-migrate:
+        condition: service_completed_successfully
+
+  colombia-sim:
+    image: *sim-image
+    restart: unless-stopped
+    environment:
+      MQTT_HOST: colombia-broker
+      MQTT_PORT: "1883"
+      COUNTRY: colombia
+      TEMP_THRESHOLD: "26"
+      HUMIDITY_THRESHOLD: "80"
+      PUBLISH_INTERVAL: ${PUBLISH_INTERVAL:-30}
+      DEVICES: '[{"warehouse":"MED-01","hardware_id":"co-med-01"},{"warehouse":"BOG-01","hardware_id":"co-bog-01"}]'
+    depends_on:
+      colombia-broker:
+        condition: service_started
+
+  # ---- Periodic alerters (one per country, PR #22) --------------------
+  brazil-alerter:
+    image: *cty-image
+    restart: unless-stopped
+    command: *alerter-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: brazil
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@brazil-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      ALERT_MAIL_FROM: ${ALERT_MAIL_FROM:-alerts@futurekawa.example}
+    depends_on:
+      brazil-migrate:
+        condition: service_completed_successfully
+
+  ecuador-alerter:
+    image: *cty-image
+    restart: unless-stopped
+    command: *alerter-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: ecuador
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@ecuador-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      ALERT_MAIL_FROM: ${ALERT_MAIL_FROM:-alerts@futurekawa.example}
+    depends_on:
+      ecuador-migrate:
+        condition: service_completed_successfully
+
+  colombia-alerter:
+    image: *cty-image
+    restart: unless-stopped
+    command: *alerter-cmd
+    environment:
+      <<: *api-env
+      COUNTRY: colombia
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@colombia-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+      MAILER_DSN: ${MAILER_DSN:-null://null}
+      ALERT_MAIL_FROM: ${ALERT_MAIL_FROM:-alerts@futurekawa.example}
+    depends_on:
+      colombia-migrate:
+        condition: service_completed_successfully
+
+  # ======================================================================
+  # 🏛️ HQ — aggregator backend + frontend
+  # ======================================================================
   backend:
     image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-hq-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
@@ -25,22 +338,29 @@ services:
       COUNTRY_API_KEY: ${COUNTRY_API_KEY:-change-me}
       COUNTRY_TIMEOUT_MS: "4000"
       CACHE_STALE_MS: "300000"
-      # --- Single-URL (as currently built) -------------------------------
-      # The backend today reads ONE COUNTRY_API_URL. Point it at whichever
-      # country API is reachable for a first end-to-end test.
-      COUNTRY_API_URL: ${COUNTRY_API_URL:-http://stack-brazil:8000}
-      # --- 3-country target (needs backend evolution) --------------------
-      # For true per-country sovereignty the backend must be extended to read
-      # one URL per country and merge. Wiring kept here as the target contract:
-      COUNTRY_API_URL_BRAZIL: http://stack-brazil:8000
-      COUNTRY_API_URL_ECUADOR: http://stack-ecuador:8000
-      COUNTRY_API_URL_COLOMBIA: http://stack-colombia:8000
-    # depends_on: [stack-brazil, stack-ecuador, stack-colombia]  # enable when APIs exist
+      # Multi-country: HQ queries the three sovereign APIs by service name.
+      COUNTRY_API_URL_BRAZIL: http://brazil-api:8000
+      COUNTRY_API_URL_ECUADOR: http://ecuador-api:8000
+      COUNTRY_API_URL_COLOMBIA: http://colombia-api:8000
+    depends_on:
+      brazil-api:
+        condition: service_started
+      ecuador-api:
+        condition: service_started
+      colombia-api:
+        condition: service_started
+    networks:
+      default:
+        # The frontend's nginx proxies /hq/ to `central-backend` (same-origin,
+        # no CORS); expose that alias so the real-backend frontend can reach it.
+        aliases:
+          - central-backend
 
-  # HQ frontend — React SPA served by nginx.
-  # NOTE: the published image is built with VITE_USE_MOCKS=true, so it runs on its
-  # offline MSW mock layer by default (great for the jury demo, ignores backend).
-  # To hit the real backend, rebuild: --build-arg VITE_USE_MOCKS=false --build-arg VITE_API_URL=http://localhost:3000
+  # React SPA (nginx). It calls the HQ backend through its built-in `/hq` reverse
+  # proxy (nginx -> central-backend:3000), so it stays same-origin (no CORS). The
+  # offline mock layer was removed, so the SPA ALWAYS talks to the real backend —
+  # nothing to rebuild; the published image works as-is. It only needs the backend
+  # reachable under the `central-backend` alias (set on the backend service above).
   frontend:
     image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-hq-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
@@ -49,31 +369,7 @@ services:
     depends_on:
       - backend
 
-  # ---------------------------------------------------------------------------
-  # TODO — 3 sovereign country APIs. NOT runnable yet: Thomas's Symfony image
-  # (apps/country/api) is unpublished and the backend multi-URL aggregation is
-  # pending. Uncomment one block per country when both land. Each is the API
-  # half of the per-country stack (the IoT/broker/worker halves stay in
-  # apps/country/docker-compose.yml, deployed at the edge).
-  # ---------------------------------------------------------------------------
-  #
-  # stack-brazil:
-  #   image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
-  #   restart: unless-stopped
-  #   environment:
-  #     APP_ENV: prod
-  #     API_KEY: ${COUNTRY_API_KEY:-change-me}
-  #     DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@db-brazil:5432/${DB_NAME:-futurekawa}
-  #   depends_on: [db-brazil]
-  # db-brazil:
-  #   image: postgres:16-alpine
-  #   environment: { POSTGRES_USER: ${DB_USER:-futurekawa}, POSTGRES_PASSWORD: ${DB_PASSWORD:?set a strong password in .env}, POSTGRES_DB: ${DB_NAME:-futurekawa} }
-  #   volumes: [db-brazil-data:/var/lib/postgresql/data]
-  #
-  # stack-ecuador / db-ecuador  — same shape, COUNTRY=ecuador
-  # stack-colombia / db-colombia — same shape, COUNTRY=colombia
-
-# volumes:
-#   db-brazil-data:
-#   db-ecuador-data:
-#   db-colombia-data:
+volumes:
+  brazil-db-data:
+  ecuador-db-data:
+  colombia-db-data:

@@ -73,6 +73,12 @@ describe("GET /warehouses/:id/measures", () => {
     expect(res.status).toBe(200);
     expect(res.body.warehouseId).toBe(1);
     expect(res.body.measures).toHaveLength(1);
-    expect(getMeasures).toHaveBeenCalledWith(1);
+    // Routed to the warehouse's owning country via its source + local id.
+    expect(getMeasures).toHaveBeenCalledWith("BRAZIL", 1);
+  });
+
+  it("404s on an unknown warehouse", async () => {
+    expect((await request(app).get("/warehouses/999/measures")).status).toBe(404);
+    expect(getMeasures).not.toHaveBeenCalled();
   });
 });

@@ -13,7 +13,7 @@ lotsRouter.get(
   asyncHandler(async (req, res) => {
     const countryId = parseIntParam(req.query.country);
     const exploitationId = parseIntParam(req.query.exploitation);
-    const { data, ...meta } = await getAggregate();
+    const { data, meta } = await getAggregate();
     assertCountry(data, countryId);
     res.json({ lots: selectLots(data, { countryId, exploitationId }), meta });
   }),
@@ -41,7 +41,7 @@ lotsRouter.get(
       lotId: lot.id,
       reference: lot.reference,
       warehouse: lot.warehouse,
-      measures: await getWarehouseMeasures(lot.warehouseId),
+      measures: await getWarehouseMeasures(lot.source, lot.localWarehouseId),
     });
   }),
 );

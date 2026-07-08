@@ -1,6 +1,12 @@
 api_platform:
-    title: Hello API Platform
+    title: FutureKawa Country API
     version: 1.0.0
+    # Serve BOTH JSON-LD (default, Hydra) and plain JSON. The HQ backend requests
+    # `Accept: application/json` and expects plain arrays; without `json` here
+    # API Platform answers 406 Not Acceptable.
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
     defaults:
         stateless: true
         cache_headers:

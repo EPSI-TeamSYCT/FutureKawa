@@ -45,5 +45,6 @@ export const rawAlertSchema = z.object({
   createdAt: z.string(),
   emailSent: z.boolean(),
   warehouse: z.string(),
-  batch: z.string().nullable(),
+  // API Platform omits a null relation entirely (undefined), so accept absent too.
+  batch: z.string().nullable().optional(),
 });
