@@ -17,8 +17,10 @@ import { CountryProvider } from "@/hooks/CountryProvider";
 import { useCountryFilter } from "@/hooks/country-context";
 import { useTheme } from "@/hooks/theme-context";
 import { useHotkeys, type HotkeyDestination } from "@/hooks/useHotkeys";
-import { SCOPES } from "@/lib/countries";
-import { WAREHOUSES } from "@/lib/warehouses";
+import { useAsync } from "@/hooks/useAsync";
+import { getEntrepots } from "@/api/entrepots";
+import { getAlertes } from "@/api/alertes";
+import { getCountry, SCOPES } from "@/lib/countries";
 import logoBlanc from "@/assets/brand/logo-blanc.svg";
 import "./AppLayout.css";
 
@@ -27,14 +29,13 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   end?: boolean;
-  badge?: number;
 }
 
 const NAV: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/lots", label: "Lots", icon: Boxes },
   { to: "/entrepots", label: "Entrepôts", icon: Warehouse },
-  { to: "/alertes", label: "Alertes", icon: Bell, badge: 3 },
+  { to: "/alertes", label: "Alertes", icon: Bell },
   { to: "/parametres", label: "Paramètres", icon: Settings },
 ];
 
@@ -79,6 +80,9 @@ function AppShell() {
 
   const onGo = useCallback((dest: HotkeyDestination) => navigate(DEST_PATH[dest]), [navigate]);
   const openPalette = useCallback(() => setPaletteOpen(true), []);
+  const { data: entrepots } = useAsync((signal) => getEntrepots("siege", signal), []);
+  const { data: alertes } = useAsync((signal) => getAlertes({}, signal), []);
+  const alertCount = alertes?.length ?? 0;
 
   useHotkeys({
     onOpenPalette: openPalette,
@@ -96,13 +100,13 @@ function AppShell() {
       keywords: "aller naviguer page",
       perform: () => navigate(item.to),
     }));
-    const warehouses: CommandItem[] = WAREHOUSES.map((w) => ({
+    const warehouses: CommandItem[] = (entrepots ?? []).map((w) => ({
       id: `wh-${w.id}`,
-      label: w.name,
+      label: w.nom,
       group: "Entrepôts",
-      hint: w.city,
+      hint: getCountry(w.pays).name,
       icon: <Warehouse size={16} strokeWidth={1.75} />,
-      keywords: `entrepot ${w.city} ${w.country}`,
+      keywords: `entrepot ${w.nom} ${w.pays}`,
       perform: () => navigate(`/entrepots/${w.id}`),
     }));
     const actions: CommandItem[] = [
@@ -125,7 +129,7 @@ function AppShell() {
       })),
     ];
     return [...pages, ...warehouses, ...actions];
-  }, [navigate, toggleTheme, setScope]);
+  }, [navigate, toggleTheme, setScope, entrepots]);
 
   return (
     <div className="fk-app">
@@ -136,18 +140,26 @@ function AppShell() {
         </div>
 
         <nav className="fk-sidebar-nav">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => `fk-nav-item ${isActive ? "is-active" : ""}`.trim()}
-            >
-              <item.icon className="fk-nav-icon" size={18} strokeWidth={1.75} aria-hidden="true" />
-              <span className="fk-nav-label">{item.label}</span>
-              {item.badge != null && <span className="fk-nav-badge fk-mono">{item.badge}</span>}
-            </NavLink>
-          ))}
+          {NAV.map((item) => {
+            const badge = item.to === "/alertes" ? alertCount : 0;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) => `fk-nav-item ${isActive ? "is-active" : ""}`.trim()}
+              >
+                <item.icon
+                  className="fk-nav-icon"
+                  size={18}
+                  strokeWidth={1.75}
+                  aria-hidden="true"
+                />
+                <span className="fk-nav-label">{item.label}</span>
+                {badge > 0 && <span className="fk-nav-badge fk-mono">{badge}</span>}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="fk-sidebar-foot">

@@ -15,7 +15,6 @@ import type {
   EntrepotStatut,
   Lot,
   Mesure,
-  PaysInfo,
   Periode,
 } from "./types";
 
@@ -27,15 +26,6 @@ export function codeFromIso(isoCode: string): CountryCode {
 
 export function indexCodeByCountryId(countries: BkCountry[]): Map<number, CountryCode> {
   return new Map(countries.map((c) => [c.id, codeFromIso(c.isoCode)]));
-}
-
-export function mapPays(c: BkCountry): PaysInfo {
-  return {
-    code: codeFromIso(c.isoCode),
-    nom: c.name,
-    ideal: { temp: c.ideal.temperature, humidity: c.ideal.humidity },
-    tolerance: { temp: c.tolerance.temperature, humidity: c.tolerance.humidity },
-  };
 }
 
 export function mapLot(l: BkLot, codeByCountryId: Map<number, CountryCode>): Lot {

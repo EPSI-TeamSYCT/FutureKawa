@@ -6,7 +6,6 @@ import {
   mapEntrepot,
   mapLot,
   mapMesure,
-  mapPays,
 } from "./mappers";
 import type { BkAlert, BkCountry, BkLot, BkMeasure, BkWarehouse } from "./backend";
 
@@ -40,17 +39,6 @@ function bkLot(over: Partial<BkLot>): BkLot {
     ...over,
   };
 }
-
-describe("mapPays", () => {
-  it("lowercases the iso code and renames conditions", () => {
-    expect(mapPays(bkCountry)).toEqual({
-      code: "co",
-      nom: "Colombie",
-      ideal: { temp: 26, humidity: 80 },
-      tolerance: { temp: 3, humidity: 2 },
-    });
-  });
-});
 
 describe("mapLot", () => {
   it("resolves country/warehouse and derives a recent lot as CONFORME", () => {

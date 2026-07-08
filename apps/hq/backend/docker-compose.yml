@@ -4,25 +4,11 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    # Lets the container reach a country API running on the host
-    # (COUNTRY_API_URL=http://host.docker.internal:...).
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
       PORT: 3000
-      # Point these at the country API once it runs (host.docker.internal
-      # reaches the host from inside the container).
       COUNTRY_API_URL: http://host.docker.internal:8080
-      COUNTRY_API_KEY: change-me
+      COUNTRY_API_KEY: ${COUNTRY_API_KEY}
       COUNTRY_TIMEOUT_MS: 4000
       CACHE_STALE_MS: 300000
-
-  # --- External services ---
-  # The country API and the frontend are NOT managed here (other teams own
-  # them). Point COUNTRY_API_URL/KEY at the country API above. Example if the
-  # frontend were added to this compose:
-  #
-  # frontend:
-  #   image: futurekawa/hq-frontend
-  #   environment:
-  #     API_URL: http://central-backend:3000
