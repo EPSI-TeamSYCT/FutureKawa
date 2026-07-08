@@ -1,0 +1,30 @@
+.entd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--fk-text-muted);
+  font-size: var(--fk-fs-body);
+}
+.entd-back:hover {
+  color: var(--fk-text);
+  text-decoration: none;
+}
+
+.entd-conditions {
+  margin-bottom: var(--fk-sp-16);
+}
+.entd-live {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fk-sp-12);
+}
+.entd-updated {
+  font-size: var(--fk-fs-caption);
+  color: var(--fk-text-meta);
+}
+
+.entd-gauges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--fk-sp-32);
+}

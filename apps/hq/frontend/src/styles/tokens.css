@@ -1,0 +1,284 @@
+/*
+ * FutureKawa design tokens — the single source of truth for the whole UI.
+ * Extracted verbatim from « Charte FutureKawa ». No component may hard-code a
+ * colour; everything reads from these var(--fk-*) tokens.
+ *
+ *  - Semantic tokens (--fk-bg, --fk-surface, --fk-accent, --fk-cta …) change
+ *    value between the light (default) and dark themes, but keep their ROLE.
+ *  - Raw scales (espresso / coffee / caramel / neutre) are theme-independent.
+ *
+ * Golden rules baked into the palette:
+ *   · One caramel action per screen — caramel is a signal, never decoration.
+ *   · The "caramel trap": vivid #C77B3B fails contrast as small text on ivory,
+ *     so orange TEXT uses --fk-cta (#A96428) in light; #C77B3B is for pastilles,
+ *     borders and fills only.
+ */
+
+:root {
+  /* ---- Raw scales (constant across themes) ----------------------------- */
+
+  /* Espresso */
+  --fk-espresso-50: #f0e9e4;
+  --fk-espresso-100: #dcc9bc;
+  --fk-espresso-200: #c0a18c;
+  --fk-espresso-300: #9e765c;
+  --fk-espresso-400: #7c5741;
+  --fk-espresso-500: #5c3e2c;
+  --fk-espresso-600: #4a3021;
+  --fk-espresso-700: #3b2a20;
+  --fk-espresso-800: #2f221a;
+  --fk-espresso-900: #241a13;
+  --fk-espresso-950: #1a120c;
+
+  /* Coffee (brun café) */
+  --fk-coffee-50: #f4ece6;
+  --fk-coffee-100: #e4d2c4;
+  --fk-coffee-200: #cdaf98;
+  --fk-coffee-300: #b08c6f;
+  --fk-coffee-400: #8f6a4c;
+  --fk-coffee-500: #6f4e37;
+  --fk-coffee-600: #5e4130;
+  --fk-coffee-700: #4c3427;
+  --fk-coffee-800: #3a281e;
+  --fk-coffee-900: #2a1d16;
+  --fk-coffee-950: #1c130e;
+
+  /* Caramel */
+  --fk-caramel-50: #fbf0e5;
+  --fk-caramel-100: #f3d8bc;
+  --fk-caramel-200: #e8b98c;
+  --fk-caramel-300: #db9a5e;
+  --fk-caramel-400: #d08947;
+  --fk-caramel-500: #c77b3b;
+  --fk-caramel-600: #a96428;
+  --fk-caramel-700: #8a5220;
+  --fk-caramel-800: #6b401a;
+  --fk-caramel-900: #4d2e13;
+  --fk-caramel-950: #33200e;
+
+  /* Neutres chauds (warm neutrals derived from ivory) */
+  --fk-neutre-50: #fcfaf6;
+  --fk-neutre-100: #f3ede3;
+  --fk-neutre-200: #eae2d4;
+  --fk-neutre-300: #d8cdbb;
+  --fk-neutre-400: #c0b29b;
+  --fk-neutre-500: #9e8e76;
+  --fk-neutre-600: #7c6b54;
+  --fk-neutre-700: #5a4433;
+  --fk-neutre-800: #43342a;
+  --fk-neutre-900: #2e241c;
+  --fk-neutre-950: #1d160f;
+
+  /* ---- Typography ------------------------------------------------------ */
+  --fk-font-ui: "Archivo", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --fk-font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+
+  /* type scale — size / line-height (px, verbatim from the charte) */
+  --fk-fs-display: 64px;
+  --fk-lh-display: 60px;
+  --fk-fs-h1: 40px;
+  --fk-lh-h1: 44px;
+  --fk-fs-h2: 28px;
+  --fk-lh-h2: 34px;
+  --fk-fs-h3: 20px;
+  --fk-lh-h3: 28px;
+  --fk-fs-h4: 16px;
+  --fk-lh-h4: 22px;
+  --fk-fs-body-lg: 16px;
+  --fk-lh-body-lg: 26px;
+  --fk-fs-body: 14px;
+  --fk-lh-body: 22px;
+  --fk-fs-small: 12px;
+  --fk-lh-small: 18px;
+  --fk-fs-caption: 11px;
+  --fk-lh-caption: 16px;
+  --fk-fs-code: 13px;
+  --fk-lh-code: 20px;
+
+  --fk-fw-regular: 400;
+  --fk-fw-medium: 500;
+  --fk-fw-semibold: 600;
+  --fk-fw-bold: 700;
+  --fk-fw-black: 800;
+
+  /* ---- Spacing (base-4) ------------------------------------------------ */
+  --fk-sp-4: 4px;
+  --fk-sp-8: 8px;
+  --fk-sp-12: 12px;
+  --fk-sp-16: 16px;
+  --fk-sp-24: 24px;
+  --fk-sp-32: 32px;
+  --fk-sp-48: 48px;
+  --fk-sp-64: 64px;
+
+  /* ---- Radius (identity: angular-pro) ---------------------------------- */
+  --fk-radius-badge: 4px;
+  --fk-radius-btn: 6px;
+  --fk-radius-card: 8px;
+  --fk-radius-panel: 10px;
+  --fk-radius-modal: 12px;
+  --fk-radius-full: 9999px;
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --fk-dur-1: 120ms;
+  --fk-dur-2: 160ms;
+  --fk-dur-3: 200ms;
+  --fk-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Layout ---------------------------------------------------------- */
+  --fk-container-max: 1280px;
+  --fk-grid-gutter: 24px;
+  --fk-sidebar-w: 210px;
+  --fk-sidebar-w-collapsed: 64px;
+  --fk-topbar-h: 60px;
+
+  /* ---- Sensor-log surface (deliberately espresso even in light theme) -- */
+  --fk-log-bg: #1a120c;
+  --fk-log-text: #c8b9a6;
+  --fk-log-meta: #8a7461;
+  --fk-log-value: #e6d8c6;
+  --fk-log-id: #c79a6b;
+  --fk-log-info: #7fa890;
+  --fk-log-warn: #e0904a;
+  --fk-log-error: #e5776a;
+  --fk-log-cursor: #4fb87a;
+}
+
+/* ======================================================================= */
+/*  LIGHT THEME (default) — "terrain", daylight legibility                  */
+/* ======================================================================= */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --fk-bg: #f3ede3; /* neutre-100 */
+  --fk-surface: #fcf9f3; /* neutre-50  */
+  --fk-inset: #eae2d4; /* neutre-200 */
+  --fk-border: #d8cdbb; /* neutre-300 */
+  --fk-border-subtle: #efe7d8;
+  --fk-text: #3b2a20; /* espresso-700 */
+  --fk-text-muted: #5a4433; /* neutre-700 */
+  --fk-text-meta: #8a7461; /* mono captions / meta */
+
+  --fk-accent: #6f4e37; /* coffee-500 — links, focus, secondary */
+  --fk-accent-hover: #5e4130; /* coffee-600 */
+  --fk-cta: #a96428; /* caramel-600 — primary action */
+  --fk-cta-hover: #8a5220; /* caramel-700 */
+  --fk-cta-text: #ffffff;
+  --fk-alert: #c77b3b; /* caramel-500 — EN ALERTE signal (fills/borders) */
+  --fk-success: #2e9e5b;
+  --fk-danger: #b33a2b;
+  --fk-danger-hover: #96301f;
+  --fk-danger-text: #ffffff;
+
+  /* focus ring (2px, brun café) */
+  --fk-ring: #6f4e37;
+  --fk-ring-danger: #b33a2b;
+
+  /* status badges */
+  --fk-status-conforme-bg: #e5f1e9;
+  --fk-status-conforme-border: #9fcfb4;
+  --fk-status-conforme-text: #1e7343;
+  --fk-status-alerte-bg: #fbeadb;
+  --fk-status-alerte-border: #e1a567;
+  --fk-status-alerte-text: #a96428;
+  --fk-status-perime-bg: #f6ded9;
+  --fk-status-perime-border: #d68a7e;
+  --fk-status-perime-text: #96301f;
+  --fk-status-expedie-bg: #eae2d4;
+  --fk-status-expedie-border: #c0b29b;
+  --fk-status-expedie-text: #5a4433;
+
+  /* chart */
+  --fk-chart-temp: #6f4e37;
+  --fk-chart-hum: #3b2a20;
+  --fk-chart-band: #fbeadb;
+  --fk-chart-band-line: #e1a567;
+  --fk-chart-point: #6f4e37;
+  --fk-chart-point-out: #c77b3b;
+  --fk-chart-point-stroke: #fcf9f3;
+  --fk-chart-axis: #d8cdbb;
+  --fk-chart-axis-label: #8a7461;
+  --fk-spark: #6f4e37;
+
+  /* gauge segments */
+  --fk-gauge-danger: #e7c8c3;
+  --fk-gauge-warn: #f3d8bc;
+  --fk-gauge-ideal: #b8dcc6;
+
+  /* elevation */
+  --fk-shadow-1: 0 1px 2px rgba(59, 42, 32, 0.1);
+  --fk-shadow-2: 0 4px 12px rgba(59, 42, 32, 0.14);
+  --fk-shadow-3: 0 16px 40px rgba(59, 42, 32, 0.22);
+
+  /* selection */
+  --fk-selection-bg: #f3d8bc;
+  --fk-selection-text: #3b2a20;
+}
+
+/* ======================================================================= */
+/*  DARK THEME — HQ supervision, long sessions, data-dense                  */
+/* ======================================================================= */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --fk-bg: #241a13; /* espresso-900 */
+  --fk-surface: #2f221a; /* espresso-800 */
+  --fk-inset: #1a120c; /* espresso-950 */
+  --fk-border: #46352a;
+  --fk-border-subtle: #3b2c22;
+  --fk-text: #f0e9df;
+  --fk-text-muted: #d6c9ba;
+  --fk-text-meta: #a98d77;
+
+  --fk-accent: #c79a6b;
+  --fk-accent-hover: #d8b58c;
+  --fk-cta: #e0904a; /* caramel, dark contrast */
+  --fk-cta-hover: #db9a5e;
+  --fk-cta-text: #241a13;
+  --fk-alert: #c77b3b; /* unchanged — a memorised operator cue */
+  --fk-success: #4fb87a;
+  --fk-danger: #d95f4e;
+  --fk-danger-hover: #e5776a;
+  --fk-danger-text: #241a13;
+
+  --fk-ring: #c79a6b;
+  --fk-ring-danger: #d95f4e;
+
+  --fk-status-conforme-bg: rgba(79, 184, 122, 0.16);
+  --fk-status-conforme-border: rgba(79, 184, 122, 0.45);
+  --fk-status-conforme-text: #4fb87a;
+  --fk-status-alerte-bg: rgba(199, 123, 59, 0.18);
+  --fk-status-alerte-border: rgba(224, 144, 74, 0.5);
+  --fk-status-alerte-text: #e0904a;
+  --fk-status-perime-bg: rgba(217, 95, 78, 0.16);
+  --fk-status-perime-border: rgba(217, 95, 78, 0.5);
+  --fk-status-perime-text: #e5776a;
+  --fk-status-expedie-bg: #3b2c22;
+  --fk-status-expedie-border: #5a4433;
+  --fk-status-expedie-text: #d6c9ba;
+
+  --fk-chart-temp: #c79a6b;
+  --fk-chart-hum: #d6c9ba;
+  --fk-chart-band: rgba(199, 123, 59, 0.14);
+  --fk-chart-band-line: rgba(224, 144, 74, 0.4);
+  --fk-chart-point: #c79a6b;
+  --fk-chart-point-out: #e0904a;
+  --fk-chart-point-stroke: #2f221a;
+  --fk-chart-axis: #46352a;
+  --fk-chart-axis-label: #a98d77;
+  --fk-spark: #e0904a;
+
+  --fk-gauge-danger: rgba(217, 95, 78, 0.32);
+  --fk-gauge-warn: rgba(224, 144, 74, 0.28);
+  --fk-gauge-ideal: rgba(79, 184, 122, 0.3);
+
+  --fk-shadow-1: inset 0 1px 0 rgba(199, 154, 107, 0.14), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --fk-shadow-2: inset 0 1px 0 rgba(199, 154, 107, 0.2), 0 6px 18px rgba(0, 0, 0, 0.5);
+  --fk-shadow-3:
+    inset 0 1px 0 rgba(199, 154, 107, 0.24), 0 0 0 1px rgba(199, 154, 107, 0.12),
+    0 20px 50px rgba(0, 0, 0, 0.6);
+
+  --fk-selection-bg: rgba(224, 144, 74, 0.32);
+  --fk-selection-text: #f0e9df;
+}

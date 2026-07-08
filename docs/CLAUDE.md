@@ -25,7 +25,8 @@ Stay scoped to docs unless explicitly asked to read code for accuracy.
 | `architecture/` | overview, distributed system, data model | EN |
 | `security/` | auth (JWT, roles, scopes, OWASP) | EN |
 | `tests/` | test strategy & plans | EN |
-| `ci-cd/` | Jenkins pipeline | EN |
+| `ci-cd/` | GitHub Actions pipeline (CI + release) | EN |
+| `deployment/` | how to run the docker-compose stacks | EN |
 | `phase2/` | automation schema, interview questionnaire | EN |
 | `user-guide/en` + `user-guide/fr` | business user guide | EN + FR |
 | `schemas/` | Excalidraw exports (png/excalidraw) | neutral |

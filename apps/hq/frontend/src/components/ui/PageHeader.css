@@ -1,0 +1,24 @@
+.fk-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--fk-sp-16);
+  margin-bottom: var(--fk-sp-24);
+}
+.fk-page-eyebrow {
+  margin-bottom: 6px;
+}
+.fk-page-title {
+  color: var(--fk-text);
+}
+.fk-page-desc {
+  margin-top: 6px;
+  max-width: 68ch;
+  color: var(--fk-text-muted);
+}
+.fk-page-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--fk-sp-12);
+  flex-shrink: 0;
+}

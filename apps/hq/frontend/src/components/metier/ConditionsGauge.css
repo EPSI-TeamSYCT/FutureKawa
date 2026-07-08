@@ -1,0 +1,70 @@
+.fk-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fk-sp-8);
+}
+
+.fk-gauge-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fk-sp-12);
+}
+.fk-gauge-value {
+  font-size: var(--fk-fs-h3);
+  font-weight: var(--fk-fw-semibold);
+}
+.fk-gauge-value.is-in {
+  color: var(--fk-success);
+}
+.fk-gauge-value.is-out {
+  color: var(--fk-status-alerte-text);
+}
+
+.fk-gauge-track {
+  position: relative;
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.fk-gauge-seg {
+  height: 100%;
+}
+.seg-danger {
+  background: var(--fk-gauge-danger);
+}
+.seg-warn {
+  background: var(--fk-gauge-warn);
+}
+.seg-ideal {
+  background: var(--fk-gauge-ideal);
+}
+
+.fk-gauge-marker {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  border-radius: 1px;
+  transform: translateX(-1px);
+  transition: left var(--fk-dur-3) var(--fk-ease);
+}
+.fk-gauge-marker.is-in {
+  background: var(--fk-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fk-success) 22%, transparent);
+}
+.fk-gauge-marker.is-out {
+  background: var(--fk-alert);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fk-alert) 24%, transparent);
+}
+
+.fk-gauge-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fk-fs-caption);
+  color: var(--fk-text-meta);
+}
+.fk-gauge-ideal-label {
+  color: var(--fk-text-muted);
+}

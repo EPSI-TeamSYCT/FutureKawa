@@ -1,0 +1,114 @@
+name: Release
+
+# Runs when a PR is merged into main. Derives the version bump from the source
+# branch name (feat/feature -> minor, fix -> patch, else none) and builds/pushes
+# the image of every changed service. Branch name comes from the PR event, so it
+# works even with squash-merges.
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  meta:
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' }}
+    runs-on: ubuntu-latest
+    outputs:
+      bump: ${{ steps.bump.outputs.bump }}
+      simulator: ${{ steps.filter.outputs.simulator }}
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      country-api: ${{ steps.filter.outputs.country-api }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Determine bump from branch name
+        id: bump
+        env:
+          # Passed as an env var (never interpolated into the script) to avoid
+          # shell injection — a branch name is attacker-controllable.
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          case "$HEAD_REF" in
+            feat/*|feature/*) bump=minor ;;
+            fix/*)            bump=patch ;;
+            *)                bump=none  ;;
+          esac
+          echo "bump=$bump" >> "$GITHUB_OUTPUT"
+          echo "branch=$HEAD_REF -> bump=$bump"
+
+      # Which services had image-relevant changes (src/deps/Dockerfile)?
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        id: filter
+        with:
+          filters: |
+            simulator:
+              - 'apps/country/iot/simulator/src/**'
+              - 'apps/country/iot/simulator/pyproject.toml'
+              - 'apps/country/iot/simulator/uv.lock'
+              - 'apps/country/iot/simulator/Dockerfile'
+            backend:
+              - 'apps/hq/backend/src/**'
+              - 'apps/hq/backend/package.json'
+              - 'apps/hq/backend/package-lock.json'
+              - 'apps/hq/backend/tsconfig*.json'
+              - 'apps/hq/backend/Dockerfile'
+            frontend:
+              - 'apps/hq/frontend/src/**'
+              - 'apps/hq/frontend/index.html'
+              - 'apps/hq/frontend/package.json'
+              - 'apps/hq/frontend/package-lock.json'
+              - 'apps/hq/frontend/tsconfig*.json'
+              - 'apps/hq/frontend/vite.config.ts'
+              - 'apps/hq/frontend/Dockerfile'
+              - 'apps/hq/frontend/nginx.conf'
+            country-api:
+              - 'apps/country/api/src/**'
+              - 'apps/country/api/config/**'
+              - 'apps/country/api/composer.json'
+              - 'apps/country/api/composer.lock'
+              - 'apps/country/api/migrations/**'
+              - 'apps/country/api/Dockerfile'
+
+  iot-simulator:
+    needs: meta
+    if: ${{ needs.meta.outputs.simulator == 'true' }}
+    permissions:
+      contents: write
+      packages: write
+    uses: ./.github/workflows/cd-iot-simulator.yml
+    with:
+      bump: ${{ needs.meta.outputs.bump }}
+    secrets: inherit
+
+  hq-backend:
+    needs: meta
+    if: ${{ needs.meta.outputs.backend == 'true' }}
+    permissions:
+      contents: write
+      packages: write
+    uses: ./.github/workflows/cd-backend.yml
+    with:
+      bump: ${{ needs.meta.outputs.bump }}
+    secrets: inherit
+
+  hq-frontend:
+    needs: meta
+    if: ${{ needs.meta.outputs.frontend == 'true' }}
+    permissions:
+      contents: write
+      packages: write
+    uses: ./.github/workflows/cd-frontend.yml
+    with:
+      bump: ${{ needs.meta.outputs.bump }}
+    secrets: inherit
+
+  country-api:
+    needs: meta
+    if: ${{ needs.meta.outputs.country-api == 'true' }}
+    permissions:
+      contents: write
+      packages: write
+    uses: ./.github/workflows/cd-country-api.yml
+    with:
+      bump: ${{ needs.meta.outputs.bump }}
+    secrets: inherit

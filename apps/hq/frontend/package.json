@@ -1,0 +1,45 @@
+{
+  "name": "@futurekawa/hq-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "FutureKawa — HQ frontend (green-coffee lots & IoT supervision)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "oxlint src",
+    "format": "oxfmt --write src",
+    "format:check": "oxfmt --check src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc -b",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.7",
+    "chartjs-plugin-annotation": "^3.1.0",
+    "lucide-react": "^0.469.0",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^22.10.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.2.7",
+    "jsdom": "^25.0.1",
+    "oxfmt": "^0.58.0",
+    "oxlint": "^1.73.0",
+    "typescript": "~5.6.3",
+    "vite": "^6.0.7",
+    "vitest": "^3.2.4"
+  }
+}

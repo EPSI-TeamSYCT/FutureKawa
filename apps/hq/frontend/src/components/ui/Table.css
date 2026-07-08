@@ -1,0 +1,67 @@
+.fk-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--fk-radius-card);
+}
+
+.fk-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--fk-fs-body);
+  color: var(--fk-text);
+}
+
+/* Header — sticky, mono, uppercase micro-label */
+.fk-th {
+  position: relative;
+  padding: 10px 16px;
+  background: var(--fk-inset);
+  color: var(--fk-text-muted);
+  font-family: var(--fk-font-mono);
+  font-weight: var(--fk-fw-medium);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--fk-border);
+}
+.fk-table-scroll.is-sticky .fk-th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.fk-th.is-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.fk-th.is-sortable:hover {
+  color: var(--fk-text);
+}
+
+/* Body cells — thin borders, no zebra */
+.fk-td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--fk-border-subtle);
+  vertical-align: middle;
+}
+.fk-table tbody tr:last-child .fk-td {
+  border-bottom: none;
+}
+
+/* Row states — hover + selected accent bar, never zebra striping */
+.fk-table tbody tr {
+  transition: background-color var(--fk-dur-1) var(--fk-ease);
+}
+.fk-table tbody tr:hover {
+  background: var(--fk-inset);
+}
+.fk-table tbody tr.is-active {
+  background: var(--fk-inset);
+  box-shadow: inset 3px 0 0 var(--fk-alert);
+}
+.fk-table tbody tr.is-muted .fk-td {
+  color: var(--fk-text-meta);
+  text-decoration: line-through;
+  text-decoration-color: var(--fk-neutre-400);
+}

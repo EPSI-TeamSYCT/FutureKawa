@@ -1,0 +1,93 @@
+.fk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.fk-field-label {
+  font-size: var(--fk-fs-code);
+  font-weight: var(--fk-fw-semibold);
+  color: var(--fk-text);
+}
+
+.fk-field-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fk-input {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--fk-bg);
+  color: var(--fk-text);
+  border: 1.5px solid var(--fk-border);
+  border-radius: var(--fk-radius-btn);
+  font-family: var(--fk-font-ui);
+  font-size: var(--fk-fs-body);
+  line-height: 1.3;
+  transition:
+    border-color var(--fk-dur-2) var(--fk-ease),
+    box-shadow var(--fk-dur-1) var(--fk-ease);
+}
+.fk-input::placeholder {
+  color: var(--fk-text-meta);
+}
+.fk-input:hover:not(:disabled):not(:focus) {
+  border-color: var(--fk-neutre-400);
+}
+.fk-input:focus {
+  outline: none;
+  border-color: var(--fk-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fk-accent) 22%, transparent);
+}
+.fk-input:disabled {
+  background: var(--fk-inset);
+  color: var(--fk-text-meta);
+  cursor: not-allowed;
+}
+
+/* Leading icon */
+.fk-field-control.has-leading .fk-input {
+  padding-left: 38px;
+}
+.fk-field-leading {
+  position: absolute;
+  left: 13px;
+  display: inline-flex;
+  color: var(--fk-text-meta);
+  pointer-events: none;
+}
+
+/* Error state */
+.fk-field.is-error .fk-input {
+  border-color: var(--fk-danger);
+}
+.fk-field.is-error .fk-input:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fk-danger) 20%, transparent);
+}
+.fk-field-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fk-fs-small);
+  color: var(--fk-danger);
+}
+.fk-field-hint {
+  font-size: var(--fk-fs-small);
+  color: var(--fk-text-muted);
+}
+
+/* Select */
+.fk-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 38px;
+  cursor: pointer;
+}
+.fk-select-chevron {
+  position: absolute;
+  right: 12px;
+  color: var(--fk-text-meta);
+  pointer-events: none;
+}

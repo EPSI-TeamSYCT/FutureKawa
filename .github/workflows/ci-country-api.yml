@@ -1,0 +1,103 @@
+name: CI · country-api
+
+# Reusable per-service pipeline (PHP / Symfony API). Called by the ci.yml orchestrator.
+# Same gating as every other service (changes → quality → security → tests).
+#
+# The API already ships the tooling + composer scripts (quality/security/test:coverage).
+# Remaining for a fully green run (see the API spec):
+#   - a test suite under tests/ (+ an 80% coverage gate to match the other services)
+#   - a Dockerfile (used by cd-country-api.yml)
+on:
+  workflow_call:
+
+jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - 'apps/country/api/src/**'
+              - 'apps/country/api/config/**'
+              - 'apps/country/api/migrations/**'
+              - 'apps/country/api/tests/**'
+              - 'apps/country/api/composer.json'
+              - 'apps/country/api/composer.lock'
+              - 'apps/country/api/Dockerfile'
+
+  quality:
+    name: quality
+    needs: changes
+    if: ${{ needs.changes.outputs.code == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/api
+    env:
+      APP_ENV: test
+      APP_SECRET: ci
+      # Let php-cs-fixer run on newer PHP without an interactive prompt.
+      PHP_CS_FIXER_IGNORE_ENV: "1"
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, pdo_pgsql
+          tools: composer:v2
+          coverage: none
+      - run: composer validate --strict
+      - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
+      # composer quality = lint:yaml · lint:container · php-cs-fixer check · phpstan
+      - run: composer quality
+
+  # Runs after quality, INCLUDING when quality was skipped, but NOT when it
+  # failed — keeps the CVE audit running on every PR (status functions required).
+  security:
+    name: security
+    needs: quality
+    if: ${{ !failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/api
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.4"
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
+      - run: composer audit # CVE audit of the dependencies
+
+  tests:
+    name: tests
+    needs: [changes, quality, security]
+    if: ${{ needs.changes.outputs.code == 'true' && needs.quality.result == 'success' && needs.security.result == 'success' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/country/api
+    env:
+      APP_ENV: test
+      APP_SECRET: ci
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, intl, pdo_pgsql
+          tools: composer:v2
+          coverage: pcov
+      - run: composer install --no-interaction --no-progress --prefer-dist --no-scripts
+      # Current tests are unit tests (no DB). When DB-backed functional tests are
+      # added, bring back a postgres service + doctrine:database:create + migrate.
+      # TODO(api): enforce an 80% coverage gate to match the other services.
+      - run: composer test:coverage

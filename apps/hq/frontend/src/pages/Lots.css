@@ -1,0 +1,30 @@
+.lots-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--fk-sp-12);
+  margin-bottom: var(--fk-sp-16);
+  flex-wrap: wrap;
+}
+.lots-search {
+  flex: 1;
+  min-width: 240px;
+}
+.lots-filters .fk-field {
+  gap: 0;
+}
+.lots-count {
+  color: var(--fk-text-meta);
+  font-size: var(--fk-fs-small);
+}
+.lots-id-link {
+  color: var(--fk-accent);
+  font-weight: var(--fk-fw-medium);
+}
+.lots-id-link:hover {
+  color: var(--fk-accent-hover);
+  text-decoration: none;
+}
+.lots-empty {
+  margin: var(--fk-sp-16);
+  border: none;
+}
