@@ -1,7 +1,7 @@
 /**
- * Tiny fetch wrapper around the central HQ API. In mock mode VITE_API_URL is
- * empty, so requests hit `/api/*` on the same origin and MSW intercepts them.
- * Pointing at a real backend is a single env-var change.
+ * Tiny fetch wrapper around the HQ backend. Requests reach it through the `/hq`
+ * reverse proxy (see vite.config.ts / nginx.conf), so the SPA stays same-origin
+ * and no CORS is needed.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
@@ -28,14 +28,6 @@ function buildUrl(path: string, params?: QueryParams): string {
   return qs ? `${url}?${qs}` : url;
 }
 
-async function parse<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    throw new ApiError(res.status, `Requête échouée (${res.status}) : ${res.statusText}`);
-  }
-  if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
-}
-
 export async function apiGet<T>(
   path: string,
   params?: QueryParams,
@@ -45,14 +37,9 @@ export async function apiGet<T>(
     headers: { Accept: "application/json" },
     signal,
   });
-  return parse<T>(res);
-}
-
-export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  const res = await fetch(buildUrl(path), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  return parse<T>(res);
+  if (!res.ok) {
+    throw new ApiError(res.status, `Requête échouée (${res.status}) : ${res.statusText}`);
+  }
+  if (res.status === 204) return undefined as T;
+  return (await res.json()) as T;
 }

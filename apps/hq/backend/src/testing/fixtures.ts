@@ -1,5 +1,5 @@
 import type { Cached } from "../lib/cache";
-import type { Aggregate, Alert, Country, Lot } from "../types/domain";
+import type { Aggregate, Alert, Country, Lot, Warehouse } from "../types/domain";
 
 export function country(over: Partial<Country> & Pick<Country, "id">): Country {
   return {
@@ -39,16 +39,41 @@ export function alert(over: Partial<Alert> & Pick<Alert, "id" | "createdAt">): A
   };
 }
 
-export function aggregate(over: Partial<Aggregate> = {}): Aggregate {
-  return { countries: [], lots: [], alerts: [], ...over };
+export function warehouse(over: Partial<Warehouse> & Pick<Warehouse, "id">): Warehouse {
+  return {
+    name: `WH-${over.id}`,
+    countryId: 1,
+    country: "Brazil",
+    isoCode: "BR",
+    ideal: { temperature: 29, humidity: 55 },
+    tolerance: { temperature: 3, humidity: 2 },
+    lots: 0,
+    ...over,
+  };
 }
 
-// Shared scene: two countries, three lots (out of FIFO order), one alert.
+export function aggregate(over: Partial<Aggregate> = {}): Aggregate {
+  return { countries: [], warehouses: [], lots: [], alerts: [], ...over };
+}
+
+// Shared scene: two countries, two warehouses, three lots (out of FIFO order),
+// one alert.
 export function scene(): Aggregate {
   return aggregate({
     countries: [
       country({ id: 1, name: "Brazil" }),
       country({ id: 2, name: "Colombia", isoCode: "CO" }),
+    ],
+    warehouses: [
+      warehouse({ id: 1, name: "WH-BR", countryId: 1, lots: 2 }),
+      warehouse({
+        id: 2,
+        name: "WH-CO",
+        countryId: 2,
+        country: "Colombia",
+        isoCode: "CO",
+        lots: 1,
+      }),
     ],
     lots: [
       lot({ id: 2, storageDate: "2026-03-01T00:00:00.000Z", countryId: 1 }),

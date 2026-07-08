@@ -12,7 +12,7 @@ vi.mock("../adapters/country-api.adapter", () => ({
 }));
 
 import { countryClient } from "../adapters/country-api.adapter";
-import { getAggregate, getWarehouseMeasures } from "./aggregate.service";
+import { enrichWarehouses, getAggregate, getWarehouseMeasures } from "./aggregate.service";
 
 const c = vi.mocked(countryClient);
 
@@ -76,6 +76,43 @@ describe("getAggregate", () => {
       warehouse: "Warehouse A",
     });
     expect(data.alerts[0]).toMatchObject({ id: 5, country: "Colombia", batchId: 10 });
+  });
+
+  it("builds warehouses enriched with their country and lot count", async () => {
+    const { data } = await getAggregate();
+    expect(data.warehouses[0]).toMatchObject({
+      id: 3,
+      name: "Warehouse A",
+      country: "Colombia",
+      isoCode: "CO",
+      ideal: { temperature: 26, humidity: 80 },
+      lots: 1,
+    });
+  });
+});
+
+describe("enrichWarehouses", () => {
+  it("attaches the latest reading and flags out-of-range", async () => {
+    const { data } = await getAggregate();
+    c.fetchWarehouseMeasures.mockResolvedValueOnce([
+      { id: 1, temperature: 26, humidity: 80, measuredAt: "2026-01-01T00:00:00.000Z" },
+      { id: 2, temperature: 40, humidity: 80, measuredAt: "2026-01-02T00:00:00.000Z" },
+    ]);
+
+    const [status] = await enrichWarehouses(data.warehouses);
+
+    expect(status?.latestMeasure).toMatchObject({ id: 2, temperature: 40 });
+    expect(status?.outOfRange).toBe(true); // 40°C is far past 26 ± 3
+  });
+
+  it("has no reading and is in range when the warehouse has no measures", async () => {
+    const { data } = await getAggregate();
+    c.fetchWarehouseMeasures.mockResolvedValueOnce([]);
+
+    const [status] = await enrichWarehouses(data.warehouses);
+
+    expect(status?.latestMeasure).toBeNull();
+    expect(status?.outOfRange).toBe(false);
   });
 });
 

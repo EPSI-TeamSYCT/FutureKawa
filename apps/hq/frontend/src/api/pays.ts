@@ -1,6 +1,7 @@
-import { apiGet } from "./client";
+import { fetchCountries } from "./backend";
+import { mapPays } from "./mappers";
 import type { PaysInfo } from "./types";
 
 export function getPays(signal?: AbortSignal): Promise<PaysInfo[]> {
-  return apiGet<PaysInfo[]>("/api/pays", undefined, signal);
+  return fetchCountries(signal).then((countries) => countries.map(mapPays));
 }
