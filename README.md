@@ -8,8 +8,15 @@ Real-time temperature & humidity monitoring of coffee warehouses in 🇧🇷 Bra
 🇪🇨 Ecuador and 🇨🇴 Colombia — from the sensor on the shelf to a consolidated HQ dashboard.
 
 [![CI](https://github.com/EPSI-TeamSYCT/FutureKawa/actions/workflows/ci.yml/badge.svg)](https://github.com/EPSI-TeamSYCT/FutureKawa/actions/workflows/ci.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=EPSI-TeamSYCT_FutureKawa&metric=alert_status)](https://sonarcloud.io/dashboard?id=EPSI-TeamSYCT_FutureKawa)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
+[![License](https://img.shields.io/badge/license-proprietary-lightgrey)](#license)
+
+[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white)](#)
+[![Symfony](https://img.shields.io/badge/Symfony-7-000000?logo=symfony&logoColor=white)](#)
 [![Node](https://img.shields.io/badge/Node-22-339933?logo=node.js&logoColor=white)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](#)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](#)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-GHCR-2496ED?logo=docker&logoColor=white)](#)
 
@@ -17,15 +24,18 @@ Real-time temperature & humidity monitoring of coffee warehouses in 🇧🇷 Bra
 
 ## Table of contents
 
-- [What is FutureKawa?](#what-is-futurekawa)
-- [Architecture](#architecture)
-- [Monorepo layout](#monorepo-layout)
-- [Quickstart](#quickstart)
-- [Tech stack](#tech-stack)
-- [CI/CD](#cicd)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [Team](#team)
+- [☕ FutureKawa](#-futurekawa)
+  - [Table of contents](#table-of-contents)
+  - [What is FutureKawa?](#what-is-futurekawa)
+  - [Architecture](#architecture)
+  - [Monorepo layout](#monorepo-layout)
+  - [Quickstart](#quickstart)
+  - [Tech stack](#tech-stack)
+  - [CI/CD](#cicd)
+  - [Documentation](#documentation)
+  - [Contributing](#contributing)
+  - [Team](#team)
+  - [License](#license)
 
 ## What is FutureKawa?
 
@@ -120,9 +130,9 @@ Full instructions, `.env` reference and dev-mode (per app) in the
 | Domain | Choices |
 |---|---|
 | IoT | ESP8266 + DHT11 · PlatformIO/Arduino · MQTT (Mosquitto) · Python simulator (uv, paho-mqtt) |
-| Country API | Symfony · API Platform |
+| Country API | PHP 8.4 · Symfony · API Platform · PostgreSQL · FrankenPHP |
 | HQ backend | Node 22 · Express · TypeScript · axios · zod · pino |
-| HQ frontend | React 18 · Vite · TypeScript · Chart.js · MSW |
+| HQ frontend | React 19 · Vite · TypeScript · Chart.js · MSW |
 | Quality (JS/TS) | [oxc](https://oxc.rs) — oxlint + oxfmt |
 | Quality (Python) | ruff · mypy · pytest |
 | CI/CD | GitHub Actions (reusable workflows) · GHCR · Docker |
@@ -161,11 +171,16 @@ commitlint). Full workflow in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Team
 
-**SYCT** — EPSI M1 MSPR2.
+**Team SYCT** — EPSI M1 · MSPR2 (Bloc 4 · RNCP 35584).
 
-| Area | Scope |
-|---|---|
-| IoT · CI/CD · Infra | IoT tranche, simulator, pipelines, Docker/compose |
-| Country API · Database | Symfony API + per-country datastore |
-| HQ Backend | Express aggregator/BFF |
-| HQ Frontend | React supervision dashboard |
+| Member | Area | Scope |
+|---|---|---|
+| **Samuel RESSIOT** | IoT · CI/CD · Infra | IoT tranche, simulator, pipelines, Docker / Compose |
+| **Thomas ALGLAVE** | Country API · Database | Symfony API + per-country datastore |
+| **Cristelle ALMODAR** | HQ Backend | Express aggregator / BFF |
+| **Yassine ZOUITNI** | HQ Frontend | React supervision dashboard |
+
+## License
+
+Proprietary — academic project produced for the **EPSI M1 MSPR2** certification.
+Not licensed for external reuse.
