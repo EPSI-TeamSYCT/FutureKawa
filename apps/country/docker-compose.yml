@@ -55,28 +55,41 @@ services:
       timeout: 3s
       retries: 10
 
-  # Country REST API — Symfony / API Platform (apps/country/api). Built locally
-  # from ./api, or pulled from GHCR when deploying.
+  # One-shot: create the schema + seed this country's demo data, then exit.
+  # Idempotent (re-running against a seeded DB is a no-op). serverVersion in the
+  # URL because the prod image ships no .env carrying it.
+  migrate:
+    image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
+    restart: "no"
+    command: ["sh", "-c", "php bin/console doctrine:migrations:migrate --no-interaction && php bin/console app:seed"]
+    environment:
+      APP_ENV: prod
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
+      COUNTRY: ${COUNTRY:-brazil}
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
+    depends_on:
+      country-db:
+        condition: service_healthy
+
+  # Country REST API — Symfony / API Platform. Pulled from GHCR (built by the CD).
   country-api:
     image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
-    build: ./api
     restart: unless-stopped
     environment:
       APP_ENV: prod
       APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
-      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
       API_KEY: ${COUNTRY_API_KEY:-change-me}
     ports:
       - "8000:8000"
     depends_on:
-      country-db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   # Ingest worker — the "Worker subscribe" of the architecture diagram: subscribes
   # to MQTT and persists measures. Same image as the API, run as a console command.
   ingest-worker:
     image: ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-country-api:${IMAGE_TAG:-latest}
-    build: ./api
     restart: unless-stopped
     command: ["php", "bin/console", "app:mqtt:subscribe"]
     environment:
@@ -87,12 +100,12 @@ services:
       MQTT_USER: ${MQTT_USER:-}
       MQTT_PASSWORD: ${MQTT_PASSWORD:-}
       COUNTRY: ${COUNTRY:-brazil}
-      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}
+      DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
     depends_on:
       mosquitto:
         condition: service_started
-      country-db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   country-db-data:
