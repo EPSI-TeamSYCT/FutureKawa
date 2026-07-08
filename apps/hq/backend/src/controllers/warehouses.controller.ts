@@ -15,7 +15,7 @@ warehousesRouter.get(
   "/warehouses",
   asyncHandler(async (req, res) => {
     const countryId = parseIntParam(req.query.country);
-    const { data, ...meta } = await getAggregate();
+    const { data, meta } = await getAggregate();
     assertCountry(data, countryId);
     const list =
       countryId !== undefined
@@ -41,6 +41,14 @@ warehousesRouter.get(
   "/warehouses/:id/measures",
   asyncHandler(async (req, res) => {
     const id = parseIntParam(req.params.id)!;
-    res.json({ warehouseId: id, measures: await getWarehouseMeasures(id) });
+    const { data } = await getAggregate();
+    const warehouse = data.warehouses.find((w) => w.id === id);
+    if (!warehouse) throw new HttpError(404, Errors.WAREHOUSE_NOT_FOUND, String(id));
+    // The warehouse id is global (offset); route to its owning country API via
+    // its `source` and the local id that API knows it by.
+    res.json({
+      warehouseId: id,
+      measures: await getWarehouseMeasures(warehouse.source, warehouse.localWarehouseId),
+    });
   }),
 );

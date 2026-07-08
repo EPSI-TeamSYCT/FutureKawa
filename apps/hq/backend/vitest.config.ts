@@ -17,7 +17,9 @@ export default defineConfig({
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
     env: {
-      COUNTRY_API_URL: "http://country.test",
+      COUNTRY_API_URL_BRAZIL: "http://brazil.test",
+      COUNTRY_API_URL_ECUADOR: "http://ecuador.test",
+      COUNTRY_API_URL_COLOMBIA: "http://colombia.test",
       COUNTRY_API_KEY: "test-key",
       CACHE_STALE_MS: "300000",
       LOG_LEVEL: "silent",

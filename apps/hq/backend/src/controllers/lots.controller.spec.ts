@@ -62,7 +62,7 @@ describe("GET /lots/:id/measures", () => {
     expect(res.status).toBe(200);
     expect(res.body.warehouse).toBe("WH-1");
     expect(res.body.measures).toHaveLength(1);
-    expect(getMeasures).toHaveBeenCalledWith(1);
+    expect(getMeasures).toHaveBeenCalledWith("BRAZIL", 1);
   });
 
   it("404s on an unknown lot before fetching measures", async () => {
