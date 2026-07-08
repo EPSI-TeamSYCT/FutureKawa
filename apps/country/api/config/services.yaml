@@ -10,6 +10,8 @@ parameters:
     # Defaults for the env vars used by the app. The real environment (docker
     # compose / .env) overrides these.
     env(DEFAULT_URI): 'http://localhost'
+    # Demo default for the X-API-KEY shared secret; override in prod via the env.
+    env(COUNTRY_API_KEY): 'change-me'
     env(COUNTRY): 'brazil'
     env(MQTT_HOST): 'localhost'
     env(MQTT_PORT): '1883'
