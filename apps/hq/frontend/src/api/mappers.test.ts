@@ -94,7 +94,9 @@ describe("mapAlerte", () => {
       emailStatut: "ENVOYE",
       traitee: false,
     });
-    expect(mapAlerte({ ...base, type: "peremption", emailSent: false, batchId: null }, codeById)).toMatchObject({
+    expect(
+      mapAlerte({ ...base, type: "peremption", emailSent: false, batchId: null }, codeById),
+    ).toMatchObject({
       type: "PEREMPTION",
       emailStatut: "EN_ATTENTE",
       lotId: null,

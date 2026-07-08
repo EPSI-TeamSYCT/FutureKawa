@@ -12,11 +12,7 @@ vi.mock("../adapters/country-api.adapter", () => ({
 }));
 
 import { countryClient } from "../adapters/country-api.adapter";
-import {
-  enrichWarehouses,
-  getAggregate,
-  getWarehouseMeasures,
-} from "./aggregate.service";
+import { enrichWarehouses, getAggregate, getWarehouseMeasures } from "./aggregate.service";
 
 const c = vi.mocked(countryClient);
 

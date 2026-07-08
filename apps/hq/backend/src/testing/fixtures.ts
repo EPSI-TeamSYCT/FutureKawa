@@ -66,7 +66,14 @@ export function scene(): Aggregate {
     ],
     warehouses: [
       warehouse({ id: 1, name: "WH-BR", countryId: 1, lots: 2 }),
-      warehouse({ id: 2, name: "WH-CO", countryId: 2, country: "Colombia", isoCode: "CO", lots: 1 }),
+      warehouse({
+        id: 2,
+        name: "WH-CO",
+        countryId: 2,
+        country: "Colombia",
+        isoCode: "CO",
+        lots: 1,
+      }),
     ],
     lots: [
       lot({ id: 2, storageDate: "2026-03-01T00:00:00.000Z", countryId: 1 }),

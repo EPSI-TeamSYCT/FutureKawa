@@ -19,9 +19,7 @@ export async function getLots(filters: LotFilters = {}, signal?: AbortSignal): P
   const countries = await fetchCountries(signal);
   const codeById = indexCodeByCountryId(countries);
   const scope = paysParam(filters.scope);
-  const countryId = scope
-    ? countries.find((c) => codeFromIso(c.isoCode) === scope)?.id
-    : undefined;
+  const countryId = scope ? countries.find((c) => codeFromIso(c.isoCode) === scope)?.id : undefined;
 
   const lots = await fetchLots(countryId != null ? { country: countryId } : undefined, signal);
   let mapped = lots.map((l) => mapLot(l, codeById));

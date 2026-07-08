@@ -39,7 +39,11 @@ describe("iriId", () => {
 describe("toWarehouse", () => {
   it("resolves the country's conditions and carries the lot count", () => {
     expect(
-      toWarehouse({ id: 3, name: "Warehouse A", country: "/api/countries/1" }, lookups.countries, 4),
+      toWarehouse(
+        { id: 3, name: "Warehouse A", country: "/api/countries/1" },
+        lookups.countries,
+        4,
+      ),
     ).toMatchObject({
       id: 3,
       name: "Warehouse A",

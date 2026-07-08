@@ -11,13 +11,7 @@ import {
   toRef,
   toWarehouse,
 } from "../mappers/domain.mapper";
-import type {
-  Aggregate,
-  Lookups,
-  Measure,
-  Warehouse,
-  WarehouseStatus,
-} from "../types/domain";
+import type { Aggregate, Lookups, Measure, Warehouse, WarehouseStatus } from "../types/domain";
 
 function mapById<T extends { id: number }>(items: T[]): Map<number, T> {
   return new Map(items.map((item) => [item.id, item]));

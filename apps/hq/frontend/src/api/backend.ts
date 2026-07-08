@@ -69,25 +69,17 @@ export function fetchCountries(signal?: AbortSignal): Promise<BkCountry[]> {
   );
 }
 
-export function fetchLots(
-  params?: QueryParams,
-  signal?: AbortSignal,
-): Promise<BkLot[]> {
+export function fetchLots(params?: QueryParams, signal?: AbortSignal): Promise<BkLot[]> {
   return apiGet<{ lots: BkLot[] }>(`${HQ}/lots`, params, signal).then((r) => r.lots);
 }
 
 export function fetchLot(id: string, signal?: AbortSignal): Promise<BkLot> {
-  return apiGet<{ lot: BkLot }>(
-    `${HQ}/lots/${encodeURIComponent(id)}`,
-    undefined,
-    signal,
-  ).then((r) => r.lot);
+  return apiGet<{ lot: BkLot }>(`${HQ}/lots/${encodeURIComponent(id)}`, undefined, signal).then(
+    (r) => r.lot,
+  );
 }
 
-export function fetchLotMeasures(
-  id: string,
-  signal?: AbortSignal,
-): Promise<BkMeasure[]> {
+export function fetchLotMeasures(id: string, signal?: AbortSignal): Promise<BkMeasure[]> {
   return apiGet<{ measures: BkMeasure[] }>(
     `${HQ}/lots/${encodeURIComponent(id)}/measures`,
     undefined,
@@ -95,13 +87,8 @@ export function fetchLotMeasures(
   ).then((r) => r.measures);
 }
 
-export function fetchAlerts(
-  params?: QueryParams,
-  signal?: AbortSignal,
-): Promise<BkAlert[]> {
-  return apiGet<{ alerts: BkAlert[] }>(`${HQ}/alerts`, params, signal).then(
-    (r) => r.alerts,
-  );
+export function fetchAlerts(params?: QueryParams, signal?: AbortSignal): Promise<BkAlert[]> {
+  return apiGet<{ alerts: BkAlert[] }>(`${HQ}/alerts`, params, signal).then((r) => r.alerts);
 }
 
 export function fetchWarehouses(signal?: AbortSignal): Promise<BkWarehouse[]> {
@@ -118,10 +105,7 @@ export function fetchWarehouse(id: string, signal?: AbortSignal): Promise<BkWare
   ).then((r) => r.warehouse);
 }
 
-export function fetchWarehouseMeasures(
-  id: string,
-  signal?: AbortSignal,
-): Promise<BkMeasure[]> {
+export function fetchWarehouseMeasures(id: string, signal?: AbortSignal): Promise<BkMeasure[]> {
   return apiGet<{ measures: BkMeasure[] }>(
     `${HQ}/warehouses/${encodeURIComponent(id)}/measures`,
     undefined,

@@ -7,7 +7,10 @@ export interface AlerteFilters {
   scope?: CountryScope;
 }
 
-export async function getAlertes(filters: AlerteFilters = {}, signal?: AbortSignal): Promise<Alerte[]> {
+export async function getAlertes(
+  filters: AlerteFilters = {},
+  signal?: AbortSignal,
+): Promise<Alerte[]> {
   const [countries, alerts] = await Promise.all([
     fetchCountries(signal),
     fetchAlerts(undefined, signal),
