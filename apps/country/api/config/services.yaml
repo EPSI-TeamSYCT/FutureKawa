@@ -17,6 +17,8 @@ parameters:
     env(MQTT_PORT): '1883'
     env(MQTT_USER): ''
     env(MQTT_PASSWORD): ''
+    env(MAILER_DSN): 'null://null'
+    env(ALERT_MAIL_FROM): 'alerts@futurekawa.example'
 
 services:
     # default configuration for services in *this* file
