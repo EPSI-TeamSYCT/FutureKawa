@@ -1,42 +1,50 @@
-# FutureKawa country API — Symfony / API Platform on FrankenPHP.
-# The SAME image runs the REST API (default) and the MQTT ingest worker
-# (override the command with: php bin/console app:mqtt:subscribe).
-FROM dunglas/frankenphp:1-php8.4-alpine
+# syntax=docker/dockerfile:1
+#
+# FutureKawa — Country API (Symfony / API Platform) + MQTT ingestion worker.
+#
+# ONE image, TWO roles:
+#   - country-api    : serves HTTP on :8000 (default command, FrankenPHP)
+#   - ingest-worker  : runs `php bin/console app:mqtt:subscribe` (command override)
+#
+# TLS is terminated by Traefik in front, so FrankenPHP serves plain HTTP here.
 
-# PHP extensions needed by Doctrine/Postgres + Symfony.
-RUN install-php-extensions pdo_pgsql intl opcache zip
+FROM dunglas/frankenphp:1-php8.4
 
-# Composer from the official image.
+# PHP extensions:
+#   pdo_pgsql : PostgreSQL driver (Doctrine)
+#   intl      : required by Symfony
+#   opcache   : bytecode cache (prod perf)
+#   pcntl     : POSIX signals — the worker uses them for graceful shutdown
+#   zip       : composer dist installs
+RUN install-php-extensions pdo_pgsql intl opcache pcntl zip
+
+# Composer (copied from the official image)
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
+
+# Production runtime by default.
+# SERVER_NAME=:8000 makes FrankenPHP serve plain HTTP on 8000 with NO auto-TLS
+# (Traefik handles HTTPS). Document root defaults to /app/public.
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
     SERVER_NAME=:8000
 
-# Install PHP dependencies first for better layer caching.
+# 1) Dependencies first — cached as long as composer.{json,lock} don't change.
 COPY composer.json composer.lock symfony.lock ./
-RUN composer install --no-dev --no-scripts --no-progress --prefer-dist \
-    --no-interaction --ignore-platform-reqs
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
 
-# Application code — copied explicitly (never `COPY . .`) so no dev/secret file
-# ever lands in the image.
-COPY bin ./bin
-COPY config ./config
-COPY migrations ./migrations
-COPY public ./public
-COPY src ./src
-COPY translations ./translations
-# Base .env so Symfony's dotenv boots (no secret in it; real values come from the
-# environment, e.g. docker compose). Without it the app crashes on boot.
-COPY .env ./.env
+# 2) Application source.
+COPY . .
 
+# 3) Finalise: authoritative autoloader + Symfony auto-scripts (cache warmup, assets),
+#    then make the writable dirs owned by the web user.
 RUN composer dump-autoload --no-dev --optimize --classmap-authoritative \
- && mkdir -p var /data/caddy /config/caddy \
- && chown -R www-data:www-data /app /data /config
+ && composer run-script auto-scripts --no-interaction \
+ && mkdir -p var/cache var/log var/share \
+ && chown -R www-data:www-data var
 
-# Run as a non-root user (binds :8000, a non-privileged port).
-USER www-data
-
-# FrankenPHP serves public/ on :8000 (SERVER_NAME above).
 EXPOSE 8000
+
+# Default command (inherited from the base image) starts FrankenPHP and serves
+# the API. The worker service overrides this with `php bin/console app:mqtt:subscribe`.

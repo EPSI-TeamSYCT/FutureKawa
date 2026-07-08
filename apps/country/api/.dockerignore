@@ -1,12 +1,21 @@
-# Keep the build context small and let the image build its own deps.
-/vendor/
-/var/
-/tests/
-/.git/
-.env.local
-.env.*.local
-.php-cs-fixer.cache
-.phpunit.cache/
-docker-compose*.yml
-Dockerfile
-.dockerignore
+# Rebuilt inside the image
+/vendor
+/var
+
+# Never bake local secrets / env overrides into the image
+/.env.local
+/.env.*.local
+/.env.dev
+/.env.test
+
+# Dev-only
+/tests
+/.git
+/.github
+/.php-cs-fixer.cache
+/.php-cs-fixer.dist.php
+/.phpunit.cache
+/phpunit.dist.xml
+/phpstan.dist.neon
+/.editorconfig
+coverage.xml
