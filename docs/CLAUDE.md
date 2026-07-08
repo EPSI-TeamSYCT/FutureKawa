@@ -12,11 +12,13 @@ Stay scoped to docs unless explicitly asked to read code for accuracy.
 
 ## Language policy
 
-- Everything in `docs/` is **English only**, EXCEPT `docs/user-guide/` which is **bilingual**:
-  - `docs/user-guide/en/` — English
-  - `docs/user-guide/fr/` — French (mirror of EN structure)
-- When updating the user guide, update EN first, then mirror to FR.
-- Keep business terms consistent with the glossary in `/PROJECT_STRUCTURE.md`.
+- Everything in `docs/` is **English only**, EXCEPT the **field-facing** docs, which
+  are **multilingual** to match the operators on site:
+  - `docs/user-guide/` — `en/` · `fr/` · `pt/` (Brazil) · `es/` (Ecuador & Colombia)
+  - `docs/change-management/` — same four languages
+- Write the **English master first**, then mirror to FR / PT / ES (same structure).
+- Keep business terms consistent across languages (lot/lote, warehouse/entrepôt/
+  armazém/almacén, exploitation/fazenda/finca, alert/alerta…).
 
 ## Directory map
 
@@ -28,8 +30,9 @@ Stay scoped to docs unless explicitly asked to read code for accuracy.
 | `ci-cd/` | GitHub Actions pipeline (CI + release) | EN |
 | `deployment/` | how to run the docker-compose stacks | EN |
 | `phase2/` | automation schema, interview questionnaire | EN |
-| `user-guide/en` + `user-guide/fr` | business user guide | EN + FR |
-| `schemas/` | Excalidraw exports (png/excalidraw) | neutral |
+| `user-guide/{en,fr,pt,es}` | business user guide | EN · FR · PT · ES |
+| `change-management/{en,fr,pt,es}` | change-management plan | EN · FR · PT · ES |
+| `schemas/` | rendered diagram exports (PNG) + Mermaid sources | neutral |
 
 ## Writing rules
 
