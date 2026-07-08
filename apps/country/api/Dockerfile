@@ -27,6 +27,9 @@ COPY migrations ./migrations
 COPY public ./public
 COPY src ./src
 COPY translations ./translations
+# Base .env so Symfony's dotenv boots (no secret in it; real values come from the
+# environment, e.g. docker compose). Without it the app crashes on boot.
+COPY .env ./.env
 
 RUN composer dump-autoload --no-dev --optimize --classmap-authoritative \
  && mkdir -p var /data/caddy /config/caddy \
