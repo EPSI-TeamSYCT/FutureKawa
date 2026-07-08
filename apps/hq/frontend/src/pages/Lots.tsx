@@ -21,9 +21,9 @@ import { LotStatusBadge } from "@/components/metier";
 import { useCountryFilter } from "@/hooks/country-context";
 import { useAsync } from "@/hooks/useAsync";
 import { getLots } from "@/api/lots";
+import { getEntrepots } from "@/api/entrepots";
 import { ageTone } from "@/lib/conditions";
 import { getCountry, scopeName } from "@/lib/countries";
-import { WAREHOUSES, warehousesByCountry } from "@/lib/warehouses";
 import type { Lot, LotStatut } from "@/api/types";
 import "./Lots.css";
 
@@ -64,7 +64,9 @@ export function Lots() {
     [scope, entrepot, statut],
   );
 
-  const warehouseOptions = scope === "siege" ? WAREHOUSES : warehousesByCountry(scope);
+  // Warehouse filter options come from the backend (real ids that match lots).
+  const { data: entrepots } = useAsync((signal) => getEntrepots(scope, signal), [scope]);
+  const warehouseOptions = entrepots ?? [];
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -121,7 +123,7 @@ export function Lots() {
           <option value="">Tous les entrepôts</option>
           {warehouseOptions.map((w) => (
             <option key={w.id} value={w.id}>
-              {w.name}
+              {w.nom}
             </option>
           ))}
         </Select>

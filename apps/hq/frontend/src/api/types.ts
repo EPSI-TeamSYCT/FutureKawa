@@ -49,11 +49,4 @@ export interface Alerte {
   traitee: boolean;
 }
 
-export interface PaysInfo {
-  code: CountryCode;
-  nom: string;
-  ideal: Conditions;
-  tolerance: Conditions;
-}
-
 export type Periode = "24h" | "7j" | "30j" | "tout";
