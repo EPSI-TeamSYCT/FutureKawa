@@ -1,16 +1,19 @@
 # 🚀 Running the stack
 
-How to run FutureKawa with Docker Compose. Two stacks mirror the topology:
+How to run FutureKawa with Docker Compose. Three entry points mirror the topology:
 
-- **HQ stack** — `docker-compose.yml` at the repo root (backend + frontend).
-- **Country stack** — `apps/country/docker-compose.yml`, deployed **once per
-  country** (broker + IoT publisher; API/DB/ingest as they land).
+- **Full stack (one command)** — `docker-compose.yml` at the repo root runs the
+  **whole project** end-to-end for a demo/jury: one country's edge (broker +
+  simulator + API + DB + ingest) **plus** the HQ (backend + frontend), all wired.
+- **Country stack** — `apps/country/docker-compose.yml`, the per-country edge,
+  deployed **once per country** (broker + IoT publisher + API + DB + ingest).
+- **HQ-only** — the HQ half in isolation (see the full-stack file's HQ services).
 
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
 - [Authenticate to GHCR](#authenticate-to-ghcr)
-- [HQ stack](#hq-stack)
+- [Full stack (one command)](#full-stack-one-command)
 - [Country stack](#country-stack)
 - [Verify the MQTT feed](#verify-the-mqtt-feed)
 - [Frontend: mocks vs real backend](#frontend-mocks-vs-real-backend)
@@ -39,25 +42,86 @@ docker login ghcr.io -u <your-github-user>
 > 💡 For the jury demo you can instead make each package **public** (Package →
 > _Package settings_ → _Change visibility_) and skip the login entirely.
 
-## HQ stack
+## Full stack (one command)
 
-From the repo **root**:
+The repo-root `docker-compose.yml` is the project's **main** compose. It reuses
+the per-country edge stack (via Compose `include:` of
+`apps/country/docker-compose.yml`, **not** duplicated) for one country (Brazil)
+and adds the HQ layer, so a single `up` brings the whole system online:
 
 ```bash
-cp .env.example .env       # optional: REGISTRY, IMAGE_TAG, COUNTRY_API_KEY…
-docker compose up -d
+docker login ghcr.io       # images are private GHCR packages (see below)
+cp .env.example .env        # set APP_SECRET, DB_PASSWORD, COUNTRY_API_KEY…
+docker compose up -d --build
 ```
+
+Everything shares one Docker network (`futurekawa_default`), so services reach
+each other by name — the HQ backend calls `http://country-api:8000` directly.
 
 | Service | Port | Notes |
 |---|---|---|
-| `backend` | `3000` | Aggregator/BFF. Reads `COUNTRY_API_URL` (single-URL today). |
+| `mosquitto` | `1883` | MQTT broker (the country's local bus). |
+| `iot-simulator` | — | Publishes `futurekawa/brazil/<wh>/measurements`. |
+| `country-db` | — | Postgres 16 (internal only). |
+| `migrate` | — | One-shot Doctrine migration, then exits (creates tables). |
+| `country-api` | `8000` | Symfony / API Platform. Reachable at `/api`. |
+| `ingest-worker` | — | MQTT → DB consumer (`app:mqtt:subscribe`). |
+| `backend` | `3000` | HQ aggregator/BFF. Reads `COUNTRY_API_URL` (single-URL today). |
 | `frontend` | `8080` | React SPA (nginx). Runs on offline mocks by default. |
 
 ```bash
 docker compose ps        # status
 docker compose logs -f   # follow logs
-docker compose down      # stop
+docker compose down      # stop (add -v to also drop the DB volume)
 ```
+
+### Database initialisation (migration)
+
+The country DB starts empty; the `migrate` service runs
+`doctrine:migrations:migrate` once the DB is healthy, creating the schema before
+the API serves data. It is idempotent (re-running against a migrated DB is a
+no-op). Compose `include:` seals the imported `country-api`/`ingest-worker`, so
+they cannot be given an extra `depends_on: migrate`; the migration is quick, so
+in practice the schema lands within a second or two of the API booting. For a
+**strictly ordered** start, run the migration first, then the rest:
+
+```bash
+docker compose up -d migrate   # waits for the DB, migrates, exits
+docker compose up -d           # brings up everything else
+```
+
+Watch it succeed with `docker compose logs migrate` — expect
+`[OK] Successfully migrated to version: …`.
+
+### Smoke test
+
+```bash
+curl -fsS localhost:8000/api            # country API up
+curl -fsS localhost:3000/health         # HQ backend → {"status":"ok"}
+curl -fsS -o /dev/null -w '%{http_code}\n' localhost:8080   # frontend → 200
+```
+
+> ⚠️ **Known issue (owned by the country-api image).** The published
+> `futurekawa-country-api` prod image ships **without an `/app/.env`** file, but
+> the Symfony runtime still probes for one, so `country-api` and `ingest-worker`
+> crash on boot (`Unable to read the "/app/.env" environment file`) and the
+> worker crash-loops. The full-stack `migrate` service works around this locally
+> (it creates an empty `.env` and passes `?serverVersion=16` in `DATABASE_URL`),
+> but the fix belongs in `apps/country/api/Dockerfile` (e.g. `composer dump-env
+> prod` or committing a minimal `.env`). Until then, the **MQTT publish path**
+> (simulator → broker) works end-to-end; the **persist/read path**
+> (worker → DB → API → backend) needs that image fix.
+
+## HQ services in isolation
+
+To run only the HQ half, target its two services from the root compose:
+
+```bash
+docker compose up -d backend frontend
+```
+
+(They still expect a reachable `country-api`; point `COUNTRY_API_URL` at an
+external one in `.env` if the edge is not running.)
 
 ## Country stack
 
@@ -88,9 +152,16 @@ COUNTRY=ecuador docker compose --env-file .env.ecuador up -d
 
 ## Verify the MQTT feed
 
-Subscribe to the broker from inside the country's compose network:
+Subscribe to the broker from inside the compose network. The network name is
+`<project>_default` — `futurekawa_default` for the full stack, or
+`futurekawa-<country>_default` for a standalone country stack:
 
 ```bash
+# full stack (repo root)
+docker run --rm -it --network futurekawa_default eclipse-mosquitto:2 \
+  mosquitto_sub -h mosquitto -t 'futurekawa/#' -v
+
+# standalone country stack (apps/country)
 docker run --rm -it --network futurekawa-brazil_default eclipse-mosquitto:2 \
   mosquitto_sub -h mosquitto -t 'futurekawa/#' -v
 ```
@@ -121,13 +192,15 @@ docker build \
 
 ## What is not wired yet
 
-Kept as commented, ready-to-enable blocks in the compose files:
-
-- **`ingest-worker`** — the MQTT → DB consumer (not implemented).
-- **`country-api` + `country-db`** — the Symfony API and its datastore (in progress).
+- **Multi-country edge** — the full stack runs **one** country (Brazil). Ecuador
+  and Colombia edges are kept as commented placeholders; add them once the
+  backend merges multiple APIs.
 - **Backend multi-URL** — the HQ backend currently reads a single
   `COUNTRY_API_URL`; true per-country aggregation needs it extended to query the
-  three sovereign APIs and merge.
+  three sovereign APIs and merge. The 3-country target vars are present but
+  commented in the root compose and `.env.example`.
+- **country-api `/app/.env` boot crash** — see the Known issue above; the
+  persist/read path is blocked on an image fix in `apps/country/api/Dockerfile`.
 
 ## Developer mode (per app)
 
