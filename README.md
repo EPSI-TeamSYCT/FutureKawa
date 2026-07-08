@@ -24,16 +24,18 @@ Real-time temperature & humidity monitoring of coffee warehouses in 🇧🇷 Bra
 
 ## Table of contents
 
-- [What is FutureKawa?](#what-is-futurekawa)
-- [Architecture](#architecture)
-- [Monorepo layout](#monorepo-layout)
-- [Quickstart](#quickstart)
-- [Tech stack](#tech-stack)
-- [CI/CD](#cicd)
-- [Documentation](#documentation)
-- [Contributing](#contributing)
-- [Team](#team)
-- [License](#license)
+- [☕ FutureKawa](#-futurekawa)
+  - [Table of contents](#table-of-contents)
+  - [What is FutureKawa?](#what-is-futurekawa)
+  - [Architecture](#architecture)
+  - [Monorepo layout](#monorepo-layout)
+  - [Quickstart](#quickstart)
+  - [Tech stack](#tech-stack)
+  - [CI/CD](#cicd)
+  - [Documentation](#documentation)
+  - [Contributing](#contributing)
+  - [Team](#team)
+  - [License](#license)
 
 ## What is FutureKawa?
 
@@ -174,7 +176,7 @@ commitlint). Full workflow in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 | Member | Area | Scope |
 |---|---|---|
 | **Samuel RESSIOT** | IoT · CI/CD · Infra | IoT tranche, simulator, pipelines, Docker / Compose |
-| **Thomas ALGAVE** | Country API · Database | Symfony API + per-country datastore |
+| **Thomas ALGLAVE** | Country API · Database | Symfony API + per-country datastore |
 | **Cristelle ALMODAR** | HQ Backend | Express aggregator / BFF |
 | **Yassine ZOUITNI** | HQ Frontend | React supervision dashboard |
 
