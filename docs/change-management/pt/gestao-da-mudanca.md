@@ -56,8 +56,7 @@ consolida os três países numa visão única — mantendo **cada país dono dos
 > em vez de explicar uma perda depois. O objetivo da gestão da mudança é **fazer sentir**
 > esse benefício, não apenas anunciá-lo.
 
-> 📸 **[SCREENSHOT]** — Painel da sede, Brasil selecionado, armazém wh-01 aberto, um lote
-> EM ALERTA com sua curva de temperatura/umidade saindo da faixa verde.
+![Vista de detalhe do armazém com a curva de temperatura/umidade do lote saindo da faixa verde](../../schemas/screenshot-warehouse-detail.png)
 
 ## 👥 Partes interessadas & impacto
 
@@ -241,8 +240,7 @@ Como sabemos que a mudança realmente pegou — revisados por país e na sede.
 > 💡 Os KPIs são revisados **com** as equipes locais, no idioma delas — a revisão é, ela
 > mesma, um momento de comunicação e participação, não uma auditoria.
 
-> 📸 **[SCREENSHOT]** — Área de KPIs/visão geral do painel da sede: estoque por país e
-> número de alertas ativos lado a lado para Brasil, Equador e Colômbia.
+![Visão geral do painel da sede: KPIs, condições por armazém e últimos alertas](../../schemas/screenshot-dashboard.png)
 
 ## 🔮 Ligação com a fase 2
 

@@ -67,9 +67,7 @@ Per-service commands:
 | `hq-frontend` | oxlint · oxfmt · tsc · vite build | `npm audit --omit=dev --audit-level=high` | `npm run test:coverage` (80 % on `src/lib`) |
 | `country-api` | `composer quality` (lint:yaml · lint:container · php-cs-fixer · phpstan) | `composer audit` | `composer test:coverage` |
 
-> 📸 **[SCREENSHOT]** — A green CI run on a pull request: the GitHub **Checks** tab
-> showing all four services' `changes → quality → security → tests` jobs passed
-> (skipped jobs greyed out for the services that didn't change).
+![Green CI run on a pull request: the GitHub Checks tab with all four services' changes → quality → security → tests jobs passing](../schemas/screenshot-ci-run.png)
 
 ## 🚦 Gating rules
 
@@ -125,8 +123,7 @@ Two independent gates must both be green to merge:
   (see [Security hardening](#security-hardening)); a failing Quality Gate is a
   **required status check**, so the PR cannot merge.
 
-> 📸 **[SCREENSHOT]** — The SonarCloud project dashboard for FutureKawa: Quality
-> Gate **Passed**, coverage badge, and zero open security issues.
+![SonarCloud Quality Gate Passed for FutureKawa, with security and reliability ratings](../schemas/screenshot-sonarcloud.png)
 
 ## 🏷️ Release — build, push & versioning
 

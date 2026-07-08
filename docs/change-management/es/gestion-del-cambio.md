@@ -56,8 +56,7 @@ dueño de sus datos** (soberanía).
 > lote, en vez de explicar una pérdida después. El objetivo de la gestión del cambio es
 > **hacer sentir** ese beneficio, no solo anunciarlo.
 
-> 📸 **[SCREENSHOT]** — Panel de la sede, Brasil seleccionado, almacén wh-01 abierto, un
-> lote EN ALERTA con su curva de temperatura/humedad saliendo de la franja verde.
+![Vista de detalle del almacén con la curva de temperatura/humedad del lote saliendo de la franja verde](../../schemas/screenshot-warehouse-detail.png)
 
 ## 👥 Partes interesadas & impacto
 
@@ -242,8 +241,7 @@ Cómo sabemos que el cambio realmente caló — revisados por país y en la sede
 > 💡 Los KPIs se revisan **con** los equipos locales, en su idioma — la revisión es, en
 > sí misma, un momento de comunicación y participación, no una auditoría.
 
-> 📸 **[SCREENSHOT]** — Zona de KPIs/resumen del panel de la sede: stock por país y número
-> de alertas activas lado a lado para Brasil, Ecuador y Colombia.
+![Resumen del panel de la sede: KPIs, condiciones por almacén y últimas alertas](../../schemas/screenshot-dashboard.png)
 
 ## 🔮 Vínculo con la fase 2
 

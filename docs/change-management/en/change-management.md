@@ -54,8 +54,7 @@ countries into one view — while **each country keeps its own data** (sovereign
 > loss afterwards. The goal of change management is to make that benefit **felt**, not
 > just announced.
 
-> 📸 **[SCREENSHOT]** — HQ dashboard, Brazil selected, warehouse wh-01 open, one lot
-> EN ALERTE with its temperature/humidity curve leaving the green band.
+![Warehouse detail view with the lot's temperature/humidity curve leaving the green band](../../schemas/screenshot-warehouse-detail.png)
 
 ## 👥 Stakeholders & impact
 
@@ -236,8 +235,7 @@ How we know the change has actually landed — reviewed per country and at HQ.
 > 💡 KPIs are reviewed **with** the local teams, in their language — the review is
 > itself a communication and participation moment, not an audit.
 
-> 📸 **[SCREENSHOT]** — HQ dashboard KPI/overview area: per-country stock and active
-> alert counts side by side for Brazil, Ecuador and Colombia.
+![HQ dashboard overview: KPIs, per-warehouse conditions and the latest alerts](../../schemas/screenshot-dashboard.png)
 
 ## 🔮 Link to phase 2
 

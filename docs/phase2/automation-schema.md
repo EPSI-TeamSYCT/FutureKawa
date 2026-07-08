@@ -99,9 +99,7 @@ Sensor data is fresh and the actuators are healthy:
    settles with **all actuators idle** once inside the band.
 5. The web app shows the warehouse in **auto** mode, in band, no active alert.
 
-> 📸 **[SCREENSHOT]** — HQ dashboard, Brazil selected, warehouse wh-01 open in
-> phase‑2 "auto" mode: temperature/humidity curve inside the green band, actuator
-> panel showing all elements idle, no active alert.
+![Warehouse detail view with the temperature/humidity chart for warehouse wh-01](../schemas/screenshot-warehouse-detail.png)
 
 ## Degraded case
 

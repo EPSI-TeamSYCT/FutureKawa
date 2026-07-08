@@ -71,10 +71,7 @@ Pinned in [`platformio.ini`](../../apps/country/iot/platformio.ini):
 
 ![IoT wiring](../schemas/iot-wiring.png)
 
-> 📸 **[SCREENSHOT]** — PlatformIO serial monitor @ 115200 baud showing the node
-> booting: `WiFi connected`, `MQTT connected`, then repeating `PUB
-> futurekawa/brazil/wh-01/measurements -> {…} [ok]` lines, with the 🟢 green status
-> LED lit on the breadboard.
+![Real ESP8266 + DHT11 breadboard prototype of the IoT node, wired and powered on](../schemas/photo-iot-prototype.png)
 
 ## 🧠 Hardware choice, limits & risks
 
