@@ -33,7 +33,8 @@ x-sim-image: &sim-image ${REGISTRY:-ghcr.io/epsi-teamsyct}/futurekawa-iot-simula
 x-api-env: &api-env
   APP_ENV: prod
   APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
-  API_KEY: ${COUNTRY_API_KEY:-change-me}
+  # The API validates X-API-KEY against %env(COUNTRY_API_KEY)% (ApiKeySubscriber).
+  COUNTRY_API_KEY: ${COUNTRY_API_KEY:-change-me}
 
 x-db-healthcheck: &db-healthcheck
   test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-futurekawa} -d ${DB_NAME:-futurekawa}"]

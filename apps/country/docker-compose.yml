@@ -79,7 +79,8 @@ services:
       APP_ENV: prod
       APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env}
       DATABASE_URL: postgresql://${DB_USER:-futurekawa}:${DB_PASSWORD}@country-db:5432/${DB_NAME:-futurekawa}?serverVersion=16&charset=utf8
-      API_KEY: ${COUNTRY_API_KEY:-change-me}
+      # The API validates X-API-KEY against %env(COUNTRY_API_KEY)% (ApiKeySubscriber).
+      COUNTRY_API_KEY: ${COUNTRY_API_KEY:-change-me}
     ports:
       - "8000:8000"
     depends_on:
