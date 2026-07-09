@@ -55,21 +55,7 @@ Colombia `26°C / 80%`), and — by design — **each country keeps its own data
 Two layers: a **sovereign country edge** (replicated per country) and a central
 **HQ** that aggregates them.
 
-```
-        ┌──────────────────────── Country edge (×3, sovereign) ────────────────────────┐
-        │                                                                               │
-        │   📡 IoT sensor ──MQTT──► 🦟 Mosquitto ──► ⚙️ ingest worker ──► 🧩 Country API ─┼──┐
-        │      (ESP8266 / simulator)     broker         (MQTT→DB)          + 🗄️ DB        │  │
-        └───────────────────────────────────────────────────────────────────────────────┘  │
-                                                                              HTTP (per country)
-                                                                                             │
-                        ┌──────────────────── Headquarters ─────────────────────┐           │
-                        │   🔌 Backend (BFF / aggregator) ◄──────────────────────┼───────────┘
-                        │        │                                               │
-                        │        ▼                                               │
-                        │   🖥️ Frontend (React dashboard)                        │
-                        └────────────────────────────────────────────────────────┘
-```
+![FutureKawa distributed architecture — three sovereign country edges (sensor → broker → ingest worker → country API + DB) aggregated by the HQ backend and frontend.](docs/schemas/architecture-distributed.png)
 
 - **IoT → MQTT**: sensors publish `futurekawa/<country>/<warehouse>/measurements`
   (QoS 1). Contract in [`packages/contracts`](packages/contracts/README.md).
