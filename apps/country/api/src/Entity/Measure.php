@@ -2,11 +2,18 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\MeasureRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ApiResource]
+// Charts read the LATEST measures: default to newest-first + a generous page so
+// a time series is available, and allow filtering by the owning warehouse
+// (through the sensor). Without this the API returns the 30 OLDEST rows, so
+// charts freeze on the first readings.
+#[ApiResource(order: ['measuredAt' => 'DESC'], paginationItemsPerPage: 500)]
+#[ApiFilter(SearchFilter::class, properties: ['sensor.warehouse' => 'exact'])]
 #[ORM\Entity(repositoryClass: MeasureRepository::class)]
 class Measure
 {

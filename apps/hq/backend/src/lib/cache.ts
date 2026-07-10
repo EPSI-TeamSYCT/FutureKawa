@@ -9,6 +9,24 @@ export interface Cached<T> {
   fetchedAt: string;
 }
 
+// Freshness of one sovereign country API within a merged response.
+export interface CountryMeta {
+  code: string;
+  source: Source;
+  stale: boolean;
+  fetchedAt: string;
+}
+
+// Response-level freshness. `source`/`stale`/`fetchedAt` summarize the whole
+// merged snapshot (backward-compatible with the single-country shape);
+// `countries` breaks it down per sovereign API.
+export interface Meta {
+  source: Source;
+  stale: boolean;
+  fetchedAt: string;
+  countries: CountryMeta[];
+}
+
 // Last-known-good fallback cache. Every call refetches live; on failure it
 // serves the previous value (flagged `stale` once older than `staleMs`). This
 // keeps HQ responsive when the country API is briefly down, without any
@@ -42,4 +60,17 @@ export class FallbackCache<T> {
       };
     }
   }
+}
+
+// Roll per-country freshness up into the response-level summary: the merged
+// snapshot is "cache" if any country degraded to its cache, and "stale" if any
+// served country is stale. `fetchedAt` is the oldest contributing snapshot.
+export function summarizeMeta(countries: CountryMeta[]): Meta {
+  const source: Source = countries.some((c) => c.source === "cache") ? "cache" : "live";
+  const stale = countries.some((c) => c.stale);
+  const fetchedAt = countries.reduce(
+    (oldest, c) => (c.fetchedAt < oldest ? c.fetchedAt : oldest),
+    countries[0]?.fetchedAt ?? new Date().toISOString(),
+  );
+  return { source, stale, fetchedAt, countries };
 }

@@ -1,20 +1,25 @@
 # 🚀 Running the stack
 
-How to run FutureKawa with Docker Compose. Two stacks mirror the topology:
+How to run FutureKawa with Docker Compose. Two entry points mirror the topology:
 
-- **HQ stack** — `docker-compose.yml` at the repo root (backend + frontend).
-- **Country stack** — `apps/country/docker-compose.yml`, deployed **once per
-  country** (broker + IoT publisher; API/DB/ingest as they land).
+- **Full stack (one command)** — `docker-compose.yml` at the repo root runs the
+  **whole project** end-to-end for a demo/jury: the **three sovereign country
+  edges** (Brazil, Ecuador, Colombia) **plus** the HQ (backend + frontend), all
+  wired on one network.
+- **Country stack** — `apps/country/docker-compose.yml`, a **single** country
+  edge (broker + simulator + API + DB + ingest), the artifact deployed per
+  country in production.
 
 ## Table of contents
 
 - [Prerequisites](#prerequisites)
 - [Authenticate to GHCR](#authenticate-to-ghcr)
-- [HQ stack](#hq-stack)
-- [Country stack](#country-stack)
+- [Full stack (one command)](#full-stack-one-command)
+- [Migration & seed](#migration--seed)
+- [Smoke test](#smoke-test)
 - [Verify the MQTT feed](#verify-the-mqtt-feed)
-- [Frontend: mocks vs real backend](#frontend-mocks-vs-real-backend)
-- [What is not wired yet](#what-is-not-wired-yet)
+- [Frontend ↔ backend](#frontend--backend)
+- [Country stack (single country)](#country-stack-single-country)
 - [Developer mode (per app)](#developer-mode-per-app)
 
 ## Prerequisites
@@ -28,44 +33,135 @@ Images are **private** GHCR packages, so log in first with a token that has the
 `read:packages` scope:
 
 ```bash
-# with the GitHub CLI
 gh auth refresh -h github.com -s read:packages
 gh auth token | docker login ghcr.io -u <your-github-user> --password-stdin
-
-# or with a classic PAT (read:packages)
-docker login ghcr.io -u <your-github-user>
+# or a classic PAT: docker login ghcr.io -u <your-github-user>
 ```
 
 > 💡 For the jury demo you can instead make each package **public** (Package →
 > _Package settings_ → _Change visibility_) and skip the login entirely.
 
-## HQ stack
+## Full stack (one command)
 
-From the repo **root**:
+The repo-root `docker-compose.yml` brings the **complete system** online — three
+country edges + HQ — with a single command. All custom images are **pulled** from
+GHCR (built once by the CD); nothing is built here.
 
 ```bash
-cp .env.example .env       # optional: REGISTRY, IMAGE_TAG, COUNTRY_API_KEY…
+docker login ghcr.io       # images are private GHCR packages
+cp .env.example .env        # set APP_SECRET, DB_PASSWORD, COUNTRY_API_KEY
 docker compose up -d
 ```
 
-| Service | Port | Notes |
+Everything shares one Docker network (`futurekawa_default`), so services reach
+each other by name — the HQ backend calls `http://brazil-api:8000`,
+`http://ecuador-api:8000` and `http://colombia-api:8000` directly.
+
+Per country `<c>` (`brazil` · `ecuador` · `colombia`):
+
+| Service | Host port | Role |
 |---|---|---|
-| `backend` | `3000` | Aggregator/BFF. Reads `COUNTRY_API_URL` (single-URL today). |
-| `frontend` | `8080` | React SPA (nginx). Runs on offline mocks by default. |
+| `<c>-broker` | — | MQTT broker (the country's local bus) |
+| `<c>-db` | — | Postgres 16 (internal, data sovereignty) |
+| `<c>-migrate` | — | one-shot: `doctrine:migrations:migrate` + `app:seed`, then exits |
+| `<c>-api` | `8001/8002/8003` | Symfony / API Platform (optional direct access) |
+| `<c>-worker` | — | MQTT → DB consumer (`app:mqtt:subscribe`) |
+| `<c>-sim` | — | IoT simulator (publishes `futurekawa/<c>/…/measurements`) |
+
+HQ:
+
+| Service | Host port | Role |
+|---|---|---|
+| `backend` | `3000` | aggregator/BFF — queries the three country APIs and merges |
+| `frontend` | `8080` | React SPA (nginx) — offline mocks by default (see below) |
 
 ```bash
 docker compose ps        # status
 docker compose logs -f   # follow logs
-docker compose down      # stop
+docker compose down      # stop (add -v to also drop the DB volumes)
 ```
 
-## Country stack
+> ⚠️ **Pre-merge only.** This branch adds code that is not yet in the published
+> images: `app:seed` (country-api) and the 3-country aggregation (hq-backend).
+> Until the branch merges and the CD republishes them, build both locally so the
+> pull-only `:latest` tags carry the new code:
+>
+> ```bash
+> docker build -t ghcr.io/epsi-teamsyct/futurekawa-country-api:latest apps/country/api
+> docker build -t ghcr.io/epsi-teamsyct/futurekawa-hq-backend:latest apps/hq/backend
+> docker compose up -d
+> ```
 
-Deployed **once per country**. Configuration is a per-country `.env`:
+## Migration & seed
+
+Each country DB starts empty. Its `<c>-migrate` one-shot waits for the DB to be
+healthy, runs `doctrine:migrations:migrate` (schema), then `app:seed` (demo data
+for that country — real warehouses like *Santos-01*, *Guayaquil-02*,
+*Medellín-01*, with sensors whose `hardware_id` matches the simulator). Both are
+**idempotent**. The `<c>-api` and `<c>-worker` services wait for it via
+`depends_on: { condition: service_completed_successfully }`, so they only start
+once the schema + seed are in place.
+
+```bash
+docker compose logs brazil-migrate   # [OK] migrated … then "seeded brazil"
+```
+
+## Smoke test
+
+```bash
+# each sovereign country API is up (returns the API Platform entrypoint)
+curl -fsS localhost:8001/api >/dev/null && echo "brazil ok"
+curl -fsS localhost:8002/api >/dev/null && echo "ecuador ok"
+curl -fsS localhost:8003/api >/dev/null && echo "colombia ok"
+
+# HQ backend consolidates the three countries
+curl -fsS localhost:3000/health                       # {"status":"ok"}
+curl -fsS localhost:3000/overview | grep -o '"country":"[^"]*"' | sort -u   # 3 countries
+
+# frontend
+curl -fsS -o /dev/null -w '%{http_code}\n' localhost:8080   # 200
+```
+
+## Verify the MQTT feed
+
+Each country has its own broker. Subscribe from inside the compose network
+(`futurekawa_default`):
+
+```bash
+docker run --rm -it --network futurekawa_default eclipse-mosquitto:2 \
+  mosquitto_sub -h brazil-broker -t 'futurekawa/#' -v      # or ecuador-broker / colombia-broker
+```
+
+Expected (one line per device, every `PUBLISH_INTERVAL` seconds):
+
+```
+futurekawa/brazil/SAN-01/measurements {"warehouse_id":"SAN-01","country":"brazil","model":"DHT11","hardware_id":"br-san-01","temperature":24.3,"humidity":49.9,"timestamp":1783454596}
+```
+
+The payload contract lives in
+[`packages/contracts`](../../packages/contracts/README.md).
+
+## Frontend ↔ backend
+
+The SPA reaches the HQ backend through its built-in **`/hq` reverse proxy**
+(nginx → `central-backend:3000`), so it stays **same-origin** (no CORS). The
+offline MSW mock layer was removed, so the frontend **always** talks to the real
+backend — the published image works as-is, nothing to rebuild. It only needs the
+backend reachable under the **`central-backend`** network alias (set on the
+`backend` service in the compose).
+
+> ⚠️ The API base path `/hq` is baked into the SPA (`const HQ = "/hq"`). Do **not**
+> also set `VITE_API_URL=/hq` at build time — that double-prefixes to `/hq/hq/…`
+> and every call 404s. Leave `VITE_API_URL` empty for the proxy setup.
+
+## Country stack (single country)
+
+`apps/country/docker-compose.yml` runs **one** country edge — the artifact
+deployed per country in production. Configuration is a per-country `.env`:
 
 ```bash
 cd apps/country
-cp .env.example .env      # set COUNTRY, DEVICES, thresholds
+cp .env.example .env      # set COUNTRY, DEVICES, thresholds, DB_PASSWORD, APP_SECRET
 docker compose up -d
 ```
 
@@ -73,61 +169,14 @@ Key variables (see `.env.example`):
 
 | Variable | Example | Meaning |
 |---|---|---|
-| `COUNTRY` | `brazil` | Country id (drives the MQTT topic) |
-| `DEVICES` | `[{"warehouse":"wh-01","hardware_id":"br-wh-01"}]` | One JSON object per IoT device |
+| `COUNTRY` | `brazil` | Country id (drives the MQTT topic + which data `app:seed` loads) |
+| `DEVICES` | `[{"warehouse":"SAN-01","hardware_id":"br-san-01"}]` | One JSON object per IoT device |
 | `TEMP_THRESHOLD` / `HUMIDITY_THRESHOLD` | `29` / `55` | Ideal band (BR 29/55 · EC 31/60 · CO 26/80) |
 | `PUBLISH_INTERVAL` | `30` | Seconds between publications |
 | `REGISTRY` / `IMAGE_TAG` | `ghcr.io/epsi-teamsyct` / `latest` | Image source |
 
-To run all three countries on one host, use a separate `.env` + project name per
-country (the compose `name:` already includes `${COUNTRY}`), e.g.:
-
-```bash
-COUNTRY=ecuador docker compose --env-file .env.ecuador up -d
-```
-
-## Verify the MQTT feed
-
-Subscribe to the broker from inside the country's compose network:
-
-```bash
-docker run --rm -it --network futurekawa-brazil_default eclipse-mosquitto:2 \
-  mosquitto_sub -h mosquitto -t 'futurekawa/#' -v
-```
-
-Expected (one line per device, every `PUBLISH_INTERVAL` seconds):
-
-```
-futurekawa/brazil/wh-01/measurements {"warehouse_id":"wh-01","country":"brazil","model":"DHT11","hardware_id":"br-wh-01","temperature":24.3,"humidity":49.9,"timestamp":1783454596}
-```
-
-The payload contract lives in
-[`packages/contracts`](../../packages/contracts/README.md).
-
-## Frontend: mocks vs real backend
-
-The published frontend image is built with `VITE_USE_MOCKS=true`, so it serves a
-**fully offline** demo (MSW mock layer) — ideal for the jury, but it **ignores
-the backend**. Vite inlines `VITE_*` at build time, so switching to a real
-backend means **rebuilding** the image:
-
-```bash
-docker build \
-  --build-arg VITE_USE_MOCKS=false \
-  --build-arg VITE_API_URL=http://localhost:3000 \
-  -t ghcr.io/epsi-teamsyct/futurekawa-hq-frontend:local \
-  apps/hq/frontend
-```
-
-## What is not wired yet
-
-Kept as commented, ready-to-enable blocks in the compose files:
-
-- **`ingest-worker`** — the MQTT → DB consumer (not implemented).
-- **`country-api` + `country-db`** — the Symfony API and its datastore (in progress).
-- **Backend multi-URL** — the HQ backend currently reads a single
-  `COUNTRY_API_URL`; true per-country aggregation needs it extended to query the
-  three sovereign APIs and merge.
+Like the full stack, it runs a `migrate` one-shot (schema + seed) before the API
+and worker start.
 
 ## Developer mode (per app)
 

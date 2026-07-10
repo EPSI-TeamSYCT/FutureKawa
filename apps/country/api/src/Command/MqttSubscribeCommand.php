@@ -36,10 +36,12 @@ class MqttSubscribeCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        // (1) Connexion : identifiants + "testament" si le worker meurt
+        // (1) Connexion : identifiants + "testament" si le worker meurt.
+        // Un env vide (broker sans auth) doit passer null : php-mqtt refuse une
+        // chaîne vide (« username may not consist of white space only »).
         $settings = (new ConnectionSettings())
-            ->setUsername($this->user)
-            ->setPassword($this->password)
+            ->setUsername('' !== $this->user ? $this->user : null)
+            ->setPassword('' !== $this->password ? $this->password : null)
             ->setKeepAliveInterval(60)
             ->setLastWillTopic("futurekawa/{$this->country}/worker/status")
             ->setLastWillMessage('offline')

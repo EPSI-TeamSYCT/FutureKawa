@@ -99,8 +99,18 @@ export function TempHumidityChart({
     const points = mesures.map((m) => new Date(m.timestamp).getTime());
     const spanDays = points.length > 1 ? (points.at(-1)! - points[0]) / 86_400_000 : 1;
 
-    const tempOut = (i: number) => isTempOutOfRange(mesures[i].temp, country);
-    const humOut = (i: number) => isHumidityOutOfRange(mesures[i].humidity, country);
+    // Guard the index: Chart.js evaluates these scriptable options against a
+    // dataIndex that can transiently exceed `mesures.length` while it reconciles
+    // element metadata across an update (e.g. navigating between lots or on a
+    // refetch), so `mesures[i]` may be undefined for a frame.
+    const tempOut = (i: number) => {
+      const m = mesures[i];
+      return m != null && isTempOutOfRange(m.temp, country);
+    };
+    const humOut = (i: number) => {
+      const m = mesures[i];
+      return m != null && isHumidityOutOfRange(m.humidity, country);
+    };
 
     const annotations: Record<string, AnnotationOptions> = {
       humMax: {

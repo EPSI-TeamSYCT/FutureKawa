@@ -1,0 +1,65 @@
+# FutureKawa — HQ ("siège") production edge.
+#
+# The single PROD artifact for the central layer: the aggregator backend + the
+# supervision SPA, pulled from the registry and published by Traefik under one
+# subdomain (https://siege.futurekawa.thom-it.fr/).
+#
+#   cp .env.example .env      # set REGISTRY, SIEGE_DOMAIN, COUNTRY_API_URL_*, key
+#   docker compose pull
+#   docker compose up -d
+#
+# Only the frontend is exposed. The SPA reaches the backend through its built-in
+# nginx reverse proxy (/hq/ -> central-backend:3000), so it stays same-origin
+# (no CORS) and the backend never needs a public route. The backend then calls
+# the three sovereign country APIs over the public internet (HTTPS).
+
+name: futurekawa-siege
+
+# Backend env — the BFF that fans out to the three country APIs.
+x-backend-env: &backend-env
+  PORT: "3000"
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  # Shared key sent as X-API-KEY to every country API (must match theirs).
+  COUNTRY_API_KEY: ${COUNTRY_API_KEY}
+  COUNTRY_TIMEOUT_MS: ${COUNTRY_TIMEOUT_MS:-4000}
+  CACHE_STALE_MS: ${CACHE_STALE_MS:-300000}
+  # Public base URLs of the sovereign APIs. The backend appends /api/... itself,
+  # so DO NOT include the /api suffix here.
+  COUNTRY_API_URL_BRAZIL: ${COUNTRY_API_URL_BRAZIL}
+  COUNTRY_API_URL_ECUADOR: ${COUNTRY_API_URL_ECUADOR}
+  COUNTRY_API_URL_COLOMBIA: ${COUNTRY_API_URL_COLOMBIA}
+
+services:
+  # --- Aggregator / BFF (Express) — internal only -------------------------
+  # Named `central-backend` so the frontend's nginx (proxy_pass to
+  # http://central-backend:3000/) resolves it on the shared internal network.
+  central-backend:
+    image: ${REGISTRY}/futurekawa-hq-backend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment: *backend-env
+    networks: [internal]
+
+  # --- Supervision SPA (nginx) — published via Traefik --------------------
+  frontend:
+    image: ${REGISTRY}/futurekawa-hq-frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      central-backend:
+        condition: service_healthy
+    networks: [internal, web]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.siege.rule=Host(`${SIEGE_DOMAIN}`)"
+      - "traefik.http.routers.siege.entrypoints=${TRAEFIK_ENTRYPOINT}"
+      - "traefik.http.routers.siege.tls=true"
+      - "traefik.http.routers.siege.tls.certresolver=${CERT_RESOLVER}"
+      - "traefik.http.services.siege.loadbalancer.server.port=8080"
+
+networks:
+  # Private network — frontend <-> backend traffic stays internal.
+  internal:
+    driver: bridge
+  # Existing Traefik network (created outside this stack).
+  web:
+    external: true
